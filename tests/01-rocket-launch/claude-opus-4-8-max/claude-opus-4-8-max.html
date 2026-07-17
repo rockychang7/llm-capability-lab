@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>claude-opus-4-8 · 一键点火火箭升空</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#04060c;
+    font-family:"Segoe UI","Microsoft YaHei",system-ui,Arial,sans-serif;
+    user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent; }
+  canvas { display:block; position:fixed; inset:0; }
+
+  /* ---------- 标题 ---------- */
+  #title { position:fixed; top:18px; left:0; right:0; text-align:center; z-index:5;
+    color:#cfe9ff; letter-spacing:.42em; font-size:13px; font-weight:600;
+    text-shadow:0 0 14px rgba(90,170,255,.55); pointer-events:none;
+    transition:opacity .8s ease; }
+  #title small { display:block; letter-spacing:.18em; font-size:10px; opacity:.5; margin-top:5px; }
+
+  /* ---------- 遥测 HUD ---------- */
+  #hud { position:fixed; top:16px; left:16px; z-index:5;
+    font-family:"SFMono-Regular",Consolas,"Roboto Mono",monospace;
+    color:#7ff0d8; background:rgba(6,16,22,.55); border:1px solid rgba(90,220,190,.28);
+    border-radius:10px; padding:12px 14px; min-width:186px;
+    box-shadow:0 0 24px rgba(0,0,0,.5), inset 0 0 20px rgba(30,120,110,.08);
+    backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+    opacity:0; transform:translateY(-6px); transition:opacity .5s ease, transform .5s ease; }
+  #hud.on { opacity:1; transform:none; }
+  #hud .row { display:flex; justify-content:space-between; align-items:baseline; gap:14px;
+    font-size:12px; line-height:1.9; }
+  #hud .k { color:#4fae9c; letter-spacing:.06em; }
+  #hud .v { color:#b9ffe9; font-variant-numeric:tabular-nums; text-shadow:0 0 8px rgba(80,240,200,.45); }
+  #hud .phase { color:#ffd27a; text-shadow:0 0 10px rgba(255,190,90,.5); font-weight:600; }
+  #hud .tt { font-size:15px; color:#eafff9; letter-spacing:.03em; }
+  #hud .bar { height:4px; margin-top:9px; border-radius:3px; background:rgba(90,220,190,.14); overflow:hidden; }
+  #hud .bar i { display:block; height:100%; width:0%;
+    background:linear-gradient(90deg,#2fd6a6,#7ff0d8); box-shadow:0 0 10px rgba(90,240,200,.6);
+    transition:width .12s linear; }
+
+  /* ---------- 中央倒计时 ---------- */
+  #big { position:fixed; inset:0; z-index:4; display:flex; align-items:center; justify-content:center;
+    pointer-events:none; }
+  #big span { font-size:min(30vh,260px); font-weight:800; color:#eaf4ff;
+    text-shadow:0 0 40px rgba(120,180,255,.7), 0 0 90px rgba(90,150,255,.4);
+    opacity:0; }
+  #big span.go { font-size:min(14vh,150px); letter-spacing:.14em; color:#ffe6a8;
+    text-shadow:0 0 40px rgba(255,180,80,.8); }
+
+  /* ---------- 点火按钮 ---------- */
+  #ignite { position:fixed; left:50%; bottom:46px; transform:translateX(-50%); z-index:6;
+    width:132px; height:132px; border-radius:50%; border:none; cursor:pointer;
+    color:#fff; font-weight:800; font-size:15px; letter-spacing:.16em; line-height:1.35;
+    background:radial-gradient(circle at 50% 36%, #ff7b5e 0%, #f0402a 46%, #b81607 100%);
+    box-shadow:0 10px 30px rgba(240,50,30,.45), inset 0 3px 10px rgba(255,255,255,.45),
+      inset 0 -10px 22px rgba(120,0,0,.55);
+    text-shadow:0 1px 2px rgba(90,0,0,.6);
+    transition:transform .12s ease, opacity .5s ease, filter .2s ease; }
+  #ignite small { display:block; font-size:10px; font-weight:600; letter-spacing:.28em; opacity:.85; margin-top:3px; }
+  #ignite::after { content:""; position:absolute; inset:-12px; border-radius:50%;
+    border:2px solid rgba(255,90,60,.55); animation:pulse 1.9s ease-out infinite; }
+  @keyframes pulse { 0%{ transform:scale(.92); opacity:.8 } 70%{ opacity:0 } 100%{ transform:scale(1.35); opacity:0 } }
+  #ignite:hover { transform:translateX(-50%) scale(1.05); }
+  #ignite:active { transform:translateX(-50%) scale(.95); }
+  #ignite.hide { opacity:0; pointer-events:none; transform:translateX(-50%) scale(.6); }
+
+  /* ---------- 重新发射 ---------- */
+  #reset { position:fixed; left:50%; bottom:52px; transform:translateX(-50%) translateY(10px); z-index:6;
+    padding:13px 30px; border-radius:40px; border:1px solid rgba(120,220,255,.5); cursor:pointer;
+    background:rgba(10,26,40,.7); color:#bfe9ff; font-weight:700; letter-spacing:.22em; font-size:13px;
+    box-shadow:0 0 26px rgba(70,160,255,.35); backdrop-filter:blur(4px);
+    opacity:0; pointer-events:none; transition:opacity .6s ease, transform .3s ease; }
+  #reset.on { opacity:1; pointer-events:auto; transform:translateX(-50%); }
+  #reset:hover { background:rgba(20,44,66,.85); }
+
+  /* ---------- 静音 ---------- */
+  #mute { position:fixed; top:18px; right:18px; z-index:6; width:38px; height:38px; border-radius:50%;
+    border:1px solid rgba(150,190,220,.28); background:rgba(10,20,30,.5); color:#cfe4f5; cursor:pointer;
+    font-size:16px; line-height:36px; text-align:center; backdrop-filter:blur(3px); transition:background .2s; }
+  #mute:hover { background:rgba(24,40,56,.75); }
+</style>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <div id="title">火 箭 发 射 控 制<small>ROCKET LAUNCH SEQUENCE</small></div>
+
+  <div id="hud">
+    <div class="row"><span class="k">STATUS</span><span class="v phase" id="hPhase">待命 STANDBY</span></div>
+    <div class="row"><span class="k">MET</span><span class="v tt" id="hTime">T- 00:03</span></div>
+    <div class="row"><span class="k">ALT</span><span class="v" id="hAlt">0.0 km</span></div>
+    <div class="row"><span class="k">VEL</span><span class="v" id="hVel">0 m/s</span></div>
+    <div class="bar"><i id="hBar"></i></div>
+  </div>
+
+  <div id="big"><span id="bigTxt"></span></div>
+
+  <button id="ignite">点火<small>IGNITE</small></button>
+  <button id="reset">重 新 发 射</button>
+  <button id="mute" title="声音开关">🔊</button>
+
+<script>
+(function(){
+"use strict";
+
+// ======================================================================
+//  基础工具
+// ======================================================================
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+const clamp = (v,a,b)=> v<a?a : v>b?b : v;
+const lerp  = (a,b,t)=> a+(b-a)*t;
+const rand  = (a,b)=> a+Math.random()*(b-a);
+const smooth= (e0,e1,x)=>{ const t=clamp((x-e0)/(e1-e0),0,1); return t*t*(3-2*t); };
+const lerpC = (c1,c2,t)=>[ lerp(c1[0],c2[0],t), lerp(c1[1],c2[1],t), lerp(c1[2],c2[2],t) ];
+const rgb   = c => `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
+const fmt   = n => Math.round(n).toLocaleString('en-US');
+
+// ======================================================================
+//  画布尺寸 / 布局
+// ======================================================================
+let W=0, H=0, dpr=1;
+let padLine=0, flyLine=0, engageOffset=0, S=1;
+const SPACE_Y = 3600;                     // 到达此高度即进入太空
+
+function layout(){
+  padLine = H*0.74;                       // 发射台所在屏幕高度
+  flyLine = H*0.42;                       // 升空后火箭锁定的屏幕高度
+  engageOffset = padLine - flyLine;       // 相机开始跟随的世界高度
+  S = clamp(H/820, 0.72, 1.7);            // 火箭整体缩放
+}
+function resize(){
+  W = window.innerWidth; H = window.innerHeight;
+  dpr = Math.min(window.devicePixelRatio||1, 2);
+  canvas.width = Math.round(W*dpr); canvas.height = Math.round(H*dpr);
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  layout(); makeStars();
+}
+window.addEventListener('resize', resize);
+
+// ======================================================================
+//  相机：世界坐标(向上为正) → 屏幕坐标
+// ======================================================================
+let cameraY = 0;
+function worldToScreenY(wy){ return padLine - (wy - cameraY); }
+
+// ======================================================================
+//  贴图（预渲染的柔和粒子，避免逐帧创建渐变）
+// ======================================================================
+function makePuff(r,g,b,hard){
+  const s=128, c=document.createElement('canvas'); c.width=c.height=s;
+  const g2=c.getContext('2d');
+  const grd=g2.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
+  grd.addColorStop(0,   `rgba(${r},${g},${b},1)`);
+  grd.addColorStop(hard?0.28:0.42, `rgba(${r},${g},${b},${hard?0.85:0.5})`);
+  grd.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+  g2.fillStyle=grd; g2.fillRect(0,0,s,s);
+  return c;
+}
+// 烟雾按明度分级（近地面偏暗、消散后偏白）
+const SMOKE_SPRITES = [ [72,74,82],[104,106,116],[140,142,152],[176,178,188],[210,212,220] ].map(c=>makePuff(c[0],c[1],c[2],false));
+const GLOW_WHITE = makePuff(255,255,255,true);
+const GLOW_WARM  = makePuff(255,180,90,true);
+
+// ======================================================================
+//  星空 / 云
+// ======================================================================
+let stars=[], clouds=[];
+function makeStars(){
+  const n = Math.round(W*H/5200);
+  stars=[];
+  for(let i=0;i<n;i++){
+    // 用确定性伪随机让星星分布稳定
+    stars.push({ x:Math.random()*W, y:Math.random()*H,
+      r:Math.random()*1.3+0.3, tw:Math.random()*Math.PI*2, sp:rand(1.2,3.2),
+      b:rand(0.5,1) });
+  }
+}
+function makeClouds(){
+  clouds=[];
+  const N=9;
+  for(let i=0;i<N;i++){
+    const puffs=[]; const cnt=3+((Math.random()*3)|0);
+    for(let p=0;p<cnt;p++) puffs.push({ dx:rand(-70,70), dy:rand(-16,16), r:rand(34,72) });
+    clouds.push({ x:rand(0.05,0.95), wy:rand(180,1650), sc:rand(0.7,1.5), puffs });
+  }
+}
+
+// ======================================================================
+//  粒子系统
+// ======================================================================
+let smoke=[], sparks=[], rings=[];
+function spawnSmoke(x, wy, opt){
+  if(smoke.length>360) return;
+  const shade = opt.shade|0;
+  smoke.push({
+    x, wy, r:opt.r0, grow:opt.grow,
+    vx:opt.vx, vy:opt.vy, a:opt.a, decay:opt.decay,
+    rot:rand(0,6.28), vr:rand(-0.4,0.4),
+    sprite:SMOKE_SPRITES[clamp(shade,0,4)], front:opt.front
+  });
+}
+function spawnSpark(x,y){
+  if(sparks.length>260) return;
+  const ang = rand(Math.PI*0.35, Math.PI*0.65); // 大致向下并散开
+  const sp  = rand(120,430);
+  sparks.push({ x, y, vx:Math.cos(ang)*sp*(Math.random()<.5?-1:1)*0.5 + rand(-60,60),
+    vy:Math.sin(ang)*sp, life:rand(0.35,0.95), max:0.95, len:rand(4,11) });
+}
+
+function updateParticles(dt){
+  for(let i=smoke.length-1;i>=0;i--){
+    const s=smoke[i];
+    s.x+=s.vx*dt; s.wy+=s.vy*dt; s.r+=s.grow*dt;
+    s.vx*=(1-0.6*dt); s.vy=lerp(s.vy, 14, 0.4*dt); // 逐渐上浮、横向阻尼
+    s.a-=s.decay*dt; s.rot+=s.vr*dt;
+    if(s.a<=0){ smoke.splice(i,1); }
+  }
+  for(let i=sparks.length-1;i>=0;i--){
+    const p=sparks[i];
+    p.vy+=520*dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.life-=dt;
+    if(p.life<=0) sparks.splice(i,1);
+  }
+  for(let i=rings.length-1;i>=0;i--){
+    const r=rings[i]; r.rad+=r.spd*dt; r.a-=r.decay*dt;
+    if(r.a<=0) rings.splice(i,1);
+  }
+}
+
+// ======================================================================
+//  状态机
+// ======================================================================
+const PHASE={ IDLE:0, COUNTDOWN:1, LIFTOFF:2, ASCENT:3, SPACE:4, DONE:5 };
+let st;
+function initState(){
+  st = {
+    phase:PHASE.IDLE, t:0,          // t: 当前阶段计时
+    base:0, v:0,                     // 火箭底部世界高度 / 速度(px/s)
+    throttle:0, climb:0,             // 推力 0..1 / 上升进度 0..1
+    Ttime:-3,                        // 任务时间(MET)
+    shakeKick:0, spaceRise:0, spaceScale:1,
+    emitGround:0, emitTrail:0, emitVent:0, emitSpark:0,
+    ignited:false, liftFired:false,
+    angle:0
+  };
+  smoke=[]; sparks=[]; rings=[]; cameraY=0;
+  makeClouds();
+}
+
+// ======================================================================
+//  音效（WebAudio 合成引擎轰鸣，用户点击后启动）
+// ======================================================================
+let audio=null, muted=false;
+function initAudio(){
+  if(audio) return;
+  try{
+    const AC = window.AudioContext||window.webkitAudioContext;
+    const ac = new AC();
+    // 棕噪声
+    const len=ac.sampleRate*2, buf=ac.createBuffer(1,len,ac.sampleRate), d=buf.getChannelData(0);
+    let last=0;
+    for(let i=0;i<len;i++){ const w=Math.random()*2-1; last=(last+0.02*w)/1.02; d[i]=last*3.2; }
+    const src=ac.createBufferSource(); src.buffer=buf; src.loop=true;
+    const lp=ac.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=140; lp.Q.value=0.7;
+    const hp=ac.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=30;
+    const g=ac.createGain(); g.gain.value=0;
+    const master=ac.createGain(); master.gain.value=0.9;
+    src.connect(lp); lp.connect(hp); hp.connect(g); g.connect(master); master.connect(ac.destination);
+    src.start();
+    audio={ ac, lp, g, master };
+  }catch(e){ audio=null; }
+}
+function updateAudio(){
+  if(!audio) return;
+  const spaceFade = 1-smooth(0.9,1.0,st.climb);
+  const target = muted ? 0 : (0.02 + st.throttle*0.5)*spaceFade;
+  const now = audio.ac.currentTime;
+  audio.g.gain.setTargetAtTime(target, now, 0.08);
+  audio.lp.frequency.setTargetAtTime(120 + st.throttle*640 + st.climb*120, now, 0.12);
+}
+
+// ======================================================================
+//  火箭本体绘制（程序化，追求金属圆柱质感）
+// ======================================================================
+function drawRocket(cx, baseY, scale, angle, alpha){
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(cx, baseY);
+  ctx.rotate(angle);
+  ctx.scale(scale, scale);
+  // 局部坐标：底部喷口=(0,0)，火箭向上 = 负 y
+  const hw = 23;                    // 箭体半宽
+
+  // ---- 尾焰（先画，令喷管压在焰口之上）----
+  drawFlame();
+
+  // ---- 尾翼（画在箭体之后 → 内缘被箭体覆盖）----
+  drawFins(hw);
+
+  // ---- 发动机裙 + 喷管 ----
+  // 裙段
+  let g = ctx.createLinearGradient(-hw,0,hw,0);
+  g.addColorStop(0,'#2b2f36'); g.addColorStop(.5,'#5a5f68'); g.addColorStop(1,'#24272d');
+  ctx.fillStyle=g;
+  ctx.beginPath();
+  ctx.moveTo(-hw+4,-40); ctx.lineTo(hw-4,-40); ctx.lineTo(13,-20); ctx.lineTo(-13,-20); ctx.closePath();
+  ctx.fill();
+  // 喷管钟形
+  g = ctx.createLinearGradient(0,-20,0,2);
+  g.addColorStop(0,'#6b7178'); g.addColorStop(.55,'#3a3e45'); g.addColorStop(1,'#181b20');
+  ctx.fillStyle=g;
+  ctx.beginPath();
+  ctx.moveTo(-13,-20); ctx.lineTo(13,-20);
+  ctx.quadraticCurveTo(19,-8, 18,0);
+  ctx.quadraticCurveTo(0,7, -18,0);
+  ctx.quadraticCurveTo(-19,-8, -13,-20); ctx.closePath();
+  ctx.fill();
+  // 喷口内圈高光
+  ctx.fillStyle='rgba(255,180,120,'+(0.25+st.throttle*0.5)+')';
+  ctx.beginPath(); ctx.ellipse(0,0,15,4.5,0,0,6.283); ctx.fill();
+
+  // ---- 箭体主管（圆柱高光渐变）----
+  g = ctx.createLinearGradient(-hw,0,hw,0);
+  g.addColorStop(0.00,'#7e848b');
+  g.addColorStop(0.16,'#cfd4da');
+  g.addColorStop(0.40,'#ffffff');
+  g.addColorStop(0.60,'#f1f4f7');
+  g.addColorStop(0.84,'#c2c7cd');
+  g.addColorStop(1.00,'#767c83');
+  ctx.fillStyle=g;
+  ctx.fillRect(-hw,-190, hw*2, 150);
+
+  // 面板缝线
+  ctx.strokeStyle='rgba(110,116,126,0.45)'; ctx.lineWidth=0.8;
+  for(let y=-172;y<=-52;y+=24){ ctx.beginPath(); ctx.moveTo(-hw,y); ctx.lineTo(hw,y); ctx.stroke(); }
+  ctx.beginPath(); ctx.moveTo(-9,-190); ctx.lineTo(-9,-40); ctx.moveTo(11,-190); ctx.lineTo(11,-40); ctx.stroke();
+
+  // 黑色级间带
+  ctx.fillStyle='#22262c'; ctx.fillRect(-hw,-70, hw*2, 11);
+  ctx.fillStyle='rgba(255,255,255,.12)'; ctx.fillRect(-hw,-70, hw*2, 2);
+  // 蓝色装饰环
+  ctx.fillStyle='#2f6fd0'; ctx.fillRect(-hw,-176, hw*2,5); ctx.fillRect(-hw,-96, hw*2,4);
+
+  // 舷窗
+  for(const wy of [-150,-133]){
+    ctx.beginPath(); ctx.arc(0,wy,4.4,0,6.283);
+    ctx.fillStyle='#0d1622'; ctx.fill();
+    ctx.lineWidth=1.4; ctx.strokeStyle='#c9ced4'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(-1.3,wy-1.3,1.4,0,6.283); ctx.fillStyle='rgba(180,210,255,.7)'; ctx.fill();
+  }
+  // 小徽标
+  ctx.fillStyle='#d23b32'; ctx.beginPath(); ctx.arc(0,-114,3.2,0,6.283); ctx.fill();
+
+  // 圆柱两侧的环境阴影，加强立体
+  let sh=ctx.createLinearGradient(-hw,0,hw,0);
+  sh.addColorStop(0,'rgba(0,0,0,.30)'); sh.addColorStop(.2,'rgba(0,0,0,0)');
+  sh.addColorStop(.8,'rgba(0,0,0,0)'); sh.addColorStop(1,'rgba(0,0,0,.34)');
+  ctx.fillStyle=sh; ctx.fillRect(-hw,-190,hw*2,150);
+
+  // ---- 头锥 ----
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(-hw,-190);
+  ctx.quadraticCurveTo(-hw+3,-232, 0,-252);
+  ctx.quadraticCurveTo(hw-3,-232, hw,-190);
+  ctx.closePath();
+  ctx.clip();
+  g = ctx.createLinearGradient(-hw,0,hw,0);
+  g.addColorStop(0,'#8f959c'); g.addColorStop(.4,'#ffffff'); g.addColorStop(.6,'#eef1f4'); g.addColorStop(1,'#868c93');
+  ctx.fillStyle=g; ctx.fillRect(-hw,-252,hw*2,64);
+  // 红色锥尖
+  g = ctx.createLinearGradient(-hw,0,hw,0);
+  g.addColorStop(0,'#8c1f18'); g.addColorStop(.42,'#e5473a'); g.addColorStop(.6,'#d13a2f'); g.addColorStop(1,'#7c1a14');
+  ctx.fillStyle=g; ctx.fillRect(-hw,-252,hw*2,30);
+  ctx.restore();
+  // 头锥描边
+  ctx.lineWidth=1; ctx.strokeStyle='rgba(60,64,70,.5)';
+  ctx.beginPath();
+  ctx.moveTo(-hw,-190);
+  ctx.quadraticCurveTo(-hw+3,-232, 0,-252);
+  ctx.quadraticCurveTo(hw-3,-232, hw,-190);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawFins(hw){
+  const finGrad = (x0,x1)=>{ const g=ctx.createLinearGradient(0,-64,0,-2);
+    g.addColorStop(0,'#d34a41'); g.addColorStop(.55,'#b23127'); g.addColorStop(1,'#7d1a13'); return g; };
+  // 左
+  ctx.fillStyle=finGrad();
+  ctx.beginPath();
+  ctx.moveTo(-hw+3,-66); ctx.lineTo(-hw+3,-16); ctx.lineTo(-hw-22,-2);
+  ctx.quadraticCurveTo(-hw-14,-42, -hw+3,-66); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,.22)';
+  ctx.beginPath(); ctx.moveTo(-hw+3,-66); ctx.lineTo(-hw+3,-16); ctx.lineTo(-hw-6,-20);
+  ctx.quadraticCurveTo(-hw-2,-46,-hw+3,-66); ctx.closePath(); ctx.fill();
+  // 右
+  ctx.fillStyle=finGrad();
+  ctx.beginPath();
+  ctx.moveTo(hw-3,-66); ctx.lineTo(hw-3,-16); ctx.lineTo(hw+22,-2);
+  ctx.quadraticCurveTo(hw+14,-42, hw-3,-66); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.12)';
+  ctx.beginPath(); ctx.moveTo(hw-3,-66); ctx.lineTo(hw-3,-16); ctx.lineTo(hw+8,-18);
+  ctx.quadraticCurveTo(hw+4,-46,hw-3,-66); ctx.closePath(); ctx.fill();
+}
+
+// ---- 尾焰（在火箭局部坐标内，从 (0,0) 向下喷）----
+let flameSeed=0;
+function drawFlame(){
+  const thr=st.throttle;
+  if(thr<=0.001) return;
+  flameSeed += 0.6;
+  const flick = 0.80 + 0.16*Math.sin(flameSeed*1.7) + 0.10*Math.sin(flameSeed*0.9+1.3) + 0.06*(Math.random()-0.5);
+  const len = 132 * thr * flick;
+  const w   = 15  * (0.9+0.2*thr);
+  const wob = Math.sin(flameSeed*0.8)*1.6;
+
+  ctx.save();
+  ctx.globalCompositeOperation='lighter';
+  // 焰口炽白闪光
+  const flash = 26*thr;
+  ctx.globalAlpha=0.8;
+  ctx.drawImage(GLOW_WHITE, -flash, -flash*0.7, flash*2, flash*1.6);
+  ctx.globalAlpha=1;
+
+  const teardrop=(ww,ll,grad)=>{
+    ctx.fillStyle=grad;
+    ctx.beginPath();
+    ctx.moveTo(-ww,0);
+    ctx.quadraticCurveTo(-ww*0.7, ll*0.55, wob, ll);
+    ctx.quadraticCurveTo( ww*0.7, ll*0.55, ww,0);
+    ctx.closePath(); ctx.fill();
+  };
+  let g;
+  g=ctx.createLinearGradient(0,0,0,len*1.18);
+  g.addColorStop(0,'rgba(255,150,50,0.85)'); g.addColorStop(.5,'rgba(255,95,25,0.45)'); g.addColorStop(1,'rgba(230,60,0,0)');
+  teardrop(w*1.15, len*1.18, g);
+  g=ctx.createLinearGradient(0,0,0,len);
+  g.addColorStop(0,'rgba(255,224,130,0.95)'); g.addColorStop(.55,'rgba(255,160,50,0.5)'); g.addColorStop(1,'rgba(255,120,20,0)');
+  teardrop(w*0.72, len, g);
+  g=ctx.createLinearGradient(0,0,0,len*0.72);
+  g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(.4,'rgba(205,230,255,0.9)'); g.addColorStop(1,'rgba(120,180,255,0)');
+  teardrop(w*0.4, len*0.72, g);
+  // 激波菱形（Mach diamonds）
+  ctx.fillStyle='rgba(230,240,255,0.9)';
+  for(let k=1;k<=3;k++){
+    const y=len*0.16*k; const r=w*0.32*(1-k*0.12);
+    ctx.beginPath(); ctx.ellipse(wob*0.4, y, r, r*1.7, 0, 0, 6.283); ctx.fill();
+  }
+  ctx.restore();
+}
+
+// ======================================================================
+//  发射塔架 + 发射台（世界坐标，随相机移动）
+// ======================================================================
+let blink=0;
+function drawTower(alpha){
+  if(alpha<=0.01) return;
+  ctx.save();
+  ctx.globalAlpha=alpha;
+  const s=S;
+  const cx=W/2;
+  const tw = 26*s;                          // 塔宽
+  const tx = cx - (55*s + tw);              // 塔左缘
+  const y0 = worldToScreenY(0);             // 塔底(地面)
+  const top= worldToScreenY(232*s);         // 塔顶
+
+  // 桁架主体
+  ctx.strokeStyle='#5c6168'; ctx.lineWidth=Math.max(2,3*s);
+  ctx.beginPath();
+  ctx.moveTo(tx,y0); ctx.lineTo(tx,top);
+  ctx.moveTo(tx+tw,y0); ctx.lineTo(tx+tw,top);
+  ctx.stroke();
+  // 横撑 + 交叉斜撑
+  ctx.strokeStyle='#4a4f56'; ctx.lineWidth=Math.max(1,1.6*s);
+  const seg=(y0-top)/9;
+  for(let i=0;i<=9;i++){
+    const y=y0-seg*i;
+    ctx.beginPath(); ctx.moveTo(tx,y); ctx.lineTo(tx+tw,y); ctx.stroke();
+    if(i<9){ ctx.beginPath();
+      ctx.moveTo(tx,y); ctx.lineTo(tx+tw,y-seg);
+      ctx.moveTo(tx+tw,y); ctx.lineTo(tx,y-seg); ctx.stroke(); }
+  }
+  // 摆杆：升空后收回
+  const swing = smooth(0,0.6,st.climb)* -1.15;   // 收起角度
+  ctx.save();
+  ctx.translate(tx+tw, top+seg*2.2);
+  ctx.rotate(swing);
+  ctx.strokeStyle='#6a7078'; ctx.lineWidth=Math.max(2,3*s);
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(52*s,0); ctx.stroke();
+  ctx.restore();
+
+  // 塔顶红色警示灯（闪烁）
+  const on = (Math.sin(blink*3.0)>0);
+  ctx.fillStyle = on ? 'rgba(255,70,60,0.95)':'rgba(120,30,26,0.6)';
+  if(on){ ctx.globalAlpha=alpha; ctx.drawImage(GLOW_WARM, tx+tw/2-9, top-9,18,18); }
+  ctx.beginPath(); ctx.arc(tx+tw/2, top, 2.6*s,0,6.283); ctx.fill();
+
+  ctx.restore();
+}
+
+function drawPad(alpha){
+  if(alpha<=0.01) return;
+  const y=worldToScreenY(0);
+  ctx.save();
+  ctx.globalAlpha=alpha;
+  // 台面
+  const g=ctx.createLinearGradient(0,y-6,0,y+40);
+  g.addColorStop(0,'#3a3f47'); g.addColorStop(1,'#14171c');
+  ctx.fillStyle=g;
+  ctx.fillRect(0,y, W, H-y+2);
+  // 台面高光条
+  ctx.fillStyle='rgba(120,130,145,.35)'; ctx.fillRect(0,y,W,3);
+  // 中央导流槽开口
+  ctx.fillStyle='#0a0c10';
+  ctx.beginPath(); ctx.ellipse(W/2, y+4, 60*S, 12*S, 0, 0, 6.283); ctx.fill();
+  // 发动机点火时台面暖光
+  if(st.throttle>0.02 && st.base<200){
+    ctx.globalCompositeOperation='lighter';
+    ctx.globalAlpha=alpha*st.throttle*(1-smooth(0,200,st.base))*0.9;
+    ctx.drawImage(GLOW_WARM, W/2-150*S, y-40*S, 300*S, 80*S);
+    ctx.globalCompositeOperation='source-over';
+  }
+  ctx.restore();
+}
+
+// ======================================================================
+//  天空 / 星空 / 地球
+// ======================================================================
+const SKY=[
+  { c:0.0,  top:[38,104,170], bot:[186,224,255] },   // 白昼
+  { c:0.5,  top:[16,40,86],   bot:[46,92,150]   },   // 高空
+  { c:0.78, top:[6,14,40],    bot:[16,34,72]    },   // 临界
+  { c:1.0,  top:[2,4,12],     bot:[4,9,22]      },   // 太空
+];
+function skyAt(cl){
+  let a=SKY[0], b=SKY[SKY.length-1];
+  for(let i=0;i<SKY.length-1;i++){ if(cl>=SKY[i].c && cl<=SKY[i+1].c){ a=SKY[i]; b=SKY[i+1]; break; } }
+  const t=smooth(a.c,b.c,cl);
+  return { top:lerpC(a.top,b.top,t), bot:lerpC(a.bot,b.bot,t) };
+}
+function drawSky(){
+  const sk=skyAt(st.climb);
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0, rgb(sk.top)); g.addColorStop(1, rgb(sk.bot));
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  // 白昼时右上角太阳
+  const sun=1-smooth(0.25,0.55,st.climb);
+  if(sun>0.01){
+    ctx.save(); ctx.globalAlpha=sun; ctx.globalCompositeOperation='lighter';
+    const sx=W*0.82, sy=H*0.2, r=120;
+    const sg=ctx.createRadialGradient(sx,sy,0,sx,sy,r);
+    sg.addColorStop(0,'rgba(255,252,232,.95)'); sg.addColorStop(.4,'rgba(255,240,180,.4)'); sg.addColorStop(1,'rgba(255,240,180,0)');
+    ctx.fillStyle=sg; ctx.beginPath(); ctx.arc(sx,sy,r,0,6.283); ctx.fill();
+    ctx.restore();
+  }
+}
+function drawStars(t){
+  const a=smooth(0.42,0.72,st.climb);
+  if(a<=0.01) return;
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  for(const s of stars){
+    const tw=0.55+0.45*Math.sin(t*s.sp+s.tw);
+    ctx.globalAlpha=a*s.b*tw;
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,6.283); ctx.fillStyle='#eaf3ff'; ctx.fill();
+  }
+  ctx.restore();
+}
+function drawEarth(){
+  const f=smooth(0.6,0.96,st.climb);
+  if(f<=0.01) return;
+  ctx.save();
+  ctx.globalAlpha=f;
+  const R=W*2.3;
+  const rise=lerp(H*0.5, H*0.02, f);       // 逐渐升起显现
+  const cyE=H+R-rise;
+  // 地球本体
+  const g=ctx.createRadialGradient(W/2, cyE-R*0.15, R*0.2, W/2, cyE, R);
+  g.addColorStop(0,'#2f6fb0'); g.addColorStop(.5,'#1b4c86'); g.addColorStop(1,'#0a2246');
+  ctx.fillStyle=g;
+  ctx.beginPath(); ctx.arc(W/2,cyE,R,0,6.283); ctx.fill();
+  // 大陆/云带（简化）
+  ctx.globalAlpha=f*0.5;
+  ctx.fillStyle='rgba(210,235,255,.5)';
+  ctx.beginPath(); ctx.ellipse(W*0.4, cyE-R+22, W*0.16, 10, -0.2,0,6.283); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(W*0.62, cyE-R+40, W*0.12, 8, 0.15,0,6.283); ctx.fill();
+  ctx.globalAlpha=f*0.35; ctx.fillStyle='rgba(80,150,90,.6)';
+  ctx.beginPath(); ctx.ellipse(W*0.52, cyE-R+16, W*0.09,7,0,0,6.283); ctx.fill();
+  // 大气辉光边缘
+  ctx.globalAlpha=f;
+  ctx.globalCompositeOperation='lighter';
+  const rim=ctx.createRadialGradient(W/2,cyE,R-2, W/2,cyE,R+70);
+  rim.addColorStop(0,'rgba(120,190,255,0)'); rim.addColorStop(.5,'rgba(120,195,255,.55)'); rim.addColorStop(1,'rgba(120,195,255,0)');
+  ctx.fillStyle=rim;
+  ctx.beginPath(); ctx.arc(W/2,cyE,R+70,0,6.283); ctx.fill();
+  ctx.restore();
+}
+function drawClouds(t){
+  const a=1-smooth(0.35,0.62,st.climb);
+  if(a<=0.01) return;
+  ctx.save();
+  for(const c of clouds){
+    const y=worldToScreenY(c.wy);
+    if(y<-140 || y>H+140) continue;
+    const x=c.x*W;
+    ctx.globalAlpha=a*0.9;
+    for(const p of c.puffs){
+      const r=p.r*c.sc;
+      ctx.drawImage(GLOW_WHITE, x+p.dx*c.sc-r, y+p.dy*c.sc-r, r*2, r*2);
+    }
+  }
+  ctx.restore();
+}
+
+// ======================================================================
+//  绘制粒子
+// ======================================================================
+function drawSmoke(front){
+  for(const s of smoke){
+    if(s.front!==front) continue;
+    const y=worldToScreenY(s.wy);
+    if(y<-s.r*2 || y>H+s.r*2) continue;
+    ctx.globalAlpha=clamp(s.a,0,1);
+    ctx.drawImage(s.sprite, s.x-s.r, y-s.r, s.r*2, s.r*2);
+  }
+  ctx.globalAlpha=1;
+}
+function drawSparks(){
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  ctx.lineCap='round';
+  for(const p of sparks){
+    const a=clamp(p.life/p.max,0,1);
+    const sp=Math.hypot(p.vx,p.vy)||1;
+    ctx.strokeStyle=`rgba(255,${180+70*a|0},${90*a|0},${a})`;
+    ctx.lineWidth=1.7;
+    ctx.beginPath();
+    ctx.moveTo(p.x,p.y);
+    ctx.lineTo(p.x - p.vx/sp*p.len, p.y - p.vy/sp*p.len);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawRings(){
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  for(const r of rings){
+    const y=worldToScreenY(r.wy);
+    ctx.globalAlpha=clamp(r.a,0,1);
+    ctx.strokeStyle='rgba(255,220,170,'+r.a+')'; ctx.lineWidth=r.w;
+    ctx.beginPath(); ctx.ellipse(W/2,y, r.rad, r.rad*0.28, 0,0,6.283); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ======================================================================
+//  更新逻辑
+// ======================================================================
+function update(dt){
+  st.t+=dt; blink+=dt;
+
+  // ---- 阶段推进 ----
+  if(st.phase===PHASE.COUNTDOWN){
+    st.Ttime = -3 + st.t;
+    // T-2 起点火，推力在 2 秒内爬升到满
+    st.throttle = smooth(1.0, 2.7, st.t);
+    if(!st.ignited && st.t>=1.0){ st.ignited=true; for(let i=0;i<46;i++) spawnSpark(W/2, worldToScreenY(0)); }
+    if(st.t>=3.0){ // 松开压紧机构 → 升空
+      st.phase=PHASE.LIFTOFF; st.t=0; st.throttle=1; st.shakeKick=13;
+      rings.push({ wy:6, rad:20, spd:640, a:0.85, decay:1.1, w:6 });
+      bigText('升空!','go',1.1);
+    }
+  } else if(st.phase===PHASE.LIFTOFF || st.phase===PHASE.ASCENT){
+    st.throttle = 1 - 0.12*smooth(0.85,1,st.climb);
+    // 物理积分：加速度随时间增大（燃料消耗变轻），到最大后封顶
+    const a = clamp(46 + 58*st.t, 0, 660);
+    st.v = Math.min(st.v + a*dt, 820);
+    st.base += st.v*dt;
+    st.climb = clamp(st.base/SPACE_Y, 0, 1);
+    st.Ttime = st.t;
+    // 高空重力转向：轻微俯仰
+    st.angle = smooth(0.55,1,st.climb) * 0.10;
+    if(st.phase===PHASE.LIFTOFF && st.t>0.6) st.phase=PHASE.ASCENT;
+    if(st.base>=SPACE_Y){ st.phase=PHASE.SPACE; st.t=0; }
+  } else if(st.phase===PHASE.SPACE){
+    // 冲入太空：火箭远去、缩小、飞出画面顶部
+    st.climb=1; st.throttle=lerp(st.throttle,0.72,dt*1.5);
+    st.v=Math.min(st.v+120*dt,1400); st.base+=st.v*dt;
+    const k=smooth(0,3.2,st.t);
+    st.spaceRise = k*H*0.62;
+    st.spaceScale= lerp(1,0.16,k);
+    if(st.t>3.4){ st.phase=PHASE.DONE; st.t=0; showDone(); }
+  } else if(st.phase===PHASE.DONE){
+    st.spaceRise += 6*dt;                     // 缓慢飘远
+    st.throttle=lerp(st.throttle,0.5,dt);
+  }
+
+  // ---- 相机跟随 ----
+  cameraY = Math.max(0, st.base - engageOffset);
+
+  // ---- 抖动 ----
+  st.shakeKick*=Math.pow(0.03,dt);            // 快速衰减
+  const calm=1-smooth(0.85,1,st.climb);
+  const rumble = st.throttle*3.2*calm;
+  const maxQ   = smooth(0.12,0.35,st.climb)*(1-smooth(0.35,0.6,st.climb))*4; // 最大动压抖动
+  st.shakeAmp = (rumble + st.shakeKick + maxQ);
+
+  // ---- 尾焰在世界中的喷口位置 ----
+  const nozzleWy = st.base;
+
+  // ---- 粒子发射 ----
+  emit(dt, nozzleWy);
+  updateParticles(dt);
+  updateAudio();
+}
+
+function emit(dt, nozzleWy){
+  // 待命状态：箭体侧向少量白色排气（LOX 蒸发）
+  if(st.phase===PHASE.IDLE){
+    st.emitVent+=dt*7;
+    while(st.emitVent>1){ st.emitVent--;
+      spawnSmoke(W/2 + 24*S, st.base+128*S, { r0:5, grow:9, vx:rand(10,26), vy:rand(-6,-16),
+        a:rand(0.18,0.3), decay:0.5, shade:4, front:Math.random()<0.5 }); }
+    return;
+  }
+  if(st.throttle<0.03) return;
+
+  const lowAlt = st.base<260;                 // 喷口仍靠近发射台
+  const baseX = W/2;
+
+  // 地面滚滚浓烟（点火 + 升空初期，向两侧翻腾）
+  if(lowAlt){
+    st.emitGround += dt*130*st.throttle;
+    while(st.emitGround>1){ st.emitGround--;
+      const side=Math.random()<0.5?-1:1;
+      const spread=rand(0,120)*S;
+      spawnSmoke(baseX + side*(20*S+spread), rand(-6,26),
+        { r0:rand(14,26)*S, grow:rand(34,64)*S, vx:side*rand(60,170), vy:rand(-6,-40),
+          a:rand(0.55,0.85), decay:rand(0.18,0.32),
+          shade:(Math.random()<0.55?1:2), front:Math.random()<0.5 });
+    }
+  }
+  // 上升尾迹（浓密度随高度递减，进入稀薄大气后消失）
+  if(st.climb<0.72){
+    const dens=1-smooth(0.2,0.72,st.climb);
+    st.emitTrail += dt*(46*dens+8);
+    while(st.emitTrail>1){ st.emitTrail--;
+      spawnSmoke(baseX+rand(-6,6)*S, nozzleWy-rand(0,8),
+        { r0:rand(8,15)*S, grow:rand(26,44)*S, vx:rand(-14,14), vy:rand(-4,-30),
+          a:rand(0.4,0.65)*dens+0.12, decay:rand(0.28,0.42),
+          shade:(Math.random()<0.5?2:3), front:Math.random()<0.4 });
+    }
+  }
+  // 点火期间持续火花
+  if(st.throttle>0.15 && lowAlt){
+    st.emitSpark+=dt*40;
+    while(st.emitSpark>1){ st.emitSpark--; spawnSpark(baseX+rand(-14,14)*S, worldToScreenY(nozzleWy)); }
+  }
+}
+
+// ======================================================================
+//  渲染
+// ======================================================================
+let timeSec=0;
+function render(){
+  // 远景（不受抖动影响）
+  drawSky();
+  drawStars(timeSec);
+  drawEarth();
+  drawClouds(timeSec);
+
+  // 近景（受抖动影响）
+  const shx=(Math.random()-0.5)*2*st.shakeAmp + Math.sin(timeSec*80)*st.shakeAmp*0.3;
+  const shy=(Math.random()-0.5)*2*st.shakeAmp;
+  ctx.save();
+  ctx.translate(shx,shy);
+
+  const towerA = 1-smooth(0.14,0.34,st.climb);
+  drawPad(towerA);
+  drawTower(towerA);
+
+  drawSmoke(false);                 // 后层烟
+
+  // 火箭
+  let rx=W/2, ry, sc=S, ang=st.angle, ra=1;
+  if(st.phase===PHASE.SPACE || st.phase===PHASE.DONE){
+    ry = flyLine - st.spaceRise;
+    sc = S*st.spaceScale;
+    ra = clamp(1-smooth(0.7,1,st.spaceRise/(H*0.62)),0.15,1)+0.15;
+  } else {
+    ry = worldToScreenY(st.base);
+  }
+  drawRocket(rx, ry, sc, ang, Math.min(ra,1));
+
+  drawSmoke(true);                  // 前层烟（在火箭之前翻涌）
+  drawRings();
+  drawSparks();
+
+  ctx.restore();
+
+  // 暗角
+  const vg=ctx.createRadialGradient(W/2,H*0.46,H*0.3, W/2,H*0.5,H*0.85);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,0.5)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+}
+
+// ======================================================================
+//  HUD 更新
+// ======================================================================
+const el={ phase:document.getElementById('hPhase'), time:document.getElementById('hTime'),
+  alt:document.getElementById('hAlt'), vel:document.getElementById('hVel'), bar:document.getElementById('hBar') };
+const NAMES={ [PHASE.IDLE]:'待命 STANDBY', [PHASE.COUNTDOWN]:'点火 IGNITION',
+  [PHASE.LIFTOFF]:'升空 LIFTOFF', [PHASE.ASCENT]:'上升 ASCENT',
+  [PHASE.SPACE]:'入轨 SPACE', [PHASE.DONE]:'完成 COMPLETE' };
+function fmtT(sec){
+  const s=Math.sign(sec)<0?'-':'+'; const a=Math.abs(sec);
+  const mm=String(Math.floor(a/60)).padStart(2,'0');
+  const ss=String(Math.floor(a%60)).padStart(2,'0');
+  return `T${s} ${mm}:${ss}`;
+}
+function updateHUD(){
+  el.phase.textContent = NAMES[st.phase];
+  el.time.textContent  = fmtT(st.Ttime);
+  const altKm = st.base*105/SPACE_Y;
+  el.alt.textContent = altKm.toFixed(1)+' km';
+  el.vel.textContent = fmt(st.v*4.2)+' m/s';
+  el.bar.style.width = (st.climb*100).toFixed(1)+'%';
+}
+
+// ======================================================================
+//  中央大字
+// ======================================================================
+const bigTxt=document.getElementById('bigTxt');
+let bigTimer=0;
+function bigText(txt, cls, dur){
+  bigTxt.textContent=txt;
+  bigTxt.className = cls||'';
+  bigTxt.style.transition='none'; bigTxt.style.opacity='1'; bigTxt.style.transform='scale(1.15)';
+  // 触发回落动画
+  requestAnimationFrame(()=>{ bigTxt.style.transition='opacity .5s ease, transform .5s ease';
+    bigTxt.style.transform='scale(1)'; });
+  bigTimer=dur||0.9;
+}
+let lastCount=99;
+
+// ======================================================================
+//  主循环
+// ======================================================================
+let last=performance.now();
+function frame(now){
+  let dt=(now-last)/1000; last=now;
+  dt=Math.min(dt,0.05); timeSec+=dt;
+
+  update(dt);
+
+  // 倒计时大字 3/2/1
+  if(st.phase===PHASE.COUNTDOWN){
+    const remain=Math.ceil(3-st.t);
+    if(remain>=1 && remain<=3 && remain!==lastCount){ lastCount=remain; bigText(String(remain),'',0.9); }
+  }
+  if(bigTimer>0){ bigTimer-=dt; if(bigTimer<=0){ bigTxt.style.opacity='0'; } }
+
+  render();
+  updateHUD();
+  requestAnimationFrame(frame);
+}
+
+// ======================================================================
+//  控制
+// ======================================================================
+const btnIgnite=document.getElementById('ignite');
+const btnReset =document.getElementById('reset');
+const btnMute  =document.getElementById('mute');
+const hud=document.getElementById('hud');
+const title=document.getElementById('title');
+
+function ignite(){
+  if(st.phase!==PHASE.IDLE) return;
+  initAudio();
+  if(audio && audio.ac.state==='suspended') audio.ac.resume();
+  st.phase=PHASE.COUNTDOWN; st.t=0; lastCount=99;
+  btnIgnite.classList.add('hide');
+  hud.classList.add('on');
+  title.style.opacity='0';
+}
+function showDone(){
+  btnReset.classList.add('on');
+}
+function doReset(){
+  btnReset.classList.remove('on');
+  initState();
+  btnIgnite.classList.remove('hide');
+  hud.classList.remove('on');
+  title.style.opacity='1';
+  bigTxt.style.opacity='0';
+}
+btnIgnite.addEventListener('click', ignite);
+btnReset .addEventListener('click', doReset);
+btnMute  .addEventListener('click', ()=>{ muted=!muted; btnMute.textContent=muted?'🔈':'🔊'; });
+
+// ======================================================================
+//  启动
+// ======================================================================
+resize();
+initState();
+requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
