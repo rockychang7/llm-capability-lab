@@ -17,6 +17,7 @@
 | Claude Opus 4.8 · max | `claude-opus-4-8-max/` | [claude-opus-4-8-max.html](claude-opus-4-8-max/claude-opus-4-8-max.html) | 单文件，全 Canvas 绘制 |
 | GPT-5.6 sol max | `gpt-5-6-sol-max/` | [gpt-5-6-sol-max.html](gpt-5-6-sol-max/gpt-5-6-sol-max.html) | HTML / CSS / JS 三文件分离 |
 | Kimi K3 | `kimi-k3/` | [kimi-k3.html](kimi-k3/kimi-k3.html) | 单文件，SVG 火箭 + Canvas 粒子 |
+| AGY · Gemini 3.6 Flash | `agy-gemini-3-6-flash/` | [agy-gemini-3-6-flash.html](agy-gemini-3-6-flash/agy-gemini-3-6-flash.html) | 单文件，Canvas 矢量绘图 + 物理与 Web Audio 音效 |
 
 > 以上产出均为模型**原样输出**，未做人工修改。
 

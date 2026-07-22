@@ -45,7 +45,7 @@ llm-capability-lab/
 
 | # | 测试能力 | 统一 Prompt | 参赛模型 |
 |---|---------|------------|----------|
-| 01 | 前端动画 / 视觉特效（一键点火 → 火箭升空） | [详情](tests/01-rocket-launch/README.md) | `claude-opus-4-8-max` · `gpt-5-6-sol-max` · `kimi-k3` |
+| 01 | 前端动画 / 视觉特效（一键点火 → 火箭升空） | [详情](tests/01-rocket-launch/README.md) | `claude-opus-4-8-max` · `gpt-5-6-sol-max` · `kimi-k3` · `agy-gemini-3-6-flash` |
 
 ### Prompt 记录
 

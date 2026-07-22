@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGY - 逼真火箭点火升空与轨道插入模拟器</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #030712;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: #f3f4f6;
+      user-select: none;
+    }
+
+    #renderCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+    }
+
+    /* UI Glassmorphic Container */
+    .hud-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px;
+    }
+
+    .hud-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .brand-badge {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 16px;
+      color: #fff;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #f8fafc;
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: #94a3b8;
+      letter-spacing: 0.5px;
+    }
+
+    /* Telemetry HUD Panel */
+    .telemetry-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 16px 24px;
+      display: flex;
+      gap: 28px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .telemetry-item {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .telemetry-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    .telemetry-value {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 20px;
+      font-weight: 700;
+      color: #38bdf8;
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+    }
+
+    .telemetry-unit {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-left: 2px;
+    }
+
+    /* Status Bar & Logs */
+    .hud-middle-left {
+      position: absolute;
+      top: 100px;
+      left: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      pointer-events: auto;
+    }
+
+    .status-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 14px 18px;
+      width: 280px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .status-phase {
+      font-size: 13px;
+      font-weight: 600;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #eab308;
+      box-shadow: 0 0 10px #eab308;
+      animation: pulseDot 1.5s infinite alternate;
+    }
+
+    @keyframes pulseDot {
+      0% { opacity: 0.4; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .status-sub {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+
+    .stage-indicator {
+      margin-top: 10px;
+      display: flex;
+      gap: 6px;
+    }
+
+    .stage-chip {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+      transition: all 0.3s ease;
+    }
+
+    .stage-chip.active {
+      background: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
+    }
+
+    .stage-chip.done {
+      background: #22c55e;
+    }
+
+    .mission-log {
+      max-height: 160px;
+      overflow-y: auto;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 11px;
+      color: #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      scrollbar-width: none;
+    }
+    .mission-log::-webkit-scrollbar { display: none; }
+
+    .log-entry {
+      opacity: 0.85;
+      line-height: 1.3;
+    }
+    .log-time {
+      color: #38bdf8;
+      margin-right: 6px;
+    }
+
+    /* Bottom Control Bar */
+    .hud-footer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      pointer-events: auto;
+      margin-bottom: 12px;
+    }
+
+    .control-deck {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .ignite-btn {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #991b1b 100%);
+      border: 2px solid rgba(254, 202, 202, 0.4);
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      padding: 14px 40px;
+      border-radius: 16px;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ignite-btn:hover:not(:disabled) {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 0 35px rgba(239, 68, 68, 0.9), inset 0 2px 6px rgba(255, 255, 255, 0.6);
+    }
+
+    .ignite-btn:active:not(:disabled) {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .ignite-btn:disabled {
+      background: linear-gradient(135deg, #475569, #334155);
+      border-color: rgba(255, 255, 255, 0.05);
+      color: #94a3b8;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .btn-icon {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .aux-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e2e8f0;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .aux-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* Modal Victory Overlay */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.75);
+      backdrop-filter: blur(16px);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9));
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(56, 189, 248, 0.2);
+      border-radius: 28px;
+      padding: 40px;
+      max-width: 520px;
+      width: 90%;
+      text-align: center;
+      transform: scale(0.9) translateY(20px);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: scale(1) translateY(0);
+    }
+
+    .success-badge {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+    }
+
+    .modal-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #f8fafc;
+      margin-bottom: 8px;
+    }
+
+    .modal-desc {
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .stat-box-lbl {
+      font-size: 11px;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    .stat-box-val {
+      font-family: monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .reset-btn {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border: none;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 14px 36px;
+      border-radius: 14px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .reset-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
+    }
+
+    /* Sound Switcher */
+    .sound-toggle {
+      position: absolute;
+      top: 100px;
+      right: 24px;
+      pointer-events: auto;
+    }
+
+    @media (max-width: 768px) {
+      .hud-layer { padding: 12px; }
+      .telemetry-panel { padding: 10px 14px; gap: 14px; }
+      .telemetry-value { font-size: 16px; }
+      .hud-middle-left { top: 80px; left: 12px; }
+      .status-card { width: 220px; }
+      .ignite-btn { padding: 12px 24px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 渲染画布 -->
+  <canvas id="renderCanvas"></canvas>
+
+  <!-- HUD 界面层 -->
+  <div class="hud-layer">
+
+    <!-- 顶部栏 -->
+    <div class="hud-header">
+      <div class="brand-badge">
+        <div class="brand-logo">AGY</div>
+        <div>
+          <div class="brand-title">ANTIGRAVITY ROCKET LAB</div>
+          <div class="brand-subtitle">ORBITAL LAUNCH SYSTEM v2.0</div>
+        </div>
+      </div>
+
+      <!-- 实时遥测面板 -->
+      <div class="telemetry-panel">
+        <div class="telemetry-item">
+          <div class="telemetry-label">高度 ALTITUDE</div>
+          <div class="telemetry-value" id="teleAlt">0.0 <span class="telemetry-unit">km</span></div>
+        </div>
+        <div class="telemetry-item">
+          <div class="telemetry-label">速度 VELOCITY</div>
+          <div class="telemetry-value" id="teleSpeed">0 <span class="telemetry-unit">m/s</span></div>
+        </div>
+        <div class="telemetry-item">
+          <div class="telemetry-label">过载 G-FORCE</div>
+          <div class="telemetry-value" id="teleG">1.0 <span class="telemetry-unit">G</span></div>
+        </div>
+        <div class="telemetry-item">
+          <div class="telemetry-label">燃料 FUEL</div>
+          <div class="telemetry-value" id="teleFuel">100 <span class="telemetry-unit">%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 左侧状态与任务日志 -->
+    <div class="hud-middle-left">
+      <div class="status-card">
+        <div class="status-phase">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="phaseText">发射台待命 (STANDBY)</span>
+        </div>
+        <div class="status-sub" id="statusSub">系统检查完毕，等待点火指令</div>
+        <div class="stage-indicator">
+          <div class="stage-chip active" id="chipS1" title="一级火箭 Booster"></div>
+          <div class="stage-chip" id="chipS2" title="二级火箭 Upper Stage"></div>
+          <div class="stage-chip" id="chipFairing" title="整流罩 Fairing"></div>
+          <div class="stage-chip" id="chipPayload" title="卫星载荷 Payload"></div>
+        </div>
+      </div>
+
+      <div class="status-card" style="padding: 10px 14px;">
+        <div class="mission-log" id="missionLog">
+          <div class="log-entry"><span class="log-time">[T-00:10]</span> 遥测信号良好，地面水压系统充填...</div>
+          <div class="log-entry"><span class="log-time">[T-00:05]</span> 飞行控制系统已就绪</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 音频控制 -->
+    <div class="sound-toggle">
+      <button class="aux-btn" id="soundBtn">
+        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        <span id="soundText">音效: 开</span>
+      </button>
+    </div>
+
+    <!-- 底部控制栏 -->
+    <div class="hud-footer">
+      <div class="control-deck">
+        <button class="aux-btn" id="camBtn">
+          <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+          视角: 跟踪火箭
+        </button>
+
+        <button class="ignite-btn" id="igniteBtn">
+          <svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 23c-4.97 0-9-4.03-9-9 0-4.17 2.84-7.67 6.68-8.68.32-.08.64.13.72.45.08.32-.13.64-.45.72C6.54 7.37 4 10.3 4 14c0 4.41 3.59 8 8 8s8-3.59 8-8c0-2.45-1.12-4.73-3.03-6.22-.26-.2-.31-.57-.11-.83.2-.26.57-.31.83-.11C19.95 8.56 21 11.18 21 14c0 4.97-4.03 9-9 9zm.5-13.5v-7c0-.41-.34-.75-.75-.75s-.75.34-.75.75v7c-.41.23-.75.64-.75 1.15 0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5c0-.51-.34-.92-.75-1.15z"/></svg>
+          一键点火升空 (IGNITE)
+        </button>
+
+        <button class="aux-btn" id="speedBtn">
+          <svg class="btn-icon" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9 0l8.5-6L13 6v12z"/></svg>
+          倍速: 1x
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 成功入轨弹窗 -->
+  <div class="modal-overlay" id="victoryModal">
+    <div class="modal-card">
+      <div class="success-badge">
+        <svg style="width: 40px; height: 40px; fill: #fff;" viewBox="0 0 24 24">
+          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+        </svg>
+      </div>
+      <div class="modal-title">火箭成功发射并进入轨道！</div>
+      <div class="modal-desc">AGY-01 载人运载火箭已成功穿越大气层，完成一二级分离与整流罩抛离，成功进入预定近地轨道 (LEO)。</div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-box-lbl">最终轨道高度</div>
+          <div class="stat-box-val" id="resAlt">408.5 km</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-lbl">入轨入界速度</div>
+          <div class="stat-box-val" id="resSpeed">7,820 m/s</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-lbl">最大过载</div>
+          <div class="stat-box-val" id="resG">4.2 G</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-lbl">任务用时</div>
+          <div class="stat-box-val" id="resTime">02:45</div>
+        </div>
+      </div>
+
+      <button class="reset-btn" id="resetBtn">再次重置发射 (RE-LAUNCH)</button>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       AGY ROCKET LAUNCH SIMULATOR ENGINE (Native Canvas 2D + Web Audio API)
+       ========================================================================== */
+
+    const canvas = document.getElementById('renderCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // UI elements
+    const teleAlt = document.getElementById('teleAlt');
+    const teleSpeed = document.getElementById('teleSpeed');
+    const teleG = document.getElementById('teleG');
+    const teleFuel = document.getElementById('teleFuel');
+    const phaseText = document.getElementById('phaseText');
+    const statusSub = document.getElementById('statusSub');
+    const statusDot = document.getElementById('statusDot');
+    const missionLog = document.getElementById('missionLog');
+    const igniteBtn = document.getElementById('igniteBtn');
+    const camBtn = document.getElementById('camBtn');
+    const speedBtn = document.getElementById('speedBtn');
+    const soundBtn = document.getElementById('soundBtn');
+    const soundText = document.getElementById('soundText');
+    const victoryModal = document.getElementById('victoryModal');
+    const resetBtn = document.getElementById('resetBtn');
+
+    const chipS1 = document.getElementById('chipS1');
+    const chipS2 = document.getElementById('chipS2');
+    const chipFairing = document.getElementById('chipFairing');
+    const chipPayload = document.getElementById('chipPayload');
+
+    // Canvas resize
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    // Audio Engine (Web Audio API Synthesizer)
+    let audioCtx = null;
+    let audioEnabled = true;
+    let engineGain = null;
+    let engineFilter = null;
+    let rumbleNode = null;
+
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+
+        // Engine roar generator using buffer noise
+        const bufferSize = audioCtx.sampleRate * 2;
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+
+        const whiteNoise = audioCtx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+
+        engineFilter = audioCtx.createBiquadFilter();
+        engineFilter.type = 'lowpass';
+        engineFilter.frequency.setValueAtTime(120, audioCtx.currentTime);
+
+        engineGain = audioCtx.createGain();
+        engineGain.gain.setValueAtTime(0, audioCtx.currentTime);
+
+        whiteNoise.connect(engineFilter);
+        engineFilter.connect(engineGain);
+        engineGain.connect(audioCtx.destination);
+        whiteNoise.start();
+      } catch (e) {
+        console.warn("Web Audio initialization skipped:", e);
+      }
+    }
+
+    function setEngineSound(intensity, frequency = 120) {
+      if (!audioCtx || !audioEnabled) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const targetGain = Math.min(1.0, intensity * 0.4);
+      engineGain.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.05);
+      engineFilter.frequency.setTargetAtTime(frequency, audioCtx.currentTime, 0.05);
+    }
+
+    function playBangSound() {
+      if (!audioCtx || !audioEnabled) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
+    soundBtn.addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      soundText.textContent = audioEnabled ? "音效: 开" : "音效: 关";
+      if (!audioEnabled && engineGain && audioCtx) {
+        engineGain.gain.setValueAtTime(0, audioCtx.currentTime);
+      }
+    });
+
+    // Simulation State & Constants
+    const STAGES = {
+      STANDBY: 0,
+      COUNTDOWN: 1,
+      LIFTOFF: 2,
+      MAX_Q: 3,
+      MECO_STAGE_SEP: 4,
+      SECOND_STAGE_BURN: 5,
+      FAIRING_SEP: 6,
+      ORBIT_INSERTION: 7,
+      COMPLETED: 8
+    };
+
+    let simState = {
+      stage: STAGES.STANDBY,
+      time: 0,           // seconds since ignition
+      altitude: 0,       // meters
+      velocity: 0,       // m/s
+      acceleration: 0,   // m/s^2
+      gForce: 1.0,
+      fuelS1: 100,       // %
+      fuelS2: 100,       // %
+      pitch: 90,         // degrees (90 = vertical, 0 = horizontal)
+      cameraY: 0,        // world Y offset
+      cameraShake: 0,
+      simSpeed: 1,
+      cameraMode: 'follow', // 'follow', 'pad', 'orbit'
+    };
+
+    // Separated parts tracking
+    let boosterStage1 = null; // { x, y, vx, vy, rot, rotVel }
+    let fairingLeft = null;
+    let fairingRight = null;
+    let solarProgress = 0; // 0 to 1 deployment
+
+    // Stars & Environment Setup
+    const stars = [];
+    for (let i = 0; i < 400; i++) {
+      stars.push({
+        x: Math.random(),
+        y: Math.random(),
+        size: Math.random() * 2 + 0.5,
+        alpha: Math.random() * 0.8 + 0.2,
+        twinkleSpeed: Math.random() * 0.05 + 0.01
+      });
+    }
+
+    // Volumetric Particle System
+    const particles = [];
+    const sparks = [];
+    const clouds = [];
+
+    // Ambient Clouds
+    for (let i = 0; i < 15; i++) {
+      clouds.push({
+        x: (Math.random() - 0.5) * 3000,
+        y: 800 + Math.random() * 4000,
+        radius: 120 + Math.random() * 180,
+        opacity: 0.25 + Math.random() * 0.35
+      });
+    }
+
+    function addLog(msg) {
+      const now = new Date();
+      const timeStr = simState.stage >= STAGES.LIFTOFF ? 
+        `T+${Math.floor(simState.time).toString().padStart(2, '0')}s` : 
+        `T-${Math.max(0, Math.ceil(3 - simState.time)).toString().padStart(2, '0')}s`;
+      
+      const div = document.createElement('div');
+      div.className = 'log-entry';
+      div.innerHTML = `<span class="log-time">[${timeStr}]</span> ${msg}`;
+      missionLog.appendChild(div);
+      missionLog.scrollTop = missionLog.scrollHeight;
+    }
+
+    // Ignition button action
+    igniteBtn.addEventListener('click', () => {
+      if (simState.stage === STAGES.STANDBY) {
+        initAudio();
+        simState.stage = STAGES.COUNTDOWN;
+        simState.time = 0;
+        igniteBtn.disabled = true;
+        igniteBtn.innerHTML = `<span class="status-dot"></span> 倒计时中...`;
+        addLog("一键点火程序启动，主发动机火花点火系统 (TEA-TEB) 开始工作！");
+        statusSub.textContent = "倒计时进行中: 3, 2, 1...";
+      }
+    });
+
+    camBtn.addEventListener('click', () => {
+      if (simState.cameraMode === 'follow') {
+        simState.cameraMode = 'pad';
+        camBtn.innerHTML = `<svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg> 视角: 发射塔架`;
+      } else {
+        simState.cameraMode = 'follow';
+        camBtn.innerHTML = `<svg class="btn-icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg> 视角: 跟踪火箭`;
+      }
+    });
+
+    speedBtn.addEventListener('click', () => {
+      if (simState.simSpeed === 1) {
+        simState.simSpeed = 2;
+        speedBtn.textContent = "倍速: 2x";
+      } else if (simState.simSpeed === 2) {
+        simState.simSpeed = 4;
+        speedBtn.textContent = "倍速: 4x";
+      } else {
+        simState.simSpeed = 1;
+        speedBtn.textContent = "倍速: 1x";
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      location.reload();
+    });
+
+    /* ==========================================================================
+       PHYSICS & STATE UPDATE LOOP
+       ========================================================================== */
+    let lastTimestamp = performance.now();
+
+    function update(dt) {
+      dt = Math.min(dt, 0.1) * simState.simSpeed;
+
+      if (simState.stage === STAGES.COUNTDOWN) {
+        simState.time += dt;
+
+        // Sparkler effects on engine pad
+        for (let i = 0; i < 4; i++) {
+          sparks.push({
+            x: (Math.random() - 0.5) * 30,
+            y: 40,
+            vx: (Math.random() - 0.5) * 80,
+            vy: Math.random() * 120 + 40,
+            life: 1,
+            decay: Math.random() * 0.05 + 0.03
+          });
+        }
+
+        // Deluge steam
+        for (let i = 0; i < 3; i++) {
+          particles.push({
+            x: (Math.random() - 0.5) * 60,
+            y: 35,
+            vx: (Math.random() - 0.5) * 150,
+            vy: -Math.random() * 40,
+            radius: Math.random() * 20 + 10,
+            color: 'rgba(230, 240, 255, 0.6)',
+            life: 1,
+            decay: 0.015,
+            type: 'steam'
+          });
+        }
+
+        setEngineSound(simState.time / 3, 100);
+
+        if (simState.time >= 3) {
+          simState.stage = STAGES.LIFTOFF;
+          simState.time = 0;
+          playBangSound();
+          addLog("一键点火完成！全马力全量点火，脱离发射塔架升空！");
+          phaseText.textContent = "火箭升空 (LIFTOFF & ASCENT)";
+          statusSub.textContent = "九台发动机满推力工作中，穿过低空大气";
+          statusDot.style.background = "#22c55e";
+          statusDot.style.boxShadow = "0 0 10px #22c55e";
+        }
+      } else if (simState.stage >= STAGES.LIFTOFF && simState.stage < STAGES.COMPLETED) {
+        simState.time += dt;
+
+        // Stage duration physics calculations
+        let thrust = 0;
+        let mass = 1.0;
+
+        if (simState.stage === STAGES.LIFTOFF) {
+          thrust = 32.0; // High thrust at liftoff
+          simState.fuelS1 = Math.max(0, simState.fuelS1 - dt * 2.5);
+          simState.cameraShake = Math.random() * 6 + 2;
+          setEngineSound(1.0, 140);
+
+          if (simState.altitude > 8000) {
+            simState.stage = STAGES.MAX_Q;
+            addLog("通过最大动压区 (MAX-Q)，风阻与空气压力达到峰值");
+            phaseText.textContent = "最大动压区 (MAX-Q)";
+          }
+        } else if (simState.stage === STAGES.MAX_Q) {
+          thrust = 38.0;
+          simState.fuelS1 = Math.max(0, simState.fuelS1 - dt * 2.5);
+          simState.pitch = Math.max(45, 90 - (simState.altitude - 8000) / 1000 * 2);
+          simState.cameraShake = Math.random() * 10 + 4; // High vibration
+          setEngineSound(1.0, 160);
+
+          if (simState.altitude > 28000 || simState.fuelS1 <= 5) {
+            simState.stage = STAGES.MECO_STAGE_SEP;
+            playBangSound();
+            addLog("一级发动机关机 (MECO)，气动锁解扣，一二级火箭分离！");
+            phaseText.textContent = "一级分离 (STAGE SEP)";
+            chipS1.classList.remove('active');
+            chipS1.classList.add('done');
+            chipS2.classList.add('active');
+
+            // Create booster detached object
+            boosterStage1 = {
+              x: 0,
+              y: simState.altitude,
+              vx: -15,
+              vy: simState.velocity * 0.9,
+              rot: 0,
+              rotVel: 0.02
+            };
+          }
+        } else if (simState.stage === STAGES.MECO_STAGE_SEP) {
+          thrust = 0; // Brief coast during separation
+          simState.cameraShake = 1;
+          setEngineSound(0.1, 80);
+
+          if (simState.time > 2.5) {
+            simState.stage = STAGES.SECOND_STAGE_BURN;
+            playBangSound();
+            addLog("二级真空发动机成功点火，继续向预定轨道加速");
+            phaseText.textContent = "二级发动机燃烧 (SES-1)";
+            setEngineSound(0.7, 220);
+          }
+        } else if (simState.stage === STAGES.SECOND_STAGE_BURN) {
+          thrust = 22.0;
+          simState.fuelS2 = Math.max(0, simState.fuelS2 - dt * 1.8);
+          simState.pitch = Math.max(10, 45 - (simState.altitude - 30000) / 30000 * 35);
+          simState.cameraShake = Math.random() * 3 + 1;
+          setEngineSound(0.7, 240);
+
+          if (simState.altitude > 65000 && !fairingLeft) {
+            simState.stage = STAGES.FAIRING_SEP;
+            playBangSound();
+            addLog("穿越卡门线进入太空，整流罩成功分离！");
+            phaseText.textContent = "整流罩抛离 (FAIRING SEP)";
+            chipFairing.classList.add('done');
+
+            fairingLeft = { x: -5, y: simState.altitude, vx: -40, vy: simState.velocity, rot: 0, rotVel: -0.05 };
+            fairingRight = { x: 5, y: simState.altitude, vx: 40, vy: simState.velocity, rot: 0, rotVel: 0.05 };
+          }
+        } else if (simState.stage === STAGES.FAIRING_SEP) {
+          thrust = 24.0;
+          simState.fuelS2 = Math.max(0, simState.fuelS2 - dt * 1.8);
+          simState.pitch = Math.max(5, simState.pitch - dt * 2);
+
+          if (simState.altitude > 120000) {
+            simState.stage = STAGES.ORBIT_INSERTION;
+            addLog("进入近地轨道切线角，做最后入轨冲刺 (SECO)");
+            phaseText.textContent = "轨道插入 (ORBIT INSERTION)";
+          }
+        } else if (simState.stage === STAGES.ORBIT_INSERTION) {
+          thrust = 18.0;
+          simState.fuelS2 = Math.max(0, simState.fuelS2 - dt * 1.5);
+          simState.pitch = Math.max(0, simState.pitch - dt * 4);
+
+          if (simState.velocity >= 7800 || simState.altitude >= 400000) {
+            simState.stage = STAGES.COMPLETED;
+            simState.velocity = 7820;
+            simState.altitude = 408500;
+            simState.acceleration = 0;
+            simState.gForce = 0;
+            playBangSound();
+            addLog("第二级关机 (SECO)，载荷太阳能翼板展开，入轨成功！");
+            phaseText.textContent = "运行在圆轨道 (LEO IN ORBIT)";
+            statusSub.textContent = "高度 408.5km | 速度 7.82km/s | 零重力状态";
+            chipS2.classList.remove('active');
+            chipS2.classList.add('done');
+            chipPayload.classList.add('done');
+
+            setEngineSound(0);
+
+            // Trigger Victory Modal after 2 seconds
+            setTimeout(() => {
+              document.getElementById('resAlt').textContent = `${(simState.altitude / 1000).toFixed(1)} km`;
+              document.getElementById('resSpeed').textContent = `${Math.round(simState.velocity)} m/s`;
+              document.getElementById('resG').textContent = `4.2 G`;
+              const mins = Math.floor(simState.time / 60).toString().padStart(2, '0');
+              const secs = Math.floor(simState.time % 60).toString().padStart(2, '0');
+              document.getElementById('resTime').textContent = `${mins}:${secs}`;
+              victoryModal.classList.add('active');
+            }, 1800);
+          }
+        }
+
+        // Acceleration & Velocity Update
+        const gAcc = 9.81 / Math.pow(1 + simState.altitude / 6371000, 2);
+        const radPitch = simState.pitch * Math.PI / 180;
+        const vertThrust = thrust * Math.sin(radPitch);
+        
+        simState.acceleration = vertThrust - gAcc;
+        simState.velocity += simState.acceleration * dt * 15; // scaled for dramatic effect
+        simState.altitude += simState.velocity * dt;
+        simState.gForce = (simState.acceleration + gAcc) / 9.81;
+
+        // Particle generation for active thrust
+        if (thrust > 0) {
+          const isVacuum = simState.altitude > 40000;
+          const isSecondStage = simState.stage >= STAGES.SECOND_STAGE_BURN;
+          const numP = isVacuum ? 4 : 8;
+
+          for (let i = 0; i < numP; i++) {
+            const spread = isVacuum ? 60 : 12;
+            const speed = isVacuum ? 300 : 500;
+            particles.push({
+              x: (Math.random() - 0.5) * spread,
+              y: simState.altitude - (isSecondStage ? 12 : 28),
+              vx: (Math.random() - 0.5) * (isVacuum ? 120 : 30),
+              vy: -Math.random() * speed - 200,
+              radius: Math.random() * (isVacuum ? 30 : 14) + (isVacuum ? 20 : 6),
+              color: isVacuum ? 
+                `rgba(${180 + Math.random()*70}, ${120 + Math.random()*100}, 255, ${Math.random()*0.6 + 0.4})` :
+                `rgba(255, ${Math.floor(Math.random()*180 + 70)}, 30, ${Math.random()*0.8 + 0.2})`,
+              life: 1,
+              decay: isVacuum ? 0.04 : 0.02,
+              type: isVacuum ? 'vacuumPlume' : 'flame'
+            });
+          }
+
+          // Dense smoke clouds in atmosphere
+          if (!isVacuum) {
+            for (let i = 0; i < 4; i++) {
+              particles.push({
+                x: (Math.random() - 0.5) * 40,
+                y: simState.altitude - 40,
+                vx: (Math.random() - 0.5) * 80,
+                vy: -Math.random() * 100 - 50,
+                radius: Math.random() * 25 + 15,
+                color: 'rgba(200, 205, 215, 0.45)',
+                life: 1,
+                decay: 0.012,
+                type: 'smoke'
+              });
+            }
+          }
+        }
+
+        // Solar panels deployment progress in orbit
+        if (simState.stage === STAGES.COMPLETED) {
+          solarProgress = Math.min(1.0, solarProgress + dt * 0.5);
+        }
+      }
+
+      // Update booster stage separation physics
+      if (boosterStage1) {
+        boosterStage1.x += boosterStage1.vx * dt;
+        boosterStage1.y += boosterStage1.vy * dt;
+        boosterStage1.vy -= 9.8 * dt * 5;
+        boosterStage1.rot += boosterStage1.rotVel;
+      }
+      if (fairingLeft) {
+        fairingLeft.x += fairingLeft.vx * dt;
+        fairingLeft.y += fairingLeft.vy * dt;
+        fairingLeft.rot += fairingLeft.rotVel;
+        fairingRight.x += fairingRight.vx * dt;
+        fairingRight.y += fairingRight.vy * dt;
+        fairingRight.rot += fairingRight.rotVel;
+      }
+
+      // Update particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.life -= p.decay;
+        if (p.type === 'smoke') p.radius += dt * 30;
+        if (p.type === 'vacuumPlume') p.radius += dt * 40;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const s = sparks[i];
+        s.x += s.vx * dt;
+        s.y += s.vy * dt;
+        s.life -= s.decay;
+        if (s.life <= 0) sparks.splice(i, 1);
+      }
+
+      // Telemetry UI updating
+      teleAlt.childNodes[0].nodeValue = (simState.altitude / 1000).toFixed(1) + ' ';
+      teleSpeed.childNodes[0].nodeValue = Math.round(simState.velocity).toLocaleString() + ' ';
+      teleG.childNodes[0].nodeValue = simState.gForce.toFixed(1) + ' ';
+      const activeFuel = simState.stage >= STAGES.SECOND_STAGE_BURN ? simState.fuelS2 : simState.fuelS1;
+      teleFuel.childNodes[0].nodeValue = Math.max(0, Math.round(activeFuel)) + ' ';
+
+      // Camera lerp tracking
+      const targetY = simState.cameraMode === 'pad' ? 0 : simState.altitude;
+      simState.cameraY += (targetY - simState.cameraY) * 0.08;
+    }
+
+    /* ==========================================================================
+       CANVAS GRAPHICS & RENDERING SYSTEM
+       ========================================================================== */
+
+    function render() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Camera Shake offsets
+      const shakeX = (Math.random() - 0.5) * simState.cameraShake;
+      const shakeY = (Math.random() - 0.5) * simState.cameraShake;
+
+      ctx.save();
+      ctx.translate(shakeX, shakeY);
+
+      // 1. DYNAMIC SKY & ATMOSPHERE GRADIENT
+      const alt = simState.altitude;
+      const spaceFactor = Math.min(1.0, Math.max(0, (alt - 5000) / 75000));
+
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
+      if (spaceFactor < 0.2) {
+        // Daytime Ground Sky
+        skyGrad.addColorStop(0, '#1e3a8a');
+        skyGrad.addColorStop(0.5, '#3b82f6');
+        skyGrad.addColorStop(1, '#93c5fd');
+      } else if (spaceFactor < 0.8) {
+        // Stratosphere Transition
+        const t = (spaceFactor - 0.2) / 0.6;
+        skyGrad.addColorStop(0, '#020617');
+        skyGrad.addColorStop(0.5, '#0f172a');
+        skyGrad.addColorStop(1, `rgba(30, 58, 138, ${1 - t})`);
+      } else {
+        // Deep Vacuum Space
+        skyGrad.addColorStop(0, '#030712');
+        skyGrad.addColorStop(1, '#000000');
+      }
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      // 2. STARS (Fade in as altitude increases)
+      if (spaceFactor > 0.1) {
+        ctx.save();
+        ctx.globalAlpha = Math.min(1.0, (spaceFactor - 0.1) / 0.7);
+        for (const star of stars) {
+          const sx = star.x * width;
+          const sy = (star.y * height - simState.cameraY * 0.05) % height;
+          const adjustedY = sy < 0 ? sy + height : sy;
+          
+          ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha * (0.8 + Math.sin(Date.now() * star.twinkleSpeed) * 0.2)})`;
+          ctx.beginPath();
+          ctx.arc(sx, adjustedY, star.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // 3. EARTH CURVATURE IN SPACE
+      if (spaceFactor > 0.4) {
+        ctx.save();
+        const earthAlpha = Math.min(1.0, (spaceFactor - 0.4) / 0.5);
+        ctx.globalAlpha = earthAlpha;
+
+        const screenCenterY = height / 2 + (simState.altitude - simState.cameraY) * 0.15;
+        const earthRadius = width * 1.6;
+        const earthY = screenCenterY + earthRadius + 180;
+
+        // Atmosphere Glow Halo
+        const haloGrad = ctx.createRadialGradient(width / 2, earthY, earthRadius, width / 2, earthY, earthRadius + 60);
+        haloGrad.addColorStop(0, 'rgba(56, 189, 248, 0.8)');
+        haloGrad.addColorStop(0.4, 'rgba(14, 165, 233, 0.3)');
+        haloGrad.addColorStop(1, 'rgba(3, 7, 18, 0)');
+
+        ctx.fillStyle = haloGrad;
+        ctx.beginPath();
+        ctx.arc(width / 2, earthY, earthRadius + 60, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Earth Globe Body
+        const globeGrad = ctx.createRadialGradient(width / 2 - 200, earthY - earthRadius + 100, 100, width / 2, earthY, earthRadius);
+        globeGrad.addColorStop(0, '#1d4ed8');
+        globeGrad.addColorStop(0.4, '#0f172a');
+        globeGrad.addColorStop(1, '#020617');
+
+        ctx.fillStyle = globeGrad;
+        ctx.beginPath();
+        ctx.arc(width / 2, earthY, earthRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Earth Limb Line
+        ctx.strokeStyle = 'rgba(186, 230, 253, 0.9)';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      // WORLD COORDINATE TRANSFORM (Center rocket horizontally, camera vertically)
+      ctx.save();
+      const centerX = width / 2;
+      const centerY = height * 0.7; // Rocket positioned nicely in lower 1/3 of screen
+      ctx.translate(centerX, centerY);
+
+      // 4. GROUND & LAUNCH PAD (Visible when altitude low)
+      const groundRelY = simState.cameraY;
+      if (groundRelY < height * 1.5) {
+        ctx.save();
+        ctx.translate(0, groundRelY);
+
+        // Ground Terrain
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(-width, 0, width * 2, 600);
+
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-width, 0, width * 2, 10);
+
+        // Concrete Launch Pad Base
+        ctx.fillStyle = '#334155';
+        ctx.beginPath();
+        ctx.moveTo(-160, 0);
+        ctx.lineTo(-220, 80);
+        ctx.lineTo(220, 80);
+        ctx.lineTo(160, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        // Flame Trench Cavity
+        ctx.fillStyle = '#020617';
+        ctx.fillRect(-60, 0, 120, 50);
+
+        // Launch Tower (Gantry Structure)
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(-140, -320, 40, 320);
+
+        // Tower Truss Crosses
+        ctx.beginPath();
+        for (let y = -320; y < 0; y += 40) {
+          ctx.moveTo(-140, y);
+          ctx.lineTo(-100, y + 40);
+          ctx.moveTo(-100, y);
+          ctx.lineTo(-140, y + 40);
+        }
+        ctx.stroke();
+
+        // Umbilical Support Arms (swing away after liftoff)
+        const armAngle = simState.stage >= STAGES.LIFTOFF ? -Math.PI / 3 : 0;
+        ctx.save();
+        ctx.translate(-100, -180);
+        ctx.rotate(armAngle);
+        ctx.fillStyle = '#64748b';
+        ctx.fillRect(0, -6, 75, 12);
+        ctx.restore();
+
+        // Lightning Rod Tower
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(-122, -380, 4, 60);
+
+        ctx.restore();
+      }
+
+      // 5. VOLUMETRIC PARTICLES & SMOKE (In World Space)
+      for (const p of particles) {
+        const px = p.x;
+        const py = -(p.y - simState.cameraY);
+        if (py < -height || py > height) continue;
+
+        ctx.save();
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(px, py, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Sparklers at Countdown
+      for (const s of sparks) {
+        const sx = s.x;
+        const sy = -(s.y - simState.cameraY);
+        ctx.save();
+        ctx.globalAlpha = s.life;
+        ctx.fillStyle = '#ff9500';
+        ctx.fillRect(sx, sy, 3, 3);
+        ctx.restore();
+      }
+
+      // 6. SEPARATED BOOSTER (STAGE 1)
+      if (boosterStage1) {
+        ctx.save();
+        const bx = boosterStage1.x;
+        const by = -(boosterStage1.y - simState.cameraY);
+        ctx.translate(bx, by);
+        ctx.rotate(boosterStage1.rot);
+
+        // Booster Body
+        const bGrad = ctx.createLinearGradient(-12, 0, 12, 0);
+        bGrad.addColorStop(0, '#94a3b8');
+        bGrad.addColorStop(0.5, '#f8fafc');
+        bGrad.addColorStop(1, '#475569');
+        ctx.fillStyle = bGrad;
+        ctx.fillRect(-12, 0, 24, 70);
+
+        // Grid Fins
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(-18, 5, 6, 12);
+        ctx.fillRect(12, 5, 6, 12);
+
+        // Interstage Ring
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(-12, 0, 24, 6);
+
+        ctx.restore();
+      }
+
+      // 7. SEPARATED FAIRING HALVES
+      if (fairingLeft && fairingRight) {
+        [fairingLeft, fairingRight].forEach((f, idx) => {
+          ctx.save();
+          const fx = f.x;
+          const fy = -(f.y - simState.cameraY);
+          ctx.translate(fx, fy);
+          ctx.rotate(f.rot);
+
+          ctx.fillStyle = '#e2e8f0';
+          ctx.beginPath();
+          if (idx === 0) {
+            ctx.moveTo(0, -30);
+            ctx.quadraticCurveTo(-15, -15, -12, 20);
+            ctx.lineTo(0, 20);
+          } else {
+            ctx.moveTo(0, -30);
+            ctx.quadraticCurveTo(15, -15, 12, 20);
+            ctx.lineTo(0, 20);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        });
+      }
+
+      // 8. MAIN ROCKET ASSEMBLY (Center Render)
+      const rocketRelY = -(simState.altitude - simState.cameraY);
+      ctx.save();
+      ctx.translate(0, rocketRelY);
+
+      // Rocket Pitch Tilt Rotation
+      const tiltAngle = (90 - simState.pitch) * Math.PI / 180;
+      ctx.rotate(tiltAngle);
+
+      // A. Stage 1 Booster Body (If still attached)
+      if (simState.stage < STAGES.MECO_STAGE_SEP) {
+        ctx.save();
+        // Metallic Body Gradient
+        const s1Grad = ctx.createLinearGradient(-14, 0, 14, 0);
+        s1Grad.addColorStop(0, '#64748b');
+        s1Grad.addColorStop(0.3, '#f8fafc');
+        s1Grad.addColorStop(0.8, '#cbd5e1');
+        s1Grad.addColorStop(1, '#334155');
+
+        ctx.fillStyle = s1Grad;
+        ctx.fillRect(-14, -20, 28, 75);
+
+        // Rocket Markings & USA/AGY Decals
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(-14, 15, 28, 4);
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 9px monospace';
+        ctx.fillText('AGY', -8, -2);
+
+        // Engines Nozzles (3 raptor style nozzles)
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.moveTo(-12, 55); ctx.lineTo(-15, 67); ctx.lineTo(-7, 67);
+        ctx.moveTo(-4, 55);  ctx.lineTo(-6, 67);  ctx.lineTo(2, 67);
+        ctx.moveTo(4, 55);   ctx.lineTo(1, 67);   ctx.lineTo(9, 67);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // B. Stage 2 (Upper Stage Body)
+      if (simState.stage < STAGES.COMPLETED || simState.stage >= STAGES.MECO_STAGE_SEP) {
+        ctx.save();
+        const s2Y = simState.stage < STAGES.MECO_STAGE_SEP ? -65 : -20;
+
+        const s2Grad = ctx.createLinearGradient(-12, 0, 12, 0);
+        s2Grad.addColorStop(0, '#94a3b8');
+        s2Grad.addColorStop(0.4, '#ffffff');
+        s2Grad.addColorStop(1, '#475569');
+
+        ctx.fillStyle = s2Grad;
+        ctx.fillRect(-12, s2Y, 24, 45);
+
+        // Stage 2 Engine Nozzle
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.moveTo(-6, s2Y + 45);
+        ctx.lineTo(-9, s2Y + 56);
+        ctx.lineTo(9, s2Y + 56);
+        ctx.lineTo(6, s2Y + 45);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // C. Payload Satellite & Solar Panels (Revealed in space)
+      if (simState.stage >= STAGES.FAIRING_SEP) {
+        ctx.save();
+        const satY = -75;
+
+        // Satellite Body
+        ctx.fillStyle = '#eab308'; // Gold Foil Thermal Blanketing
+        ctx.fillRect(-8, satY, 16, 20);
+
+        // Antenna Dish
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, satY - 4, 6, Math.PI, 0);
+        ctx.stroke();
+
+        // Solar Array Deployment
+        if (solarProgress > 0) {
+          const pWidth = 35 * solarProgress;
+          ctx.fillStyle = '#0284c7';
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 1;
+
+          // Left Panel
+          ctx.fillRect(-8 - pWidth, satY + 4, pWidth, 12);
+          ctx.strokeRect(-8 - pWidth, satY + 4, pWidth, 12);
+
+          // Right Panel
+          ctx.fillRect(8, satY + 4, pWidth, 12);
+          ctx.strokeRect(8, satY + 4, pWidth, 12);
+        }
+
+        ctx.restore();
+      }
+
+      // D. Payload Nose Fairing (Aerodynamic Cone - detached in space)
+      if (simState.stage < STAGES.FAIRING_SEP) {
+        ctx.save();
+        const coneY = simState.stage < STAGES.MECO_STAGE_SEP ? -65 : -20;
+
+        const fGrad = ctx.createLinearGradient(-12, 0, 12, 0);
+        fGrad.addColorStop(0, '#cbd5e1');
+        fGrad.addColorStop(0.5, '#ffffff');
+        fGrad.addColorStop(1, '#64748b');
+
+        ctx.fillStyle = fGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, coneY - 32);
+        ctx.quadraticCurveTo(-14, coneY - 12, -12, coneY);
+        ctx.lineTo(12, coneY);
+        ctx.quadraticCurveTo(14, coneY - 12, 0, coneY - 32);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // Condensation Cone / Shockwave Ring at Transonic (Max-Q)
+      if (simState.stage === STAGES.MAX_Q) {
+        ctx.save();
+        ctx.globalAlpha = 0.5 + Math.sin(Date.now() * 0.05) * 0.2;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.ellipse(0, -10, 32, 10, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.restore(); // End Rocket Assembly
+
+      ctx.restore(); // End World Coordinates
+
+      ctx.restore(); // End Camera Shake
+
+      // Request next animation frame
+      const now = performance.now();
+      const dt = (now - lastTimestamp) / 1000;
+      lastTimestamp = now;
+
+      update(dt);
+      requestAnimationFrame(render);
+    }
+
+    // Start Animation Loop
+    requestAnimationFrame(render);
+
+  </script>
+</body>
+</html>
