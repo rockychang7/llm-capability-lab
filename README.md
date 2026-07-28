@@ -1,67 +1,74 @@
 # LLM Capability Lab
 
-一个用于**横向对比不同大模型「单一能力」**的实验库。
+一个基于统一 Prompt 横向比较不同大模型能力的实验库。
 
-做法很简单：每个测试给出**一个统一的 Prompt**，让不同厂商 / 不同版本的模型各自产出结果，放在一起，对比它们在**同一项具体能力**上的实现效果。
+每个测试使用同一版本的 Prompt，让不同模型独立生成结果，再对原始产物进行集中评测。
 
-## 用途
+## 核心原则
 
-- 每当有**新模型发布**，用同一套 Prompt 跑一遍，直观看它在某项能力上的水平。
-- 所有模型收到**完全相同的 Prompt**（见每个测试目录下的 `README.md`），保证可比性。
-- 模型产出**原样保存**，不做任何人工修改，确保对比公平。
+- Prompt 按 `prompt-vN.md` 版本化，已被结果引用的版本不再修改。
+- 不同模型使用相同版本的 Prompt，保证输入一致。
+- 模型产物原样保存，不修复、不润色，也不覆盖失败结果。
+- 每份结果使用 `run.yaml` 记录 Prompt 版本和最小运行信息。
+- 每个测试的评测集中写在一个 Markdown 文件中。
 
 ## 目录结构
 
-```
+```text
 llm-capability-lab/
-├── README.md                       # 本文件：项目说明 + 命名规范 + 测试清单
-└── tests/
-    └── 01-rocket-launch/           # 一个「测试」= 一个统一 Prompt
-        ├── README.md               # 该测试的统一 Prompt + 参赛模型
-        ├── claude-opus-4-8-max/
-        │   └── claude-opus-4-8-max.html
-        ├── gpt-5-6-sol-max/
-        │   ├── gpt-5-6-sol-max.html
-        │   ├── styles.css
-        │   └── app.js
-        └── kimi-k3/
-            └── kimi-k3.html
+├── AGENTS.md
+├── CLAUDE.md
+├── README.md
+├── prompts/
+│   └── 01-rocket-launch/
+│       └── prompt-v1.md
+└── results/
+    └── 01-rocket-launch/
+        ├── outputs/
+        │   ├── agy-gemini-3-6-flash/
+        │   │   ├── run.yaml
+        │   │   └── agy-gemini-3-6-flash.html
+        │   ├── claude-opus-4-8-max/
+        │   │   ├── run.yaml
+        │   │   └── claude-opus-4-8-max.html
+        │   ├── gpt-5-6-sol-max/
+        │   │   ├── run.yaml
+        │   │   ├── gpt-5-6-sol-max.html
+        │   │   ├── styles.css
+        │   │   └── app.js
+        │   └── kimi-k3/
+        │       ├── run.yaml
+        │       └── kimi-k3.html
+        └── evaluations/
+            └── evaluation-v1.md
 ```
-
-## 命名规范
-
-> 目标：无论看**目录名**还是**文件名 / 浏览器标签**，都能一眼认出「哪个模型、哪个版本、哪个测试」。
-
-| 层级 | 规则 | 示例 |
-|------|------|------|
-| 测试目录 | `NN-<能力简称>`，`NN` 两位序号便于排序 | `01-rocket-launch` |
-| 模型目录 | `<厂商模型>-<版本>`，全小写，`.` 和空格改为 `-` | `claude-opus-4-8-max`、`gpt-5-6-sol-max`、`kimi-k3` |
-| 入口文件 | 与所在模型目录同名的 `.html` | `gpt-5-6-sol-max.html` |
-| 附属资源 | 多文件产出时，`styles.css` / `app.js` 等与入口放在**同一目录** | `gpt-5-6-sol-max/styles.css` |
-
-> `<版本>` 段可带上**推理档位 / 模式**（如 `-max`、`-sol-max`），以便区分同一模型的不同设置。
 
 ## 测试清单
 
-| # | 测试能力 | 统一 Prompt | 参赛模型 |
-|---|---------|------------|----------|
-| 01 | 前端动画 / 视觉特效（一键点火 → 火箭升空） | [详情](tests/01-rocket-launch/README.md) | `claude-opus-4-8-max` · `gpt-5-6-sol-max` · `kimi-k3` · `agy-gemini-3-6-flash` |
+| # | 测试能力 | Prompt | 模型结果 | 评测 |
+|---|---|---|---|---|
+| 01 | 前端动画 / 视觉特效：一键点火并让火箭升入太空 | [prompt-v1](prompts/01-rocket-launch/prompt-v1.md) | [AGY Gemini](results/01-rocket-launch/outputs/agy-gemini-3-6-flash/agy-gemini-3-6-flash.html) · [Claude](results/01-rocket-launch/outputs/claude-opus-4-8-max/claude-opus-4-8-max.html) · [GPT](results/01-rocket-launch/outputs/gpt-5-6-sol-max/gpt-5-6-sol-max.html) · [Kimi](results/01-rocket-launch/outputs/kimi-k3/kimi-k3.html) | [evaluation-v1](results/01-rocket-launch/evaluations/evaluation-v1.md) |
 
-### Prompt 记录
+## 命名规范
 
-**01 · 一键点火火箭升空**（原样记录，含原始措辞）：
+| 内容 | 规则 | 示例 |
+|---|---|---|
+| 测试目录 | `NN-<测试简称>` | `01-rocket-launch` |
+| Prompt | `prompt-vN.md` | `prompt-v1.md` |
+| 模型目录 | 小写模型标识，可包含推理模式 | `gpt-5-6-sol-max` |
+| 运行记录 | 固定使用 `run.yaml` | `outputs/<model>/run.yaml` |
+| 评测文件 | `evaluation-vN.md` | `evaluation-v1.md` |
 
-> 给我实现一个html页面，效果要求可以一键点火 然后 火箭升空
->
-> 注意细节 首先是火箭本身必须逼真，然后点火发射的提效一定也流畅逼真，最后是火箭升空发射到太空中就完成了
+## 查看结果
 
-## 如何查看结果
+直接用浏览器打开模型目录中 `run.yaml` 指定的入口文件。多文件产物的 HTML、CSS 和 JavaScript 保存在同一目录，相对引用保持有效。
 
-直接用浏览器打开对应模型目录下的入口 `.html` 即可（附属的 css/js 已在同目录，相对引用有效）。
+## 新增测试
 
-## 如何新增一个测试
+1. 在 `prompts/` 下创建测试目录和 `prompt-v1.md`。
+2. 在 `results/<测试目录>/outputs/<模型目录>/` 中保存模型原始产物。
+3. 在模型目录中添加 `run.yaml`，记录 Prompt、版本、模型和入口文件。
+4. 在 `results/<测试目录>/evaluations/` 中创建一份评测 Markdown。
+5. 更新本 README 的测试清单。
 
-1. 在 `tests/` 下新建 `NN-<能力简称>/` 目录。
-2. 在该目录写一个 `README.md`，把**统一 Prompt** 原样贴进去。
-3. 每个参赛模型建一个 `<厂商模型>-<版本>/` 子目录，放入其**原样产出**。
-4. 回到本文件的「测试清单」表格加一行，并在「Prompt 记录」补上该测试的 Prompt。
+Agent 修改或扩展本项目时必须遵守 [AGENTS.md](AGENTS.md)。

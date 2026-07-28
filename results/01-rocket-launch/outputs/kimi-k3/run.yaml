@@ -1,0 +1,9 @@
+prompt: 01-rocket-launch
+prompt_version: 1
+
+provider: moonshot-ai
+model: kimi-k3
+mode: unknown
+
+generated_at: unknown
+entrypoint: kimi-k3.html

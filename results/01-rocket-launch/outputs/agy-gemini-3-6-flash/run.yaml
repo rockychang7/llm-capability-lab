@@ -1,0 +1,9 @@
+prompt: 01-rocket-launch
+prompt_version: 1
+
+provider: agy
+model: gemini-3-6-flash
+mode: unknown
+
+generated_at: unknown
+entrypoint: agy-gemini-3-6-flash.html

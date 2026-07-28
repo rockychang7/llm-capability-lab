@@ -1,0 +1,9 @@
+prompt: 01-rocket-launch
+prompt_version: 1
+
+provider: anthropic
+model: claude-opus-4-8
+mode: max
+
+generated_at: unknown
+entrypoint: claude-opus-4-8-max.html
