@@ -1,0 +1,9 @@
+prompt: 02-vinylformac-replica
+prompt_version: 1
+
+provider: openai
+model: gpt-5
+mode: codex
+
+generated_at: 2026-08-04T13:59:28+08:00
+entrypoint: gpt-5-codex.html

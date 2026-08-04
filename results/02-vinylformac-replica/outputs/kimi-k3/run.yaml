@@ -1,0 +1,9 @@
+prompt: 02-vinylformac-replica
+prompt_version: 1
+
+provider: moonshot-ai
+model: kimi-k3
+mode: unknown
+
+generated_at: 2026-08-04
+entrypoint: kimi-k3.html

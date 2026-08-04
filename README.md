@@ -20,27 +20,37 @@ llm-capability-lab/
 ├── CLAUDE.md
 ├── README.md
 ├── prompts/
-│   └── 01-rocket-launch/
+│   ├── 01-rocket-launch/
+│   │   └── prompt-v1.md
+│   └── 02-vinylformac-replica/
 │       └── prompt-v1.md
 └── results/
-    └── 01-rocket-launch/
-        ├── outputs/
-        │   ├── agy-gemini-3-6-flash/
-        │   │   ├── run.yaml
-        │   │   └── agy-gemini-3-6-flash.html
-        │   ├── claude-opus-4-8-max/
-        │   │   ├── run.yaml
-        │   │   └── claude-opus-4-8-max.html
-        │   ├── gpt-5-6-sol-max/
-        │   │   ├── run.yaml
-        │   │   ├── gpt-5-6-sol-max.html
-        │   │   ├── styles.css
-        │   │   └── app.js
-        │   └── kimi-k3/
-        │       ├── run.yaml
-        │       └── kimi-k3.html
-        └── evaluations/
-            └── evaluation-v1.md
+    ├── 01-rocket-launch/
+    │   ├── outputs/
+    │   │   ├── agy-gemini-3-6-flash/
+    │   │   │   ├── run.yaml
+    │   │   │   └── agy-gemini-3-6-flash.html
+    │   │   ├── claude-opus-4-8-max/
+    │   │   │   ├── run.yaml
+    │   │   │   └── claude-opus-4-8-max.html
+    │   │   ├── gpt-5-6-sol-max/
+    │   │   │   ├── run.yaml
+    │   │   │   ├── gpt-5-6-sol-max.html
+    │   │   │   ├── styles.css
+    │   │   │   └── app.js
+    │   │   └── kimi-k3/
+    │   │       ├── run.yaml
+    │   │       └── kimi-k3.html
+    │   └── evaluations/
+    │       └── evaluation-v1.md
+    └── 02-vinylformac-replica/
+        └── outputs/
+            ├── gpt-5-codex/
+            │   ├── run.yaml
+            │   └── gpt-5-codex.html
+            └── kimi-k3/
+                ├── run.yaml
+                └── kimi-k3.html
 ```
 
 ## 测试清单
@@ -48,6 +58,7 @@ llm-capability-lab/
 | # | 测试能力 | Prompt | 模型结果 | 评测 |
 |---|---|---|---|---|
 | 01 | 前端动画 / 视觉特效：一键点火并让火箭升入太空 | [prompt-v1](prompts/01-rocket-launch/prompt-v1.md) | [AGY Gemini](results/01-rocket-launch/outputs/agy-gemini-3-6-flash/agy-gemini-3-6-flash.html) · [Claude](results/01-rocket-launch/outputs/claude-opus-4-8-max/claude-opus-4-8-max.html) · [GPT](results/01-rocket-launch/outputs/gpt-5-6-sol-max/gpt-5-6-sol-max.html) · [Kimi](results/01-rocket-launch/outputs/kimi-k3/kimi-k3.html) | [evaluation-v1](results/01-rocket-launch/evaluations/evaluation-v1.md) |
+| 02 | 网页复刻：一比一还原 vinylformac.com 落地页，含动态小效果 | [prompt-v1](prompts/02-vinylformac-replica/prompt-v1.md) | [GPT-5 Codex](results/02-vinylformac-replica/outputs/gpt-5-codex/gpt-5-codex.html) · [Kimi](results/02-vinylformac-replica/outputs/kimi-k3/kimi-k3.html) | — |
 
 ## 命名规范
 
