@@ -1,0 +1,9 @@
+prompt: 03-pelican-bicycle
+prompt_version: 1
+
+provider: openai
+model: gpt-5-6
+mode: sol-max
+
+generated_at: 2026-09-18T17:10:11+08:00
+entrypoint: gpt-5-6-sol-max.svg

@@ -1,0 +1,9 @@
+prompt: 03-pelican-bicycle
+prompt_version: 1
+
+provider: github-copilot
+model: gpt-5.6-luna
+mode: unknown
+
+generated_at: unknown
+entrypoint: gpt-5-6-luna.svg
