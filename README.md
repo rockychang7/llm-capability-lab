@@ -40,6 +40,9 @@ llm-capability-lab/
     │   │   │   ├── gpt-5-6-sol-max.html
     │   │   │   ├── styles.css
     │   │   │   └── app.js
+    │   │   ├── gpt-6-astra-xhigh/
+    │   │   │   ├── run.yaml
+    │   │   │   └── gpt-6-astra-xhigh.html
     │   │   └── kimi-k3/
     │   │       ├── run.yaml
     │   │       └── kimi-k3.html
@@ -50,6 +53,9 @@ llm-capability-lab/
     │       ├── gpt-5-codex/
     │       │   ├── run.yaml
     │       │   └── gpt-5-codex.html
+    │       ├── gpt-6-astra-xhigh/
+    │       │   ├── run.yaml
+    │       │   └── gpt-6-astra-xhigh.html
     │       └── kimi-k3/
     │           ├── run.yaml
     │           └── kimi-k3.html
@@ -61,9 +67,12 @@ llm-capability-lab/
         │   ├── gpt-5-6-sol-max/
         │   │   ├── run.yaml
         │   │   └── gpt-5-6-sol-max.svg
-        │   └── gpt-5-6-terra/
+        │   ├── gpt-5-6-terra/
+        │   │   ├── run.yaml
+        │   │   └── gpt-5-6-terra.svg
+        │   └── gpt-6-astra-xhigh/
         │       ├── run.yaml
-        │       └── gpt-5-6-terra.svg
+        │       └── gpt-6-astra-xhigh.svg
         └── evaluations/
             └── evaluation-v1.md
 ```
@@ -72,9 +81,9 @@ llm-capability-lab/
 
 | # | 测试能力 | Prompt | 模型结果 | 评测 |
 |---|---|---|---|---|
-| 01 | 前端动画 / 视觉特效：一键点火并让火箭升入太空 | [prompt-v1](prompts/01-rocket-launch/prompt-v1.md) | [AGY Gemini](results/01-rocket-launch/outputs/agy-gemini-3-6-flash/agy-gemini-3-6-flash.html) · [Claude](results/01-rocket-launch/outputs/claude-opus-4-8-max/claude-opus-4-8-max.html) · [GPT](results/01-rocket-launch/outputs/gpt-5-6-sol-max/gpt-5-6-sol-max.html) · [Kimi](results/01-rocket-launch/outputs/kimi-k3/kimi-k3.html) | [evaluation-v1](results/01-rocket-launch/evaluations/evaluation-v1.md) |
-| 02 | 网页复刻：一比一还原 vinylformac.com 落地页，含动态小效果 | [prompt-v1](prompts/02-vinylformac-replica/prompt-v1.md) | [GPT-5 Codex](results/02-vinylformac-replica/outputs/gpt-5-codex/gpt-5-codex.html) · [Kimi](results/02-vinylformac-replica/outputs/kimi-k3/kimi-k3.html) | — |
-| 03 | SVG 插画生成：一只骑自行车的鹈鹕 | [prompt-v1](prompts/03-pelican-bicycle/prompt-v1.md) | [GPT-5.6 Luna](results/03-pelican-bicycle/outputs/gpt-5-6-luna/gpt-5-6-luna.svg) · [GPT-5.6 Sol Max](results/03-pelican-bicycle/outputs/gpt-5-6-sol-max/gpt-5-6-sol-max.svg) · [GPT-5.6 Terra](results/03-pelican-bicycle/outputs/gpt-5-6-terra/gpt-5-6-terra.svg) | [evaluation-v1](results/03-pelican-bicycle/evaluations/evaluation-v1.md) |
+| 01 | 前端动画 / 视觉特效：一键点火并让火箭升入太空 | [prompt-v1](prompts/01-rocket-launch/prompt-v1.md) | [AGY Gemini](results/01-rocket-launch/outputs/agy-gemini-3-6-flash/agy-gemini-3-6-flash.html) · [Claude](results/01-rocket-launch/outputs/claude-opus-4-8-max/claude-opus-4-8-max.html) · [GPT](results/01-rocket-launch/outputs/gpt-5-6-sol-max/gpt-5-6-sol-max.html) · [Astra XHigh](results/01-rocket-launch/outputs/gpt-6-astra-xhigh/gpt-6-astra-xhigh.html) · [Kimi](results/01-rocket-launch/outputs/kimi-k3/kimi-k3.html) | [evaluation-v1](results/01-rocket-launch/evaluations/evaluation-v1.md) |
+| 02 | 网页复刻：一比一还原 vinylformac.com 落地页，含动态小效果 | [prompt-v1](prompts/02-vinylformac-replica/prompt-v1.md) | [GPT-5 Codex](results/02-vinylformac-replica/outputs/gpt-5-codex/gpt-5-codex.html) · [Astra XHigh](results/02-vinylformac-replica/outputs/gpt-6-astra-xhigh/gpt-6-astra-xhigh.html) · [Kimi](results/02-vinylformac-replica/outputs/kimi-k3/kimi-k3.html) | — |
+| 03 | SVG 插画生成：一只骑自行车的鹈鹕 | [prompt-v1](prompts/03-pelican-bicycle/prompt-v1.md) | [GPT-5.6 Luna](results/03-pelican-bicycle/outputs/gpt-5-6-luna/gpt-5-6-luna.svg) · [GPT-5.6 Sol Max](results/03-pelican-bicycle/outputs/gpt-5-6-sol-max/gpt-5-6-sol-max.svg) · [GPT-5.6 Terra](results/03-pelican-bicycle/outputs/gpt-5-6-terra/gpt-5-6-terra.svg) · [Astra XHigh](results/03-pelican-bicycle/outputs/gpt-6-astra-xhigh/gpt-6-astra-xhigh.svg) | [evaluation-v1](results/03-pelican-bicycle/evaluations/evaluation-v1.md) |
 
 ## 命名规范
 

@@ -1,0 +1,9 @@
+prompt: 03-pelican-bicycle
+prompt_version: 1
+
+provider: openai
+model: gpt-6-astra
+mode: astra-xhigh
+
+generated_at: 2026-09-22T16:02:50+08:00
+entrypoint: gpt-6-astra-xhigh.svg
