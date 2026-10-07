@@ -3,187 +3,122 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="用同一份 Prompt 对比不同大模型原始产物的能力实验台。">
-  <title>LLM Capability Lab</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%23181a1d'/%3E%3Cpath d='M18 14h10v27h18v9H18z' fill='%23b9f23c'/%3E%3C/svg%3E">
+  <meta name="description" content="同一份 Prompt，不同模型的原始结果。直接阅读输入，动手比较效果。">
+  <title>LLM Capability Lab · 模型能力实验台</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%231d302b'/%3E%3Cpath d='M18 14h10v27h18v9H18z' fill='%23e9f38b'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="lab.css">
 </head>
-<body id="top">
+<body>
   <header class="topbar">
-    <a class="brand" href="#top" aria-label="返回实验台顶部">
+    <a class="brand" href="index.html" aria-label="模型能力实验台首页">
       <span class="brand-mark" aria-hidden="true">L</span>
-      <span>
-        <strong>LLM Capability Lab</strong>
-        <small>模型能力实验台</small>
-      </span>
+      <span class="brand-name">LLM Capability Lab</span>
     </a>
-    <div class="topbar-stats" aria-label="实验统计">
-      <span><strong>3</strong> 项实验</span>
-      <span><strong>12</strong> 份原始产物</span>
-    </div>
+    <span class="topbar-caption">同题输入，原样比较</span>
+    <span class="topbar-count">03 EXPERIMENTS <span aria-hidden="true">/</span> 12 OUTPUTS</span>
   </header>
 
-  <div class="app-shell">
-    <aside class="experiment-sidebar" aria-label="实验列表">
-      <div class="sidebar-heading">
-        <span>选择实验</span>
-        <small>先理解目标，再看效果</small>
-      </div>
-      <nav id="experiment-nav" class="experiment-nav"></nav>
-      <div class="sidebar-note">
-        <strong>实验只回答一件事</strong>
-        <p>同一份输入交给不同模型，原始结果会有什么差别？</p>
-      </div>
-    </aside>
+  <main class="page-wrap">
+    <nav class="experiment-nav" id="experiment-nav" aria-label="选择实验"></nav>
 
-    <main class="workspace">
-      <section class="experiment-intro" aria-labelledby="experiment-title">
-        <div>
-          <p class="eyebrow" id="experiment-eyebrow"></p>
-          <h1 id="experiment-title"></h1>
-          <p class="experiment-summary" id="experiment-summary"></p>
-        </div>
-        <a class="prompt-link" id="prompt-link" href="#">
-          查看模型收到的完整 Prompt
-          <span aria-hidden="true">↗</span>
-        </a>
-      </section>
+    <section class="intro" aria-labelledby="experiment-title">
+      <p class="eyebrow" id="experiment-eyebrow"></p>
+      <h1 id="experiment-title"></h1>
+      <p class="intro-summary" id="experiment-summary"></p>
+      <div class="intro-rule"><span class="rule-dot" aria-hidden="true"></span><span id="input-rule"></span></div>
+    </section>
 
-      <section class="plain-language-strip" aria-label="实验基本规则">
-        <div>
-          <span>输入</span>
-          <strong id="input-rule"></strong>
-        </div>
-        <div>
-          <span>样本</span>
-          <strong>每个模型保留一次原始结果</strong>
-        </div>
-        <div>
-          <span>分数</span>
-          <strong>评价这份产物，不代表模型平均水平</strong>
-        </div>
-      </section>
-
-      <section class="result-section" aria-labelledby="result-heading">
-        <div class="section-heading">
+    <div class="workbench">
+      <section class="prompt-pane" aria-labelledby="prompt-heading">
+        <div class="prompt-head">
           <div>
-            <p class="section-kicker">原始效果</p>
-            <h2 id="result-heading">直接看模型做出了什么</h2>
+            <p class="panel-kicker">01 / 输入</p>
+            <h2 id="prompt-heading">模型收到的 Prompt</h2>
+          </div>
+          <span id="prompt-version" class="prompt-version">v1</span>
+        </div>
+        <p class="prompt-note">这段文字就是模型收到的完整任务。切换实验，输入也会同步更新。</p>
+        <div id="prompt-shell" class="prompt-shell">
+          <div class="prompt-code-head"><span>ORIGINAL INPUT</span><span id="prompt-length"></span></div>
+          <pre id="prompt-text" class="prompt-text" aria-live="polite">正在读取 Prompt…</pre>
+        </div>
+        <div class="prompt-actions">
+          <button id="prompt-expand" class="text-button" type="button" hidden aria-expanded="false">展开完整内容 <span aria-hidden="true">↓</span></button>
+          <button id="prompt-copy" class="copy-button" type="button" disabled>复制 Prompt</button>
+        </div>
+        <p id="prompt-feedback" class="prompt-feedback" role="status"></p>
+      </section>
+
+      <section class="result-pane" aria-labelledby="result-heading">
+        <div class="result-head">
+          <div>
+            <p class="panel-kicker">02 / 结果</p>
+            <h2 id="result-heading">模型实际做出了什么</h2>
           </div>
           <div class="view-switch" role="group" aria-label="结果查看方式">
-            <button class="view-button is-active" type="button" data-view="focus">单个预览</button>
-            <button class="view-button" type="button" data-view="compare">并排比较</button>
+            <button class="view-button is-active" type="button" data-view="focus" aria-pressed="true">单个预览</button>
+            <button class="view-button" type="button" data-view="compare" aria-pressed="false">并排比较</button>
           </div>
         </div>
-
-        <div class="model-picker-wrap">
-          <span class="model-picker-label">选择模型</span>
-          <div id="model-picker" class="model-picker" role="tablist" aria-label="模型结果"></div>
-        </div>
+        <p class="result-hint">这里直接呈现原始产物，不修改模型生成的内容。</p>
+        <div class="model-picker" id="model-picker" role="tablist" aria-label="选择模型结果"></div>
 
         <div id="focus-view" class="focus-view">
           <div class="preview-toolbar">
-            <div>
-              <span class="preview-status" aria-hidden="true"></span>
+            <div class="preview-identity">
               <strong id="preview-model"></strong>
               <span id="preview-score" class="score-chip"></span>
             </div>
             <div class="preview-actions">
               <button id="reload-preview" class="icon-button" type="button" title="重新加载预览" aria-label="重新加载预览">↻</button>
-              <a id="open-result" class="open-result" href="#" target="_blank" rel="noopener">打开原始结果 ↗</a>
+              <a id="open-result" class="open-result" href="#" target="_blank" rel="noopener">全屏查看 <span aria-hidden="true">↗</span></a>
             </div>
           </div>
           <div id="preview-frame-wrap" class="preview-frame-wrap">
-            <iframe id="preview-frame" title="模型原始结果预览"></iframe>
+            <iframe id="preview-frame" class="preview-frame" title="模型原始结果预览"></iframe>
           </div>
-          <div id="run-facts" class="run-facts" aria-label="本次运行参数"></div>
+          <details class="run-details">
+            <summary>这份结果的运行记录 <span aria-hidden="true">⌄</span></summary>
+            <div id="run-facts" class="run-facts"></div>
+            <p class="run-note">unknown 表示当时没有可靠记录，并非默认值。</p>
+          </details>
         </div>
-
         <div id="compare-view" class="compare-view" hidden></div>
       </section>
+    </div>
 
-      <section class="explanation-section" aria-labelledby="explanation-heading">
-        <div class="section-heading compact">
-          <div>
-            <p class="section-kicker">看懂实验</p>
-            <h2 id="explanation-heading">不用术语，也能知道在比较什么</h2>
-          </div>
-        </div>
+    <section class="guide-section" aria-labelledby="guide-heading">
+      <div class="guide-head">
+        <p class="panel-kicker">03 / 怎么看</p>
+        <h2 id="guide-heading">看效果时，关注这些问题</h2>
+        <p id="capability-intro"></p>
+      </div>
+      <ul id="capability-list" class="capability-list"></ul>
+    </section>
 
-        <div class="explanation-grid">
-          <article class="explanation-block">
-            <span class="block-index">01</span>
-            <h3>这项实验在测什么</h3>
-            <p id="capability-intro"></p>
-            <ul id="capability-list" class="plain-list"></ul>
-          </article>
-
-          <article class="explanation-block">
-            <span class="block-index">02</span>
-            <h3>运行参数怎么读</h3>
-            <dl class="definition-list">
-              <div>
-                <dt>Provider</dt>
-                <dd>提供模型的公司或平台。</dd>
-              </div>
-              <div>
-                <dt>Model</dt>
-                <dd>真正参与生成的模型名称。</dd>
-              </div>
-              <div>
-                <dt>Mode</dt>
-                <dd>运行时使用的推理档位；unknown 表示当时没有记录。</dd>
-              </div>
-              <div>
-                <dt>Prompt / version</dt>
-                <dd>输入任务及其版本号，相同版本才适合横向比较。</dd>
-              </div>
-              <div>
-                <dt>Generated at</dt>
-                <dd>生成时间；unknown 表示没有可靠记录，因此不做猜测。</dd>
-              </div>
-              <div>
-                <dt>Entrypoint</dt>
-                <dd>打开这份原始结果时使用的入口文件。</dd>
-              </div>
-            </dl>
-          </article>
-
-          <article class="explanation-block evaluation-block">
-            <span class="block-index">03</span>
-            <h3>评分怎么理解</h3>
-            <p id="evaluation-intro"></p>
-            <div id="evaluation-scale" class="evaluation-scale"></div>
-          </article>
-        </div>
-      </section>
-
-      <section class="rubric-section" aria-labelledby="rubric-heading">
-        <div class="rubric-copy">
-          <p class="section-kicker">评估定义</p>
-          <h2 id="rubric-heading">每一分具体在看什么</h2>
-          <p>权重越高，说明这项能力对本实验的结果影响越大。描述尽量使用能直接观察到的现象，不用抽象术语代替判断。</p>
-          <a id="evaluation-link" class="text-link" href="#">查看完整评测记录 ↗</a>
+    <section class="evaluation-section" aria-labelledby="evaluation-heading">
+      <div class="evaluation-intro">
+        <p class="panel-kicker">04 / 评估</p>
+        <h2 id="evaluation-heading">分数怎么理解</h2>
+        <p id="evaluation-intro"></p>
+        <div id="evaluation-scale" class="evaluation-scale"></div>
+        <a id="evaluation-link" class="evaluation-link" href="#">阅读完整评测记录 <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="rubric-area">
+        <div class="rubric-title">
+          <h3 id="rubric-heading">具体看哪些方面</h3>
+          <span id="rubric-status"></span>
         </div>
         <div id="rubric-list" class="rubric-list"></div>
-      </section>
+      </div>
+    </section>
 
-      <footer class="method-footer">
-        <div>
-          <strong>比较原则</strong>
-          <p>相同 Prompt，独立生成，原样保存。错误和失败同样是有效结果。</p>
-        </div>
-        <div class="method-steps" aria-label="实验流程">
-          <span><b>1</b> 固定输入</span>
-          <span><b>2</b> 独立生成</span>
-          <span><b>3</b> 原样展示</span>
-          <span><b>4</b> 集中评测</span>
-        </div>
-      </footer>
-    </main>
-  </div>
-
-  <noscript>此实验台需要 JavaScript 来切换和预览模型结果。原始文件仍可从 README 中直接打开。</noscript>
+    <footer class="footer">
+      <strong>比较的是这一次产物，而不是模型的永久排名。</strong>
+      <span>同一版本 Prompt · 独立生成 · 原样保存</span>
+    </footer>
+  </main>
+  <noscript>此页面需要 JavaScript 才能展示 Prompt 和切换结果。原始文件可从 README 中打开。</noscript>
   <script src="lab.js"></script>
 </body>
 </html>

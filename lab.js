@@ -117,11 +117,11 @@ const experiments = [
       { score: "后评", label: "统一环境复核后再记录正式分数" }
     ],
     rubric: [
-      { name: "规格遵守", description: "要求的结构、文案、链接和技术限制是否逐项做到。", weight: 30 },
-      { name: "视觉还原", description: "布局、字体、颜色、间距和整体气质是否接近目标。", weight: 25 },
-      { name: "核心场景", description: "黑胶唱机的结构、材质、光影和拟真程度是否可信。", weight: 25 },
-      { name: "动效与交互", description: "入场、唱片、唱臂、悬停、焦点和降级是否完整。", weight: 10 },
-      { name: "响应式与稳定性", description: "不同屏幕尺寸下是否清楚、可用且没有明显错误。", weight: 10 }
+      { name: "规格遵守", description: "要求的结构、文案、链接和技术限制是否逐项做到。" },
+      { name: "视觉还原", description: "布局、字体、颜色、间距和整体气质是否接近目标。" },
+      { name: "核心场景", description: "黑胶唱机的结构、材质、光影和拟真程度是否可信。" },
+      { name: "动效与交互", description: "入场、唱片、唱臂、悬停、焦点和降级是否完整。" },
+      { name: "响应式与稳定性", description: "不同屏幕尺寸下是否清楚、可用且没有明显错误。" }
     ],
     models: [
       {
@@ -245,8 +245,14 @@ const elements = {
   eyebrow: document.querySelector("#experiment-eyebrow"),
   title: document.querySelector("#experiment-title"),
   summary: document.querySelector("#experiment-summary"),
-  promptLink: document.querySelector("#prompt-link"),
   inputRule: document.querySelector("#input-rule"),
+  promptVersion: document.querySelector("#prompt-version"),
+  promptShell: document.querySelector("#prompt-shell"),
+  promptText: document.querySelector("#prompt-text"),
+  promptLength: document.querySelector("#prompt-length"),
+  promptExpand: document.querySelector("#prompt-expand"),
+  promptCopy: document.querySelector("#prompt-copy"),
+  promptFeedback: document.querySelector("#prompt-feedback"),
   modelPicker: document.querySelector("#model-picker"),
   focusView: document.querySelector("#focus-view"),
   compareView: document.querySelector("#compare-view"),
@@ -262,12 +268,16 @@ const elements = {
   evaluationIntro: document.querySelector("#evaluation-intro"),
   evaluationScale: document.querySelector("#evaluation-scale"),
   rubricList: document.querySelector("#rubric-list"),
-  evaluationLink: document.querySelector("#evaluation-link")
+  evaluationLink: document.querySelector("#evaluation-link"),
+  rubricStatus: document.querySelector("#rubric-status")
 };
 
 let activeExperiment = experiments[0];
-let activeModel = activeExperiment.models[0];
+let activeModel = activeExperiment.models.find((model) => model.id === activeExperiment.defaultModel);
 let activeView = "focus";
+let promptContent = "";
+let promptRequest = 0;
+const promptCache = new Map();
 
 function scoreLabel(model) {
   return model.score === null ? "待评估" : `${model.score} / 100`;
@@ -280,13 +290,16 @@ function createExperimentNav() {
       button.type = "button";
       button.className = "experiment-tab";
       button.dataset.experiment = experiment.id;
-      button.innerHTML = `
-        <span class="experiment-number">${experiment.number}</span>
-        <span>
-          <strong>${experiment.navTitle}</strong>
-          <small>${experiment.navMeta}</small>
-        </span>
-      `;
+      const number = document.createElement("span");
+      number.className = "experiment-number";
+      number.textContent = experiment.number;
+      const label = document.createElement("span");
+      const title = document.createElement("strong");
+      title.textContent = experiment.navTitle;
+      const meta = document.createElement("small");
+      meta.textContent = experiment.navMeta;
+      label.append(title, meta);
+      button.append(number, label);
       button.addEventListener("click", () => selectExperiment(experiment.id));
       return button;
     })
@@ -295,35 +308,35 @@ function createExperimentNav() {
 
 function selectExperiment(id) {
   const nextExperiment = experiments.find((experiment) => experiment.id === id);
-  if (!nextExperiment) {
-    return;
-  }
+  if (!nextExperiment) return;
 
   activeExperiment = nextExperiment;
   activeModel =
     activeExperiment.models.find((model) => model.id === activeExperiment.defaultModel) ??
     activeExperiment.models[0];
   renderExperiment();
-
-  if (window.innerWidth < 821) {
-    document.querySelector(".experiment-intro").scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  loadPrompt();
 }
 
 function renderExperiment() {
   document.querySelectorAll(".experiment-tab").forEach((button) => {
     const isActive = button.dataset.experiment === activeExperiment.id;
     button.classList.toggle("is-active", isActive);
-    button.setAttribute("aria-current", isActive ? "page" : "false");
+    if (isActive) button.setAttribute("aria-current", "true");
+    else button.removeAttribute("aria-current");
+    if (isActive && window.innerWidth <= 760) {
+      button.scrollIntoView({ block: "nearest", inline: "center" });
+    }
   });
 
   elements.eyebrow.textContent = activeExperiment.eyebrow;
   elements.title.textContent = activeExperiment.title;
   elements.summary.textContent = activeExperiment.summary;
   elements.inputRule.textContent = activeExperiment.inputRule;
-  elements.promptLink.href = activeExperiment.promptUrl;
+  elements.promptVersion.textContent = `v${activeExperiment.models[0].promptVersion}`;
   elements.capabilityIntro.textContent = activeExperiment.capabilityIntro;
   elements.evaluationIntro.textContent = activeExperiment.evaluationIntro;
+  elements.rubricStatus.textContent = activeExperiment.evaluationUrl ? "正式评测维度" : "观察项 · 尚无正式评分";
 
   elements.capabilityList.replaceChildren(
     ...activeExperiment.capabilities.map((capability) => {
@@ -337,7 +350,11 @@ function renderExperiment() {
     ...activeExperiment.scale.map((item) => {
       const block = document.createElement("div");
       block.className = "scale-item";
-      block.innerHTML = `<strong>${item.score}</strong><span>${item.label}</span>`;
+      const score = document.createElement("strong");
+      score.textContent = item.score;
+      const label = document.createElement("span");
+      label.textContent = item.label;
+      block.append(score, label);
       return block;
     })
   );
@@ -346,31 +363,37 @@ function renderExperiment() {
     ...activeExperiment.rubric.map((item) => {
       const block = document.createElement("div");
       block.className = "rubric-item";
-      block.style.setProperty("--weight", `${item.weight}%`);
-      block.innerHTML = `
-        <strong>${item.name}</strong>
-        <p>${item.description}</p>
-        <span class="rubric-weight">${item.weight}%</span>
-      `;
+      const name = document.createElement("strong");
+      name.textContent = item.name;
+      const description = document.createElement("p");
+      description.textContent = item.description;
+      block.append(name, description);
+      if (item.weight !== undefined) {
+        const weight = document.createElement("span");
+        weight.className = "rubric-weight";
+        weight.textContent = `${item.weight}%`;
+        block.append(weight);
+      } else {
+        block.classList.add("no-weight");
+      }
       return block;
     })
   );
 
   if (activeExperiment.evaluationUrl) {
     elements.evaluationLink.href = activeExperiment.evaluationUrl;
-    elements.evaluationLink.textContent = "查看完整评测记录 ↗";
+    elements.evaluationLink.innerHTML = "阅读完整评测记录 <span aria-hidden='true'>↗</span>";
     elements.evaluationLink.classList.remove("is-disabled");
     elements.evaluationLink.removeAttribute("aria-disabled");
   } else {
     elements.evaluationLink.removeAttribute("href");
-    elements.evaluationLink.textContent = "本实验尚未完成正式评测";
+    elements.evaluationLink.textContent = "本实验尚无正式评测记录";
     elements.evaluationLink.classList.add("is-disabled");
     elements.evaluationLink.setAttribute("aria-disabled", "true");
   }
 
   renderModelPicker();
-  renderModel();
-  renderComparison();
+  renderView();
 }
 
 function renderModelPicker() {
@@ -381,11 +404,16 @@ function renderModelPicker() {
       button.role = "tab";
       button.className = "model-button";
       button.dataset.model = model.id;
-      button.textContent = model.label;
+      const label = document.createElement("span");
+      label.textContent = model.label;
+      const score = document.createElement("small");
+      score.textContent = scoreLabel(model);
+      button.append(label, score);
       button.addEventListener("click", () => {
         activeModel = model;
         renderModelPicker();
-        renderModel();
+        renderFocus();
+        elements.modelPicker.querySelector(`[data-model="${model.id}"]`).focus();
       });
       if (model.id === activeModel.id) {
         button.classList.add("is-active");
@@ -393,35 +421,41 @@ function renderModelPicker() {
       } else {
         button.setAttribute("aria-selected", "false");
       }
+      button.tabIndex = model.id === activeModel.id ? 0 : -1;
       return button;
     })
   );
 }
 
-function renderModel() {
+function renderFocus() {
   elements.previewModel.textContent = activeModel.label;
   elements.previewScore.textContent = scoreLabel(activeModel);
   elements.previewScore.classList.toggle("has-score", activeModel.score !== null);
-  elements.previewFrame.src = activeModel.url;
+  if (activeView === "focus") elements.previewFrame.src = activeModel.url;
   elements.previewFrame.title = `${activeExperiment.navTitle}：${activeModel.label} 原始结果`;
-  elements.previewFrame.className = "preview-frame";
   elements.previewFrameWrap.classList.toggle("is-art", activeExperiment.artifactType === "art");
   elements.openResult.href = activeModel.url;
 
   const facts = [
-    ["Prompt / version", `${activeExperiment.promptUrl.split("/")[1]} / v${activeModel.promptVersion}`],
-    ["Provider", activeModel.provider],
-    ["Model", activeModel.model],
-    ["Mode", activeModel.mode],
-    ["Generated at", activeModel.generatedAt],
-    ["Entrypoint", activeModel.url.split("/").at(-1)]
+    ["输入版本", `${activeExperiment.promptUrl.split("/")[1]} / v${activeModel.promptVersion}`, "同版本输入才能横向比较"],
+    ["提供平台", activeModel.provider, "提供这次模型服务的平台"],
+    ["模型名称", activeModel.model, "实际参与生成的模型"],
+    ["运行模式", activeModel.mode, "当时记录的推理档位"],
+    ["生成时间", activeModel.generatedAt, "没有记录则显示 unknown"],
+    ["入口文件", activeModel.url.split("/").at(-1), "这份原始结果的打开入口"]
   ];
 
   elements.runFacts.replaceChildren(
-    ...facts.map(([label, value]) => {
+    ...facts.map(([label, value, explanation]) => {
       const fact = document.createElement("div");
       fact.className = "run-fact";
-      fact.innerHTML = `<span>${label}</span><strong title="${value}">${value}</strong>`;
+      const term = document.createElement("dt");
+      term.textContent = label;
+      const detail = document.createElement("dd");
+      detail.textContent = value;
+      const help = document.createElement("small");
+      help.textContent = explanation;
+      fact.append(term, detail, help);
       return fact;
     })
   );
@@ -433,29 +467,48 @@ function renderComparison() {
     ...activeExperiment.models.map((model) => {
       const item = document.createElement("article");
       item.className = "comparison-item";
-      item.innerHTML = `
-        <div class="comparison-heading">
-          <strong>${model.label}</strong>
-          <span>${scoreLabel(model)}</span>
-        </div>
-        <iframe
-          class="comparison-frame"
-          src="${model.url}"
-          title="${activeExperiment.navTitle}：${model.label} 并排预览"
-          loading="lazy"
-        ></iframe>
-        <a class="comparison-open" href="${model.url}" target="_blank" rel="noopener">打开原始结果 ↗</a>
-      `;
+      const heading = document.createElement("div");
+      heading.className = "comparison-heading";
+      const title = document.createElement("strong");
+      title.textContent = model.label;
+      const score = document.createElement("span");
+      score.textContent = scoreLabel(model);
+      heading.append(title, score);
+      const frame = document.createElement("iframe");
+      frame.className = "comparison-frame";
+      frame.src = model.url;
+      frame.title = `${activeExperiment.navTitle}：${model.label} 并排预览`;
+      frame.loading = "lazy";
+      const link = document.createElement("a");
+      link.className = "comparison-open";
+      link.href = model.url;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = "全屏查看 ↗";
+      item.append(heading, frame, link);
       return item;
     })
   );
 }
 
 function setView(view) {
+  if (view !== "focus" && view !== "compare") return;
   activeView = view;
+  renderView();
+}
+
+function renderView() {
   const showFocus = activeView === "focus";
   elements.focusView.hidden = !showFocus;
+  elements.modelPicker.hidden = !showFocus;
   elements.compareView.hidden = showFocus;
+  if (showFocus) {
+    elements.compareView.replaceChildren();
+    renderFocus();
+  } else {
+    elements.previewFrame.removeAttribute("src");
+    renderComparison();
+  }
 
   document.querySelectorAll(".view-button").forEach((button) => {
     const isActive = button.dataset.view === activeView;
@@ -463,6 +516,67 @@ function setView(view) {
     button.setAttribute("aria-pressed", String(isActive));
   });
 }
+
+function extractPrompt(markdown) {
+  const match = markdown.match(/^```text[ \t]*\r?\n([\s\S]*?)\r?\n```[ \t]*$/m);
+  if (!match) throw new Error("未找到原始 Prompt 代码块");
+  return match[1];
+}
+
+async function loadPrompt() {
+  const request = ++promptRequest;
+  const url = activeExperiment.promptUrl;
+  promptContent = "";
+  elements.promptText.textContent = "正在读取 Prompt…";
+  elements.promptLength.textContent = "";
+  elements.promptFeedback.textContent = "";
+  elements.promptCopy.disabled = true;
+  elements.promptExpand.hidden = true;
+  elements.promptShell.classList.remove("is-collapsed");
+  elements.promptExpand.setAttribute("aria-expanded", "false");
+
+  try {
+    if (!promptCache.has(url)) {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      promptCache.set(url, extractPrompt(await response.text()));
+    }
+    if (request !== promptRequest) return;
+    promptContent = promptCache.get(url);
+    elements.promptText.textContent = promptContent;
+    elements.promptLength.textContent = `${promptContent.length.toLocaleString()} 字符`;
+    elements.promptCopy.disabled = false;
+    if (elements.promptText.scrollHeight > 360) {
+      elements.promptShell.classList.add("is-collapsed");
+      elements.promptExpand.hidden = false;
+      elements.promptExpand.innerHTML = "展开完整内容 <span aria-hidden='true'>↓</span>";
+    }
+  } catch (error) {
+    if (request !== promptRequest) return;
+    elements.promptText.textContent = "Prompt 读取失败，请通过本地 HTTP 服务打开实验台后重试。";
+    elements.promptFeedback.textContent = error.message;
+  }
+}
+
+elements.promptExpand.addEventListener("click", () => {
+  const collapsed = elements.promptShell.classList.toggle("is-collapsed");
+  elements.promptExpand.setAttribute("aria-expanded", String(!collapsed));
+  elements.promptExpand.innerHTML = collapsed
+    ? "展开完整内容 <span aria-hidden='true'>↓</span>"
+    : "收起内容 <span aria-hidden='true'>↑</span>";
+});
+
+elements.promptCopy.addEventListener("click", async () => {
+  const content = promptContent;
+  const request = promptRequest;
+  if (!content) return;
+  try {
+    await navigator.clipboard.writeText(content);
+    if (request === promptRequest) elements.promptFeedback.textContent = "完整 Prompt 已复制";
+  } catch {
+    if (request === promptRequest) elements.promptFeedback.textContent = "复制失败，请手动选中文本复制";
+  }
+});
 
 document.querySelectorAll(".view-button").forEach((button) => {
   button.addEventListener("click", () => setView(button.dataset.view));
@@ -472,6 +586,19 @@ elements.reloadPreview.addEventListener("click", () => {
   elements.previewFrame.src = activeModel.url;
 });
 
+elements.modelPicker.addEventListener("keydown", (event) => {
+  const keys = ["ArrowLeft", "ArrowRight", "Home", "End"];
+  if (!keys.includes(event.key)) return;
+  event.preventDefault();
+  const index = activeExperiment.models.findIndex((model) => model.id === activeModel.id);
+  const next = event.key === "Home" ? 0
+    : event.key === "End" ? activeExperiment.models.length - 1
+    : (index + (event.key === "ArrowRight" ? 1 : -1) + activeExperiment.models.length) % activeExperiment.models.length;
+  activeModel = activeExperiment.models[next];
+  renderModelPicker();
+  renderFocus();
+  elements.modelPicker.querySelector(`[data-model="${activeModel.id}"]`).focus();
+});
+
 createExperimentNav();
 selectExperiment(experiments[0].id);
-setView(activeView);
