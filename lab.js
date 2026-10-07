@@ -3,7 +3,7 @@ const experiments = [
     id: "rocket",
     number: "01",
     navTitle: "火箭发射动画",
-    navMeta: "前端动画 · 5 份结果",
+    navMeta: "前端动画",
     eyebrow: "实验 01 · 前端动画与视觉特效",
     title: "模型能把一句“发射火箭”做到什么程度？",
     summary: "输入只描述目标，不提供技术方案。这个实验观察模型能否自己补齐火箭造型、点火反馈、升空过程和抵达太空的完整体验。",
@@ -94,7 +94,7 @@ const experiments = [
     id: "vinyl",
     number: "02",
     navTitle: "Vinyl 网页复刻",
-    navMeta: "规格执行 · 3 份结果",
+    navMeta: "规格执行",
     eyebrow: "实验 02 · 网页复刻与规格执行",
     title: "面对一份很长的设计规格，模型能还原到什么程度？",
     summary: "输入把文案、布局、配色、动效和响应式规则写得很具体。这个实验观察模型能否持续遵守约束，并用一个 HTML 文件还原完整产品页。",
@@ -163,7 +163,7 @@ const experiments = [
     id: "pelican",
     number: "03",
     navTitle: "鹈鹕骑自行车",
-    navMeta: "SVG 插画 · 4 份结果",
+    navMeta: "SVG 插画",
     eyebrow: "实验 03 · SVG 插画生成",
     title: "只给七个英文单词，模型能画清楚一个复杂动作吗？",
     summary: "Prompt 只有“生成一张鹈鹕骑自行车的 SVG”。没有风格、构图或细节提示，因此结果直接反映模型对主体、动作和矢量结构的默认理解。",
@@ -241,6 +241,16 @@ const experiments = [
 ];
 
 const elements = {
+  labCount: document.querySelector("#lab-count"),
+  chooser: document.querySelector("#experiment-chooser"),
+  trigger: document.querySelector("#experiment-trigger"),
+  selectedNumber: document.querySelector("#selected-number"),
+  selectedTitle: document.querySelector("#selected-title"),
+  selectedMeta: document.querySelector("#selected-meta"),
+  panel: document.querySelector("#experiment-panel"),
+  search: document.querySelector("#experiment-search"),
+  matchCount: document.querySelector("#experiment-match-count"),
+  noMatch: document.querySelector("#experiment-no-match"),
   nav: document.querySelector("#experiment-nav"),
   eyebrow: document.querySelector("#experiment-eyebrow"),
   title: document.querySelector("#experiment-title"),
@@ -254,6 +264,8 @@ const elements = {
   promptCopy: document.querySelector("#prompt-copy"),
   promptFeedback: document.querySelector("#prompt-feedback"),
   modelPicker: document.querySelector("#model-picker"),
+  viewSwitch: document.querySelector("#view-switch"),
+  resultEmpty: document.querySelector("#result-empty"),
   focusView: document.querySelector("#focus-view"),
   compareView: document.querySelector("#compare-view"),
   previewModel: document.querySelector("#preview-model"),
@@ -273,7 +285,7 @@ const elements = {
 };
 
 let activeExperiment = experiments[0];
-let activeModel = activeExperiment.models.find((model) => model.id === activeExperiment.defaultModel);
+let activeModel = null;
 let activeView = "focus";
 let promptContent = "";
 let promptRequest = 0;
@@ -283,27 +295,59 @@ function scoreLabel(model) {
   return model.score === null ? "待评估" : `${model.score} / 100`;
 }
 
-function createExperimentNav() {
+function resultCount(experiment) {
+  return experiment.models.length ? `${experiment.models.length} 份结果` : "暂无结果";
+}
+
+function renderExperimentNav(query = "") {
+  const search = query.trim().toLocaleLowerCase();
+  const matches = experiments.filter((experiment) =>
+    [experiment.number, experiment.navTitle, experiment.navMeta, experiment.eyebrow]
+      .some((value) => value.toLocaleLowerCase().includes(search))
+  );
+  elements.matchCount.textContent = `${matches.length} / ${experiments.length}`;
+  elements.noMatch.hidden = matches.length > 0;
   elements.nav.replaceChildren(
-    ...experiments.map((experiment) => {
+    ...matches.map((experiment) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "experiment-tab";
+      button.className = "experiment-option";
       button.dataset.experiment = experiment.id;
       const number = document.createElement("span");
-      number.className = "experiment-number";
+      number.className = "option-number";
       number.textContent = experiment.number;
       const label = document.createElement("span");
       const title = document.createElement("strong");
       title.textContent = experiment.navTitle;
       const meta = document.createElement("small");
-      meta.textContent = experiment.navMeta;
+      meta.textContent = `${experiment.navMeta} · ${resultCount(experiment)}`;
       label.append(title, meta);
       button.append(number, label);
-      button.addEventListener("click", () => selectExperiment(experiment.id));
+      if (experiment.id === activeExperiment.id) {
+        button.classList.add("is-active");
+        button.setAttribute("aria-current", "true");
+      }
+      button.addEventListener("click", () => {
+        selectExperiment(experiment.id);
+        closeExperimentPanel(true);
+      });
       return button;
     })
   );
+}
+
+function openExperimentPanel() {
+  elements.panel.hidden = false;
+  elements.trigger.setAttribute("aria-expanded", "true");
+  elements.search.value = "";
+  renderExperimentNav();
+  elements.search.focus();
+}
+
+function closeExperimentPanel(returnFocus = false) {
+  elements.panel.hidden = true;
+  elements.trigger.setAttribute("aria-expanded", "false");
+  if (returnFocus) elements.trigger.focus();
 }
 
 function selectExperiment(id) {
@@ -313,27 +357,23 @@ function selectExperiment(id) {
   activeExperiment = nextExperiment;
   activeModel =
     activeExperiment.models.find((model) => model.id === activeExperiment.defaultModel) ??
-    activeExperiment.models[0];
+    activeExperiment.models[0] ?? null;
+  activeView = "focus";
   renderExperiment();
   loadPrompt();
 }
 
 function renderExperiment() {
-  document.querySelectorAll(".experiment-tab").forEach((button) => {
-    const isActive = button.dataset.experiment === activeExperiment.id;
-    button.classList.toggle("is-active", isActive);
-    if (isActive) button.setAttribute("aria-current", "true");
-    else button.removeAttribute("aria-current");
-    if (isActive && window.innerWidth <= 760) {
-      button.scrollIntoView({ block: "nearest", inline: "center" });
-    }
-  });
+  elements.selectedNumber.textContent = activeExperiment.number;
+  elements.selectedTitle.textContent = activeExperiment.navTitle;
+  elements.selectedMeta.textContent = `${activeExperiment.navMeta} · ${resultCount(activeExperiment)}`;
+  if (!elements.panel.hidden) renderExperimentNav(elements.search.value);
 
   elements.eyebrow.textContent = activeExperiment.eyebrow;
   elements.title.textContent = activeExperiment.title;
   elements.summary.textContent = activeExperiment.summary;
   elements.inputRule.textContent = activeExperiment.inputRule;
-  elements.promptVersion.textContent = `v${activeExperiment.models[0].promptVersion}`;
+  elements.promptVersion.textContent = `v${activeExperiment.promptUrl.match(/prompt-v(\d+)\.md$/)?.[1] ?? "unknown"}`;
   elements.capabilityIntro.textContent = activeExperiment.capabilityIntro;
   elements.evaluationIntro.textContent = activeExperiment.evaluationIntro;
   elements.rubricStatus.textContent = activeExperiment.evaluationUrl ? "正式评测维度" : "观察项 · 尚无正式评分";
@@ -397,6 +437,10 @@ function renderExperiment() {
 }
 
 function renderModelPicker() {
+  if (!activeModel) {
+    elements.modelPicker.replaceChildren();
+    return;
+  }
   elements.modelPicker.replaceChildren(
     ...activeExperiment.models.map((model) => {
       const button = document.createElement("button");
@@ -498,6 +542,18 @@ function setView(view) {
 }
 
 function renderView() {
+  const hasResults = activeExperiment.models.length > 0;
+  elements.resultEmpty.hidden = hasResults;
+  elements.viewSwitch.hidden = !hasResults;
+  if (!hasResults) {
+    elements.modelPicker.hidden = true;
+    elements.focusView.hidden = true;
+    elements.compareView.hidden = true;
+    elements.compareView.replaceChildren();
+    elements.previewFrame.removeAttribute("src");
+    elements.openResult.removeAttribute("href");
+    return;
+  }
   const showFocus = activeView === "focus";
   elements.focusView.hidden = !showFocus;
   elements.modelPicker.hidden = !showFocus;
@@ -583,12 +639,12 @@ document.querySelectorAll(".view-button").forEach((button) => {
 });
 
 elements.reloadPreview.addEventListener("click", () => {
-  elements.previewFrame.src = activeModel.url;
+  if (activeModel) elements.previewFrame.src = activeModel.url;
 });
 
 elements.modelPicker.addEventListener("keydown", (event) => {
   const keys = ["ArrowLeft", "ArrowRight", "Home", "End"];
-  if (!keys.includes(event.key)) return;
+  if (!keys.includes(event.key) || !activeModel) return;
   event.preventDefault();
   const index = activeExperiment.models.findIndex((model) => model.id === activeModel.id);
   const next = event.key === "Home" ? 0
@@ -600,5 +656,37 @@ elements.modelPicker.addEventListener("keydown", (event) => {
   elements.modelPicker.querySelector(`[data-model="${activeModel.id}"]`).focus();
 });
 
-createExperimentNav();
+elements.labCount.innerHTML = `${String(experiments.length).padStart(2, "0")} EXPERIMENTS <span aria-hidden="true">/</span> ${String(experiments.reduce((count, experiment) => count + experiment.models.length, 0)).padStart(2, "0")} OUTPUTS`;
+
+elements.trigger.addEventListener("click", () => {
+  if (elements.panel.hidden) openExperimentPanel();
+  else closeExperimentPanel(true);
+});
+elements.search.addEventListener("input", () => renderExperimentNav(elements.search.value));
+elements.chooser.addEventListener("keydown", (event) => {
+  if (elements.panel.hidden) return;
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeExperimentPanel(true);
+  } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    const options = [...elements.nav.querySelectorAll(".experiment-option")];
+    if (!options.length) return;
+    event.preventDefault();
+    const index = options.indexOf(document.activeElement);
+    const next = event.key === "ArrowDown"
+      ? (index + 1) % options.length
+      : (index - 1 + options.length) % options.length;
+    options[next].focus();
+  } else if (event.key === "Enter" && document.activeElement === elements.search) {
+    const first = elements.nav.querySelector(".experiment-option");
+    if (first) {
+      event.preventDefault();
+      first.click();
+    }
+  }
+});
+document.addEventListener("pointerdown", (event) => {
+  if (!elements.panel.hidden && !elements.chooser.contains(event.target)) closeExperimentPanel();
+});
+
 selectExperiment(experiments[0].id);

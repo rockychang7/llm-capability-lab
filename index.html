@@ -15,11 +15,28 @@
       <span class="brand-name">LLM Capability Lab</span>
     </a>
     <span class="topbar-caption">同题输入，原样比较</span>
-    <span class="topbar-count">03 EXPERIMENTS <span aria-hidden="true">/</span> 12 OUTPUTS</span>
+    <span class="topbar-count" id="lab-count"></span>
   </header>
 
   <main class="page-wrap">
-    <nav class="experiment-nav" id="experiment-nav" aria-label="选择实验"></nav>
+    <div class="experiment-chooser" id="experiment-chooser">
+      <span class="chooser-label">当前实验</span>
+      <button class="chooser-trigger" id="experiment-trigger" type="button" aria-expanded="false" aria-controls="experiment-panel">
+        <span class="chooser-number" id="selected-number"></span>
+        <span class="chooser-current">
+          <strong id="selected-title"></strong>
+          <small id="selected-meta"></small>
+        </span>
+        <span class="chooser-action">切换实验 <span class="chooser-chevron" aria-hidden="true">⌄</span></span>
+      </button>
+      <div class="experiment-panel" id="experiment-panel" hidden>
+        <label class="search-label" for="experiment-search">查找实验</label>
+        <input id="experiment-search" class="experiment-search" type="search" placeholder="搜索名称、编号或能力" autocomplete="off">
+        <div class="experiment-list-head"><span>实验列表</span><span id="experiment-match-count"></span></div>
+        <nav class="experiment-list" id="experiment-nav" aria-label="选择实验"></nav>
+        <p class="experiment-no-match" id="experiment-no-match" hidden>没有匹配的实验，试试其他关键词。</p>
+      </div>
+    </div>
 
     <section class="intro" aria-labelledby="experiment-title">
       <p class="eyebrow" id="experiment-eyebrow"></p>
@@ -55,12 +72,16 @@
             <p class="panel-kicker">02 / 结果</p>
             <h2 id="result-heading">模型实际做出了什么</h2>
           </div>
-          <div class="view-switch" role="group" aria-label="结果查看方式">
+          <div class="view-switch" id="view-switch" role="group" aria-label="结果查看方式">
             <button class="view-button is-active" type="button" data-view="focus" aria-pressed="true">单个预览</button>
             <button class="view-button" type="button" data-view="compare" aria-pressed="false">并排比较</button>
           </div>
         </div>
         <p class="result-hint">这里直接呈现原始产物，不修改模型生成的内容。</p>
+        <div id="result-empty" class="result-empty" hidden>
+          <strong>这个实验还没有模型结果</strong>
+          <p>Prompt 已可阅读；有原始产物后，这里才会出现对应模型和预览。</p>
+        </div>
         <div class="model-picker" id="model-picker" role="tablist" aria-label="选择模型结果"></div>
 
         <div id="focus-view" class="focus-view">
