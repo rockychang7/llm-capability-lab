@@ -2,144 +2,48 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="同一份 Prompt，不同模型的原始结果。直接阅读输入，动手比较效果。">
-  <title>LLM Capability Lab · 模型能力实验台</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%231d302b'/%3E%3Cpath d='M18 14h10v27h18v9H18z' fill='%23e9f38b'/%3E%3C/svg%3E">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="同一份 Prompt，交给不同大模型独立完成。原样保存产物，并排比较能力。">
+  <meta name="theme-color" content="#f5f6f8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b0e13" media="(prefers-color-scheme: dark)">
+  <title>LLM Capability Lab</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234338ca'/%3E%3Cpath d='M20 16h8v24h16v8H20z' fill='%23fff'/%3E%3C/svg%3E">
+  <script>
+    try { const t = localStorage.getItem("lab-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch {}
+  </script>
   <link rel="stylesheet" href="lab.css">
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="index.html" aria-label="模型能力实验台首页">
-      <span class="brand-mark" aria-hidden="true">L</span>
-      <span class="brand-name">LLM Capability Lab</span>
-    </a>
-    <span class="topbar-caption">同题输入，原样比较</span>
-    <span class="topbar-count" id="lab-count"></span>
+  <a class="skip-link" href="#app">跳到主要内容</a>
+  <header class="site-header">
+    <div class="container site-header-inner">
+      <a class="brand" href="#/" aria-label="LLM Capability Lab 首页">
+        <span class="brand-mark" aria-hidden="true">L</span>
+        <span class="brand-name">LLM Capability Lab</span>
+      </a>
+      <nav class="site-nav" aria-label="主导航">
+        <a href="#/" data-nav="home">总览</a>
+        <a href="#/?section=matrix" data-nav="matrix">模型对照</a>
+      </nav>
+      <button class="icon-button theme-toggle" id="theme-toggle" type="button" aria-label="切换深色或浅色模式" title="切换深色或浅色模式">
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+      </button>
+    </div>
   </header>
 
-  <main class="page-wrap">
-    <div class="experiment-chooser" id="experiment-chooser">
-      <span class="chooser-label">当前实验</span>
-      <button class="chooser-trigger" id="experiment-trigger" type="button" aria-expanded="false" aria-controls="experiment-panel">
-        <span class="chooser-number" id="selected-number"></span>
-        <span class="chooser-current">
-          <strong id="selected-title"></strong>
-          <small id="selected-meta"></small>
-        </span>
-        <span class="chooser-action">切换实验 <span class="chooser-chevron" aria-hidden="true">⌄</span></span>
-      </button>
-      <div class="experiment-panel" id="experiment-panel" hidden>
-        <label class="search-label" for="experiment-search">查找实验</label>
-        <input id="experiment-search" class="experiment-search" type="search" placeholder="搜索名称、编号或能力" autocomplete="off">
-        <div class="experiment-list-head"><span>实验列表</span><span id="experiment-match-count"></span></div>
-        <nav class="experiment-list" id="experiment-nav" aria-label="选择实验"></nav>
-        <p class="experiment-no-match" id="experiment-no-match" hidden>没有匹配的实验，试试其他关键词。</p>
-      </div>
-    </div>
-
-    <section class="intro" aria-labelledby="experiment-title">
-      <p class="eyebrow" id="experiment-eyebrow"></p>
-      <h1 id="experiment-title"></h1>
-      <p class="intro-summary" id="experiment-summary"></p>
-      <div class="intro-rule"><span class="rule-dot" aria-hidden="true"></span><span id="input-rule"></span></div>
-    </section>
-
-    <div class="workbench">
-      <section class="prompt-pane" aria-labelledby="prompt-heading">
-        <div class="prompt-head">
-          <div>
-            <p class="panel-kicker">01 / 输入</p>
-            <h2 id="prompt-heading">模型收到的 Prompt</h2>
-          </div>
-          <span id="prompt-version" class="prompt-version">v1</span>
-        </div>
-        <p class="prompt-note">这段文字就是模型收到的完整任务。切换实验，输入也会同步更新。</p>
-        <div id="prompt-shell" class="prompt-shell">
-          <div class="prompt-code-head"><span>ORIGINAL INPUT</span><span id="prompt-length"></span></div>
-          <pre id="prompt-text" class="prompt-text" aria-live="polite">正在读取 Prompt…</pre>
-        </div>
-        <div class="prompt-actions">
-          <button id="prompt-expand" class="text-button" type="button" hidden aria-expanded="false">展开完整内容 <span aria-hidden="true">↓</span></button>
-          <button id="prompt-copy" class="copy-button" type="button" disabled>复制 Prompt</button>
-        </div>
-        <p id="prompt-feedback" class="prompt-feedback" role="status"></p>
-      </section>
-
-      <section class="result-pane" aria-labelledby="result-heading">
-        <div class="result-head">
-          <div>
-            <p class="panel-kicker">02 / 结果</p>
-            <h2 id="result-heading">模型实际做出了什么</h2>
-          </div>
-          <div class="view-switch" id="view-switch" role="group" aria-label="结果查看方式">
-            <button class="view-button is-active" type="button" data-view="focus" aria-pressed="true">单个预览</button>
-            <button class="view-button" type="button" data-view="compare" aria-pressed="false">并排比较</button>
-          </div>
-        </div>
-        <p class="result-hint">这里直接呈现原始产物，不修改模型生成的内容。</p>
-        <div id="result-empty" class="result-empty" hidden>
-          <strong>这个实验还没有模型结果</strong>
-          <p>Prompt 已可阅读；有原始产物后，这里才会出现对应模型和预览。</p>
-        </div>
-        <div class="model-picker" id="model-picker" role="tablist" aria-label="选择模型结果"></div>
-
-        <div id="focus-view" class="focus-view">
-          <div class="preview-toolbar">
-            <div class="preview-identity">
-              <strong id="preview-model"></strong>
-              <span id="preview-score" class="score-chip"></span>
-            </div>
-            <div class="preview-actions">
-              <button id="reload-preview" class="icon-button" type="button" title="重新加载预览" aria-label="重新加载预览">↻</button>
-              <a id="open-result" class="open-result" href="#" target="_blank" rel="noopener">全屏查看 <span aria-hidden="true">↗</span></a>
-            </div>
-          </div>
-          <div id="preview-frame-wrap" class="preview-frame-wrap">
-            <iframe id="preview-frame" class="preview-frame" title="模型原始结果预览"></iframe>
-          </div>
-          <details class="run-details">
-            <summary>这份结果的运行记录 <span aria-hidden="true">⌄</span></summary>
-            <div id="run-facts" class="run-facts"></div>
-            <p class="run-note">unknown 表示当时没有可靠记录，并非默认值。</p>
-          </details>
-        </div>
-        <div id="compare-view" class="compare-view" hidden></div>
-      </section>
-    </div>
-
-    <section class="guide-section" aria-labelledby="guide-heading">
-      <div class="guide-head">
-        <p class="panel-kicker">03 / 怎么看</p>
-        <h2 id="guide-heading">看效果时，关注这些问题</h2>
-        <p id="capability-intro"></p>
-      </div>
-      <ul id="capability-list" class="capability-list"></ul>
-    </section>
-
-    <section class="evaluation-section" aria-labelledby="evaluation-heading">
-      <div class="evaluation-intro">
-        <p class="panel-kicker">04 / 评估</p>
-        <h2 id="evaluation-heading">分数怎么理解</h2>
-        <p id="evaluation-intro"></p>
-        <div id="evaluation-scale" class="evaluation-scale"></div>
-        <a id="evaluation-link" class="evaluation-link" href="#">阅读完整评测记录 <span aria-hidden="true">↗</span></a>
-      </div>
-      <div class="rubric-area">
-        <div class="rubric-title">
-          <h3 id="rubric-heading">具体看哪些方面</h3>
-          <span id="rubric-status"></span>
-        </div>
-        <div id="rubric-list" class="rubric-list"></div>
-      </div>
-    </section>
-
-    <footer class="footer">
-      <strong>比较的是这一次产物，而不是模型的永久排名。</strong>
-      <span>同一版本 Prompt · 独立生成 · 原样保存</span>
-    </footer>
+  <main id="app" class="container" tabindex="-1">
+    <p class="loading">正在加载实验数据…</p>
   </main>
-  <noscript>此页面需要 JavaScript 才能展示 Prompt 和切换结果。原始文件可从 README 中打开。</noscript>
+
+  <footer class="site-footer">
+    <div class="container site-footer-inner">
+      <p><strong>比较的是这一次产物，不是模型的永久排名。</strong></p>
+      <p>同一版本 Prompt · 独立生成 · 原样保存 · <a href="https://github.com/rockychang7/llm-capability-lab" target="_blank" rel="noopener">GitHub</a></p>
+    </div>
+  </footer>
+
+  <noscript><p class="noscript">此页面需要 JavaScript。原始文件可以在仓库的 results/ 目录中直接打开。</p></noscript>
   <script src="lab.js"></script>
 </body>
 </html>

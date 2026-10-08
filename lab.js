@@ -1,692 +1,484 @@
-const experiments = [
-  {
-    id: "rocket",
-    number: "01",
-    navTitle: "火箭发射动画",
-    navMeta: "前端动画",
-    eyebrow: "实验 01 · 前端动画与视觉特效",
-    title: "模型能把一句“发射火箭”做到什么程度？",
-    summary: "输入只描述目标，不提供技术方案。这个实验观察模型能否自己补齐火箭造型、点火反馈、升空过程和抵达太空的完整体验。",
-    inputRule: "所有模型使用 prompt-v1，要求完全相同",
-    promptUrl: "prompts/01-rocket-launch/prompt-v1.md",
-    evaluationUrl: "results/01-rocket-launch/evaluations/evaluation-v1.md",
-    artifactType: "page",
-    defaultModel: "gpt-5-6-sol-max",
-    capabilityIntro: "重点不是页面里有多少按钮，而是模型能否把一条模糊指令变成可信、连贯、能完成的视觉过程。",
-    capabilities: [
-      "第一眼能否认出一枚结构合理的火箭",
-      "点击后是否真的经历点火、升空和进入太空",
-      "火焰、烟雾、镜头与场景过渡是否自然",
-      "最后是否给出明确的任务完成反馈"
-    ],
-    evaluationIntro: "每项先打 0–5 分，再按权重换算成 100 分。高分代表这一次产物更完整，不等于模型永远更强。",
-    scale: [
-      { score: "0–1", label: "没有实现，或核心功能严重缺失" },
-      { score: "2–3", label: "基本能用，但问题容易被看见" },
-      { score: "4–5", label: "完成度高，效果自然且完整" }
-    ],
-    rubric: [
-      { name: "指令完成度", description: "是否点一下就能发射，并最终进入太空、明确结束。", weight: 25 },
-      { name: "火箭真实感", description: "火箭的结构、比例、材质和细节是否可信。", weight: 20 },
-      { name: "点火与发射效果", description: "尾焰、烟雾、光效和升空反馈是否有力度。", weight: 25 },
-      { name: "动画流畅度", description: "运动、镜头和场景切换是否连续稳定。", weight: 20 },
-      { name: "整体完成质量", description: "交互、信息和最终画面是否形成完整体验。", weight: 10 }
-    ],
-    models: [
-      {
-        id: "agy-gemini-3-6-flash",
-        label: "AGY · Gemini 3.6 Flash",
-        provider: "agy",
-        model: "gemini-3-6-flash",
-        mode: "unknown",
-        promptVersion: "1",
-        generatedAt: "unknown",
-        score: 56,
-        url: "results/01-rocket-launch/outputs/agy-gemini-3-6-flash/agy-gemini-3-6-flash.html"
-      },
-      {
-        id: "claude-opus-4-8-max",
-        label: "Claude Opus 4.8 · max",
-        provider: "anthropic",
-        model: "claude-opus-4-8",
-        mode: "max",
-        promptVersion: "1",
-        generatedAt: "unknown",
-        score: 85,
-        url: "results/01-rocket-launch/outputs/claude-opus-4-8-max/claude-opus-4-8-max.html"
-      },
-      {
-        id: "gpt-5-6-sol-max",
-        label: "GPT-5.6 · sol-max",
-        provider: "openai",
-        model: "gpt-5-6",
-        mode: "sol-max",
-        promptVersion: "1",
-        generatedAt: "unknown",
-        score: 91,
-        url: "results/01-rocket-launch/outputs/gpt-5-6-sol-max/gpt-5-6-sol-max.html"
-      },
-      {
-        id: "gpt-6-astra-xhigh",
-        label: "GPT-6 Astra · xhigh",
-        provider: "openai",
-        model: "gpt-6-astra",
-        mode: "astra-xhigh",
-        promptVersion: "1",
-        generatedAt: "2026-09-22T15:45:15+08:00",
-        score: null,
-        url: "results/01-rocket-launch/outputs/gpt-6-astra-xhigh/gpt-6-astra-xhigh.html"
-      },
-      {
-        id: "kimi-k3",
-        label: "Kimi K3",
-        provider: "moonshot-ai",
-        model: "kimi-k3",
-        mode: "unknown",
-        promptVersion: "1",
-        generatedAt: "unknown",
-        score: 76,
-        url: "results/01-rocket-launch/outputs/kimi-k3/kimi-k3.html"
-      }
-    ]
-  },
-  {
-    id: "vinyl",
-    number: "02",
-    navTitle: "Vinyl 网页复刻",
-    navMeta: "规格执行",
-    eyebrow: "实验 02 · 网页复刻与规格执行",
-    title: "面对一份很长的设计规格，模型能还原到什么程度？",
-    summary: "输入把文案、布局、配色、动效和响应式规则写得很具体。这个实验观察模型能否持续遵守约束，并用一个 HTML 文件还原完整产品页。",
-    inputRule: "所有模型使用同一份详细设计规格",
-    promptUrl: "prompts/02-vinylformac-replica/prompt-v1.md",
-    evaluationUrl: null,
-    artifactType: "page",
-    defaultModel: "gpt-5-codex",
-    capabilityIntro: "这不是自由发挥题。模型需要同时记住很多细节，并把视觉、文字、动画和技术限制放进同一份可运行页面。",
-    capabilities: [
-      "页面结构、文案和尺寸是否按规格落地",
-      "不用外部图片，能否画出可信的黑胶唱机场景",
-      "加载、旋转、悬停和键盘焦点等动效是否齐全",
-      "桌面和手机尺寸下是否都能正常阅读和操作"
-    ],
-    evaluationIntro: "这一组还没有正式评分，页面只展示可直接观察的比较维度，不会用未完成的评测制造排名。",
-    scale: [
-      { score: "先看", label: "核心页面是否完整、能正常打开" },
-      { score: "再比", label: "规格细节和视觉还原有多少差异" },
-      { score: "后评", label: "统一环境复核后再记录正式分数" }
-    ],
-    rubric: [
-      { name: "规格遵守", description: "要求的结构、文案、链接和技术限制是否逐项做到。" },
-      { name: "视觉还原", description: "布局、字体、颜色、间距和整体气质是否接近目标。" },
-      { name: "核心场景", description: "黑胶唱机的结构、材质、光影和拟真程度是否可信。" },
-      { name: "动效与交互", description: "入场、唱片、唱臂、悬停、焦点和降级是否完整。" },
-      { name: "响应式与稳定性", description: "不同屏幕尺寸下是否清楚、可用且没有明显错误。" }
-    ],
-    models: [
-      {
-        id: "gpt-5-codex",
-        label: "GPT-5 · Codex",
-        provider: "openai",
-        model: "gpt-5",
-        mode: "codex",
-        promptVersion: "1",
-        generatedAt: "2026-08-04T13:59:28+08:00",
-        score: null,
-        url: "results/02-vinylformac-replica/outputs/gpt-5-codex/gpt-5-codex.html"
-      },
-      {
-        id: "gpt-6-astra-xhigh",
-        label: "GPT-6 Astra · xhigh",
-        provider: "openai",
-        model: "gpt-6-astra",
-        mode: "astra-xhigh",
-        promptVersion: "1",
-        generatedAt: "2026-09-22T15:59:17+08:00",
-        score: null,
-        url: "results/02-vinylformac-replica/outputs/gpt-6-astra-xhigh/gpt-6-astra-xhigh.html"
-      },
-      {
-        id: "kimi-k3",
-        label: "Kimi K3",
-        provider: "moonshot-ai",
-        model: "kimi-k3",
-        mode: "unknown",
-        promptVersion: "1",
-        generatedAt: "2026-08-04",
-        score: null,
-        url: "results/02-vinylformac-replica/outputs/kimi-k3/kimi-k3.html"
-      }
-    ]
-  },
-  {
-    id: "pelican",
-    number: "03",
-    navTitle: "鹈鹕骑自行车",
-    navMeta: "SVG 插画",
-    eyebrow: "实验 03 · SVG 插画生成",
-    title: "只给七个英文单词，模型能画清楚一个复杂动作吗？",
-    summary: "Prompt 只有“生成一张鹈鹕骑自行车的 SVG”。没有风格、构图或细节提示，因此结果直接反映模型对主体、动作和矢量结构的默认理解。",
-    inputRule: "所有模型只收到同一句七词英文指令",
-    promptUrl: "prompts/03-pelican-bicycle/prompt-v1.md",
-    evaluationUrl: "results/03-pelican-bicycle/evaluations/evaluation-v1.md",
-    artifactType: "art",
-    defaultModel: "gpt-5-6-luna",
-    capabilityIntro: "鹈鹕和自行车各自不难，难点是要让两者在同一张图里保持结构正确，并且一眼看出“正在骑”。",
-    capabilities: [
-      "长喙、喉囊等特征能否让鹈鹕一眼可认",
-      "车轮、车架、车把和脚踏是否组成合理自行车",
-      "身体、翅膀和脚的位置能否表达骑行动作",
-      "SVG 是否完整、独立、可缩放且没有外部依赖"
-    ],
-    evaluationIntro: "这一组按 100 分直接计分。当前评测只记录了 Luna 的结果，其余产物保留为待评估状态。",
-    scale: [
-      { score: "<60", label: "主体或结构存在明显缺失" },
-      { score: "60–84", label: "能看懂主题，细节仍有不足" },
-      { score: "85–100", label: "主题清楚，结构与画面完成度高" }
-    ],
-    rubric: [
-      { name: "主题可识别性", description: "是否一眼看出是鹈鹕，而且它正在骑自行车。", weight: 30 },
-      { name: "SVG 完整性", description: "文件能否独立打开，并主要使用真正的矢量图形。", weight: 25 },
-      { name: "造型与细节", description: "鹈鹕特征、自行车结构和动作连接是否清楚。", weight: 25 },
-      { name: "构图与完成度", description: "层次、配色、姿态和整体画面是否协调完整。", weight: 20 }
-    ],
-    models: [
-      {
-        id: "gpt-5-6-luna",
-        label: "GPT-5.6 Luna",
-        provider: "github-copilot",
-        model: "gpt-5.6-luna",
-        mode: "unknown",
-        promptVersion: "1",
-        generatedAt: "unknown",
-        score: 94,
-        url: "results/03-pelican-bicycle/outputs/gpt-5-6-luna/gpt-5-6-luna.svg"
-      },
-      {
-        id: "gpt-5-6-sol-max",
-        label: "GPT-5.6 · sol-max",
-        provider: "openai",
-        model: "gpt-5-6",
-        mode: "sol-max",
-        promptVersion: "1",
-        generatedAt: "2026-09-18T17:10:11+08:00",
-        score: null,
-        url: "results/03-pelican-bicycle/outputs/gpt-5-6-sol-max/gpt-5-6-sol-max.svg"
-      },
-      {
-        id: "gpt-5-6-terra",
-        label: "GPT-5.6 Terra",
-        provider: "github-copilot",
-        model: "gpt-5.6-terra",
-        mode: "unknown",
-        promptVersion: "1",
-        generatedAt: "2026-09-18T09:06:28Z",
-        score: null,
-        url: "results/03-pelican-bicycle/outputs/gpt-5-6-terra/gpt-5-6-terra.svg"
-      },
-      {
-        id: "gpt-6-astra-xhigh",
-        label: "GPT-6 Astra · xhigh",
-        provider: "openai",
-        model: "gpt-6-astra",
-        mode: "astra-xhigh",
-        promptVersion: "1",
-        generatedAt: "2026-09-22T16:02:50+08:00",
-        score: null,
-        url: "results/03-pelican-bicycle/outputs/gpt-6-astra-xhigh/gpt-6-astra-xhigh.svg"
-      }
-    ]
-  }
-];
-
-const elements = {
-  labCount: document.querySelector("#lab-count"),
-  chooser: document.querySelector("#experiment-chooser"),
-  trigger: document.querySelector("#experiment-trigger"),
-  selectedNumber: document.querySelector("#selected-number"),
-  selectedTitle: document.querySelector("#selected-title"),
-  selectedMeta: document.querySelector("#selected-meta"),
-  panel: document.querySelector("#experiment-panel"),
-  search: document.querySelector("#experiment-search"),
-  matchCount: document.querySelector("#experiment-match-count"),
-  noMatch: document.querySelector("#experiment-no-match"),
-  nav: document.querySelector("#experiment-nav"),
-  eyebrow: document.querySelector("#experiment-eyebrow"),
-  title: document.querySelector("#experiment-title"),
-  summary: document.querySelector("#experiment-summary"),
-  inputRule: document.querySelector("#input-rule"),
-  promptVersion: document.querySelector("#prompt-version"),
-  promptShell: document.querySelector("#prompt-shell"),
-  promptText: document.querySelector("#prompt-text"),
-  promptLength: document.querySelector("#prompt-length"),
-  promptExpand: document.querySelector("#prompt-expand"),
-  promptCopy: document.querySelector("#prompt-copy"),
-  promptFeedback: document.querySelector("#prompt-feedback"),
-  modelPicker: document.querySelector("#model-picker"),
-  viewSwitch: document.querySelector("#view-switch"),
-  resultEmpty: document.querySelector("#result-empty"),
-  focusView: document.querySelector("#focus-view"),
-  compareView: document.querySelector("#compare-view"),
-  previewModel: document.querySelector("#preview-model"),
-  previewScore: document.querySelector("#preview-score"),
-  previewFrame: document.querySelector("#preview-frame"),
-  previewFrameWrap: document.querySelector("#preview-frame-wrap"),
-  openResult: document.querySelector("#open-result"),
-  reloadPreview: document.querySelector("#reload-preview"),
-  runFacts: document.querySelector("#run-facts"),
-  capabilityIntro: document.querySelector("#capability-intro"),
-  capabilityList: document.querySelector("#capability-list"),
-  evaluationIntro: document.querySelector("#evaluation-intro"),
-  evaluationScale: document.querySelector("#evaluation-scale"),
-  rubricList: document.querySelector("#rubric-list"),
-  evaluationLink: document.querySelector("#evaluation-link"),
-  rubricStatus: document.querySelector("#rubric-status")
+// Renders data/lab.json (generated by scripts/build-data.mjs). Model artifacts are shown as-is.
+const VIEWPORTS = {
+  desktop: { label: "桌面", width: 1440, height: 900 },
+  mobile: { label: "手机", width: 390, height: 844 }
 };
 
-let activeExperiment = experiments[0];
-let activeModel = null;
-let activeView = "focus";
-let promptContent = "";
-let promptRequest = 0;
-const promptCache = new Map();
+const app = document.querySelector("#app");
+let lab = null;
+let lastPage = null;
+let pendingFocus = null;
+const frameObserver = new ResizeObserver((entries) => entries.forEach((entry) => fitFrame(entry.target)));
 
-function scoreLabel(model) {
-  return model.score === null ? "待评估" : `${model.score} / 100`;
+const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => (
+  { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[char]
+));
+
+function parseRoute() {
+  const raw = location.hash.replace(/^#\/?/, "");
+  const [path, query = ""] = raw.split("?");
+  return { path: decodeURIComponent(path), params: new URLSearchParams(query) };
 }
 
-function resultCount(experiment) {
-  return experiment.models.length ? `${experiment.models.length} 份结果` : "暂无结果";
+function experimentHash(experiment, params = {}) {
+  const query = new URLSearchParams(Object.entries(params).filter(([, value]) => value));
+  const text = query.toString();
+  return `#/${experiment.id}${text ? `?${text}` : ""}`;
 }
 
-function renderExperimentNav(query = "") {
-  const search = query.trim().toLocaleLowerCase();
-  const matches = experiments.filter((experiment) =>
-    [experiment.number, experiment.navTitle, experiment.navMeta, experiment.eyebrow]
-      .some((value) => value.toLocaleLowerCase().includes(search))
-  );
-  elements.matchCount.textContent = `${matches.length} / ${experiments.length}`;
-  elements.noMatch.hidden = matches.length > 0;
-  elements.nav.replaceChildren(
-    ...matches.map((experiment) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "experiment-option";
-      button.dataset.experiment = experiment.id;
-      const number = document.createElement("span");
-      number.className = "option-number";
-      number.textContent = experiment.number;
-      const label = document.createElement("span");
-      const title = document.createElement("strong");
-      title.textContent = experiment.navTitle;
-      const meta = document.createElement("small");
-      meta.textContent = `${experiment.navMeta} · ${resultCount(experiment)}`;
-      label.append(title, meta);
-      button.append(number, label);
-      if (experiment.id === activeExperiment.id) {
-        button.classList.add("is-active");
-        button.setAttribute("aria-current", "true");
-      }
-      button.addEventListener("click", () => {
-        selectExperiment(experiment.id);
-        closeExperimentPanel(true);
-      });
-      return button;
-    })
-  );
-}
-
-function openExperimentPanel() {
-  elements.panel.hidden = false;
-  elements.trigger.setAttribute("aria-expanded", "true");
-  elements.search.value = "";
-  renderExperimentNav();
-  elements.search.focus();
-}
-
-function closeExperimentPanel(returnFocus = false) {
-  elements.panel.hidden = true;
-  elements.trigger.setAttribute("aria-expanded", "false");
-  if (returnFocus) elements.trigger.focus();
-}
-
-function selectExperiment(id) {
-  const nextExperiment = experiments.find((experiment) => experiment.id === id);
-  if (!nextExperiment) return;
-
-  activeExperiment = nextExperiment;
-  activeModel =
-    activeExperiment.models.find((model) => model.id === activeExperiment.defaultModel) ??
-    activeExperiment.models[0] ?? null;
-  activeView = "focus";
-  renderExperiment();
-  loadPrompt();
-}
-
-function renderExperiment() {
-  elements.selectedNumber.textContent = activeExperiment.number;
-  elements.selectedTitle.textContent = activeExperiment.navTitle;
-  elements.selectedMeta.textContent = `${activeExperiment.navMeta} · ${resultCount(activeExperiment)}`;
-  if (!elements.panel.hidden) renderExperimentNav(elements.search.value);
-
-  elements.eyebrow.textContent = activeExperiment.eyebrow;
-  elements.title.textContent = activeExperiment.title;
-  elements.summary.textContent = activeExperiment.summary;
-  elements.inputRule.textContent = activeExperiment.inputRule;
-  elements.promptVersion.textContent = `v${activeExperiment.promptUrl.match(/prompt-v(\d+)\.md$/)?.[1] ?? "unknown"}`;
-  elements.capabilityIntro.textContent = activeExperiment.capabilityIntro;
-  elements.evaluationIntro.textContent = activeExperiment.evaluationIntro;
-  elements.rubricStatus.textContent = activeExperiment.evaluationUrl ? "正式评测维度" : "观察项 · 尚无正式评分";
-
-  elements.capabilityList.replaceChildren(
-    ...activeExperiment.capabilities.map((capability) => {
-      const item = document.createElement("li");
-      item.textContent = capability;
-      return item;
-    })
-  );
-
-  elements.evaluationScale.replaceChildren(
-    ...activeExperiment.scale.map((item) => {
-      const block = document.createElement("div");
-      block.className = "scale-item";
-      const score = document.createElement("strong");
-      score.textContent = item.score;
-      const label = document.createElement("span");
-      label.textContent = item.label;
-      block.append(score, label);
-      return block;
-    })
-  );
-
-  elements.rubricList.replaceChildren(
-    ...activeExperiment.rubric.map((item) => {
-      const block = document.createElement("div");
-      block.className = "rubric-item";
-      const name = document.createElement("strong");
-      name.textContent = item.name;
-      const description = document.createElement("p");
-      description.textContent = item.description;
-      block.append(name, description);
-      if (item.weight !== undefined) {
-        const weight = document.createElement("span");
-        weight.className = "rubric-weight";
-        weight.textContent = `${item.weight}%`;
-        block.append(weight);
-      } else {
-        block.classList.add("no-weight");
-      }
-      return block;
-    })
-  );
-
-  if (activeExperiment.evaluationUrl) {
-    elements.evaluationLink.href = activeExperiment.evaluationUrl;
-    elements.evaluationLink.innerHTML = "阅读完整评测记录 <span aria-hidden='true'>↗</span>";
-    elements.evaluationLink.classList.remove("is-disabled");
-    elements.evaluationLink.removeAttribute("aria-disabled");
+function navigate(hash, { replace = false } = {}) {
+  if (replace) {
+    history.replaceState(null, "", hash);
+    render();
   } else {
-    elements.evaluationLink.removeAttribute("href");
-    elements.evaluationLink.textContent = "本实验尚无正式评测记录";
-    elements.evaluationLink.classList.add("is-disabled");
-    elements.evaluationLink.setAttribute("aria-disabled", "true");
+    location.hash = hash;
   }
-
-  renderModelPicker();
-  renderView();
 }
 
-function renderModelPicker() {
-  if (!activeModel) {
-    elements.modelPicker.replaceChildren();
-    return;
-  }
-  elements.modelPicker.replaceChildren(
-    ...activeExperiment.models.map((model) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.role = "tab";
-      button.className = "model-button";
-      button.dataset.model = model.id;
-      const label = document.createElement("span");
-      label.textContent = model.label;
-      const score = document.createElement("small");
-      score.textContent = scoreLabel(model);
-      button.append(label, score);
-      button.addEventListener("click", () => {
-        activeModel = model;
-        renderModelPicker();
-        renderFocus();
-        elements.modelPicker.querySelector(`[data-model="${model.id}"]`).focus();
-      });
-      if (model.id === activeModel.id) {
-        button.classList.add("is-active");
-        button.setAttribute("aria-selected", "true");
-      } else {
-        button.setAttribute("aria-selected", "false");
-      }
-      button.tabIndex = model.id === activeModel.id ? 0 : -1;
-      return button;
-    })
-  );
+function vendorLabel(vendor) {
+  return lab.vendors[vendor]?.label ?? vendor;
 }
 
-function renderFocus() {
-  elements.previewModel.textContent = activeModel.label;
-  elements.previewScore.textContent = scoreLabel(activeModel);
-  elements.previewScore.classList.toggle("has-score", activeModel.score !== null);
-  if (activeView === "focus") elements.previewFrame.src = activeModel.url;
-  elements.previewFrame.title = `${activeExperiment.navTitle}：${activeModel.label} 原始结果`;
-  elements.previewFrameWrap.classList.toggle("is-art", activeExperiment.artifactType === "art");
-  elements.openResult.href = activeModel.url;
-
-  const facts = [
-    ["输入版本", `${activeExperiment.promptUrl.split("/")[1]} / v${activeModel.promptVersion}`, "同版本输入才能横向比较"],
-    ["提供平台", activeModel.provider, "提供这次模型服务的平台"],
-    ["模型名称", activeModel.model, "实际参与生成的模型"],
-    ["运行模式", activeModel.mode, "当时记录的推理档位"],
-    ["生成时间", activeModel.generatedAt, "没有记录则显示 unknown"],
-    ["入口文件", activeModel.url.split("/").at(-1), "这份原始结果的打开入口"]
-  ];
-
-  elements.runFacts.replaceChildren(
-    ...facts.map(([label, value, explanation]) => {
-      const fact = document.createElement("div");
-      fact.className = "run-fact";
-      const term = document.createElement("dt");
-      term.textContent = label;
-      const detail = document.createElement("dd");
-      detail.textContent = value;
-      const help = document.createElement("small");
-      help.textContent = explanation;
-      fact.append(term, detail, help);
-      return fact;
-    })
-  );
+function vendorDot(vendor) {
+  return `<span class="vendor-dot" data-vendor="${escapeHtml(vendor)}" aria-hidden="true"></span>`;
 }
 
-function renderComparison() {
-  elements.compareView.classList.toggle("is-art", activeExperiment.artifactType === "art");
-  elements.compareView.replaceChildren(
-    ...activeExperiment.models.map((model) => {
-      const item = document.createElement("article");
-      item.className = "comparison-item";
-      const heading = document.createElement("div");
-      heading.className = "comparison-heading";
-      const title = document.createElement("strong");
-      title.textContent = model.label;
-      const score = document.createElement("span");
-      score.textContent = scoreLabel(model);
-      heading.append(title, score);
-      const frame = document.createElement("iframe");
-      frame.className = "comparison-frame";
-      frame.src = model.url;
-      frame.title = `${activeExperiment.navTitle}：${model.label} 并排预览`;
-      frame.loading = "lazy";
-      const link = document.createElement("a");
-      link.className = "comparison-open";
-      link.href = model.url;
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.textContent = "全屏查看 ↗";
-      item.append(heading, frame, link);
-      return item;
-    })
-  );
+function scoreText(result) {
+  return result.score ? String(result.score.total) : "待评";
 }
 
-function setView(view) {
-  if (view !== "focus" && view !== "compare") return;
-  activeView = view;
-  renderView();
+function scoredResults(experiment) {
+  return experiment.results.filter((result) => result.score);
 }
 
-function renderView() {
-  const hasResults = activeExperiment.models.length > 0;
-  elements.resultEmpty.hidden = hasResults;
-  elements.viewSwitch.hidden = !hasResults;
-  if (!hasResults) {
-    elements.modelPicker.hidden = true;
-    elements.focusView.hidden = true;
-    elements.compareView.hidden = true;
-    elements.compareView.replaceChildren();
-    elements.previewFrame.removeAttribute("src");
-    elements.openResult.removeAttribute("href");
-    return;
-  }
-  const showFocus = activeView === "focus";
-  elements.focusView.hidden = !showFocus;
-  elements.modelPicker.hidden = !showFocus;
-  elements.compareView.hidden = showFocus;
-  if (showFocus) {
-    elements.compareView.replaceChildren();
-    renderFocus();
-  } else {
-    elements.previewFrame.removeAttribute("src");
-    renderComparison();
-  }
+/* ---------- Home ---------- */
 
-  document.querySelectorAll(".view-button").forEach((button) => {
-    const isActive = button.dataset.view === activeView;
-    button.classList.toggle("is-active", isActive);
-    button.setAttribute("aria-pressed", String(isActive));
+function renderHome(params) {
+  const experiments = lab.experiments;
+  const totalResults = experiments.reduce((sum, experiment) => sum + experiment.results.length, 0);
+  const models = new Map();
+  experiments.forEach((experiment) => experiment.results.forEach((result) => {
+    if (!models.has(result.model)) models.set(result.model, { model: result.model, label: result.label.replace(/ · Run \d+$/, ""), vendor: result.vendor });
+  }));
+  const modelRows = [...models.values()].sort((a, b) =>
+    vendorLabel(a.vendor).localeCompare(vendorLabel(b.vendor)) || a.label.localeCompare(b.label));
+
+  document.title = "LLM Capability Lab · 大模型能力实验台";
+  app.innerHTML = `
+    <section class="hero">
+      <p class="eyebrow">大模型能力实验台</p>
+      <h1>同一份 Prompt，看不同模型各自做出了什么</h1>
+      <p class="hero-lead">每个实验只给模型同一段输入，产物原样保存、不做修改。你可以直接打开结果，并排比较，再对照评分看差距在哪。</p>
+      <dl class="stat-row">
+        <div class="stat"><dt>实验</dt><dd>${experiments.length}</dd></div>
+        <div class="stat"><dt>模型</dt><dd>${models.size}</dd></div>
+        <div class="stat"><dt>产物</dt><dd>${totalResults}</dd></div>
+        <div class="stat"><dt>已评分</dt><dd>${experiments.reduce((sum, experiment) => sum + scoredResults(experiment).length, 0)}</dd></div>
+      </dl>
+    </section>
+
+    <section class="section" aria-labelledby="experiments-heading">
+      <div class="section-head">
+        <h2 id="experiments-heading">全部实验</h2>
+        <p>每个实验考察一种能力，点进去看 Prompt 和所有模型的产物。</p>
+      </div>
+      <div class="experiment-grid">
+        ${experiments.map(renderExperimentCard).join("")}
+      </div>
+    </section>
+
+    <section class="section" id="matrix" aria-labelledby="matrix-heading">
+      <div class="section-head">
+        <h2 id="matrix-heading">模型 × 实验</h2>
+        <p>格子里是该实验内的得分（满分 100）。分数只在同一实验里可比，所以不算跨实验总分。</p>
+      </div>
+      <div class="matrix-scroll" tabindex="0" role="region" aria-label="模型与实验得分对照表，可横向滚动">
+        <table class="matrix">
+          <thead>
+            <tr>
+              <th scope="col" class="matrix-model">模型</th>
+              ${experiments.map((experiment) => `
+                <th scope="col"><a href="${experimentHash(experiment)}"><span class="mono">${experiment.number}</span> ${escapeHtml(experiment.title)}</a></th>`).join("")}
+            </tr>
+          </thead>
+          <tbody>
+            ${modelRows.map((row) => `
+              <tr>
+                <th scope="row" class="matrix-model">
+                  <span class="model-name">${vendorDot(row.vendor)}${escapeHtml(row.label)}</span>
+                  <span class="model-vendor">${escapeHtml(vendorLabel(row.vendor))}</span>
+                </th>
+                ${experiments.map((experiment) => renderMatrixCell(experiment, row.model)).join("")}
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+      <p class="matrix-legend"><span class="cell-pending">待评</span> 已有产物，还没评分　<span class="cell-empty">—</span> 没有参加这个实验</p>
+    </section>
+  `;
+
+  if (params.get("section") === "matrix") requestAnimationFrame(() => document.querySelector("#matrix")?.scrollIntoView());
+}
+
+function renderExperimentCard(experiment) {
+  const scored = scoredResults(experiment);
+  const top = scored[0];
+  const thumb = experiment.thumb
+    ? `<img src="${escapeHtml(experiment.thumb)}" alt="" loading="lazy" width="720" height="450">`
+    : `<span class="thumb-placeholder mono">${experiment.number}</span>`;
+  return `
+    <a class="experiment-card" href="${experimentHash(experiment)}">
+      <div class="card-thumb${experiment.artifactType === "image" ? " is-image" : ""}">${thumb}</div>
+      <div class="card-body">
+        <div class="card-meta"><span class="mono">${experiment.number}</span><span class="tag">${escapeHtml(experiment.capability)}</span></div>
+        <h3>${escapeHtml(experiment.title)}</h3>
+        <p>${escapeHtml(experiment.question)}</p>
+      </div>
+      <div class="card-foot">
+        <span>${experiment.results.length} 份产物 · 已评 ${scored.length}</span>
+        ${top ? `<span class="card-top">${vendorDot(top.vendor)}${escapeHtml(top.label)} <strong>${top.score.total}</strong></span>` : `<span class="muted">尚未评分</span>`}
+      </div>
+    </a>`;
+}
+
+function renderMatrixCell(experiment, model) {
+  const results = experiment.results.filter((result) => result.model === model);
+  if (!results.length) return `<td><span class="cell-empty" aria-label="未参加">—</span></td>`;
+  const best = results.find((result) => result.score) ?? results[0];
+  const href = experimentHash(experiment, { m: best.key });
+  if (!best.score) return `<td><a class="cell-pending" href="${href}">待评</a></td>`;
+  const scored = scoredResults(experiment);
+  const isTop = scored[0]?.key === best.key && scored.length > 1;
+  return `<td><a class="cell-score${isTop ? " is-top" : ""}" href="${href}" title="${escapeHtml(experiment.title)}：${best.score.total} / 100${isTop ? "（本实验最高）" : ""}">
+    <span class="cell-bar" style="--value:${best.score.total}" aria-hidden="true"></span><strong>${best.score.total}</strong></a></td>`;
+}
+
+/* ---------- Experiment ---------- */
+
+function renderExperiment(experiment, params) {
+  const results = experiment.results;
+  const active = results.find((result) => result.key === params.get("m")) ?? results[0] ?? null;
+  const view = params.get("view") === "compare" && results.length > 1 ? "compare" : "focus";
+  const isPage = experiment.artifactType === "page";
+  const viewport = isPage && params.get("vp") === "mobile" ? "mobile" : "desktop";
+  const state = { m: active?.key, view: view === "compare" ? "compare" : null, vp: viewport === "mobile" ? "mobile" : null };
+  const link = (changes) => experimentHash(experiment, { ...state, ...changes });
+
+  document.title = `${experiment.number} ${experiment.title} · LLM Capability Lab`;
+  app.innerHTML = `
+    <nav class="breadcrumb" aria-label="位置"><a href="#/">全部实验</a><span aria-hidden="true">/</span><span>${experiment.number} ${escapeHtml(experiment.title)}</span></nav>
+
+    <header class="exp-head">
+      <div class="card-meta"><span class="mono">实验 ${experiment.number}</span><span class="tag">${escapeHtml(experiment.capability)}</span></div>
+      <h1>${escapeHtml(experiment.question)}</h1>
+      <p class="hero-lead">${escapeHtml(experiment.summary)}</p>
+    </header>
+
+    ${renderPrompt(experiment)}
+
+    <section class="results" aria-labelledby="results-heading">
+      <div class="results-head">
+        <h2 id="results-heading">模型产物 <span class="count">${results.length}</span></h2>
+        ${results.length ? `
+        <div class="controls">
+          ${results.length > 1 ? `
+          <div class="segmented" role="group" aria-label="查看方式">
+            <a href="${link({ view: null })}" data-replace aria-current="${view === "focus"}">单个</a>
+            <a href="${link({ view: "compare" })}" data-replace aria-current="${view === "compare"}">并排</a>
+          </div>` : ""}
+          ${isPage ? `
+          <div class="segmented" role="group" aria-label="预览尺寸">
+            ${Object.entries(VIEWPORTS).map(([key, value]) => `
+              <a href="${link({ vp: key === "mobile" ? "mobile" : null })}" data-replace aria-current="${viewport === key}" title="按 ${value.width}×${value.height} 渲染后缩放">${value.label}</a>`).join("")}
+          </div>` : ""}
+        </div>` : ""}
+      </div>
+
+      ${!results.length ? `
+        <div class="empty-state"><strong>这个实验还没有模型产物</strong><p>Prompt 已经可以阅读，有产物后会出现在这里。</p></div>`
+      : view === "compare" ? renderCompare(experiment, viewport, link)
+      : renderFocus(experiment, active, viewport, link)}
+    </section>
+
+    ${renderMethod(experiment)}
+  `;
+
+  app.querySelectorAll(".frame-box").forEach((box) => frameObserver.observe(box));
+  bindPrompt(experiment);
+}
+
+function renderPrompt(experiment) {
+  const long = experiment.prompt.split("\n").length > 8 || experiment.prompt.length > 420;
+  return `
+    <section class="prompt-card${long ? " is-collapsed" : ""}" aria-labelledby="prompt-heading">
+      <div class="prompt-bar">
+        <h2 id="prompt-heading">Prompt <span class="mono muted">v${experiment.promptVersion} · ${experiment.prompt.length.toLocaleString()} 字符</span></h2>
+        <div class="prompt-actions">
+          <button class="button" type="button" data-copy-prompt>复制</button>
+          <a class="button ghost" href="${escapeHtml(experiment.promptPath)}" target="_blank" rel="noopener">源文件</a>
+        </div>
+      </div>
+      <pre class="prompt-text" id="prompt-text">${escapeHtml(experiment.prompt)}</pre>
+      ${long ? `<button class="prompt-toggle" type="button" aria-expanded="false" aria-controls="prompt-text" data-toggle-prompt>展开全部</button>` : ""}
+      <p class="sr-only" role="status" data-prompt-status></p>
+    </section>`;
+}
+
+function bindPrompt(experiment) {
+  const card = app.querySelector(".prompt-card");
+  const status = app.querySelector("[data-prompt-status]");
+  app.querySelector("[data-copy-prompt]")?.addEventListener("click", async (event) => {
+    const button = event.currentTarget;
+    try {
+      await navigator.clipboard.writeText(experiment.prompt);
+      button.textContent = "已复制";
+      status.textContent = "Prompt 已复制";
+    } catch {
+      button.textContent = "复制失败";
+      status.textContent = "复制失败，请手动选中文本";
+    }
+    setTimeout(() => { button.textContent = "复制"; }, 1600);
+  });
+  app.querySelector("[data-toggle-prompt]")?.addEventListener("click", (event) => {
+    const collapsed = card.classList.toggle("is-collapsed");
+    event.currentTarget.setAttribute("aria-expanded", String(!collapsed));
+    event.currentTarget.textContent = collapsed ? "展开全部" : "收起";
   });
 }
 
-function extractPrompt(markdown) {
-  const match = markdown.match(/^```text[ \t]*\r?\n([\s\S]*?)\r?\n```[ \t]*$/m);
-  if (!match) throw new Error("未找到原始 Prompt 代码块");
-  return match[1];
+function renderModelTabs(experiment, active, link) {
+  return `
+    <div class="model-tabs" role="tablist" aria-label="选择模型">
+      ${experiment.results.map((result) => {
+        const selected = result.key === active.key;
+        return `
+        <a class="model-tab" role="tab" href="${link({ m: result.key })}" data-replace data-key="${escapeHtml(result.key)}"
+           aria-selected="${selected}" tabindex="${selected ? 0 : -1}">
+          ${vendorDot(result.vendor)}
+          <span class="model-tab-name">${escapeHtml(result.label)}</span>
+          <span class="score-pill${result.score ? "" : " is-pending"}">${scoreText(result)}</span>
+        </a>`;
+      }).join("")}
+    </div>`;
 }
 
-async function loadPrompt() {
-  const request = ++promptRequest;
-  const url = activeExperiment.promptUrl;
-  promptContent = "";
-  elements.promptText.textContent = "正在读取 Prompt…";
-  elements.promptLength.textContent = "";
-  elements.promptFeedback.textContent = "";
-  elements.promptCopy.disabled = true;
-  elements.promptExpand.hidden = true;
-  elements.promptShell.classList.remove("is-collapsed");
-  elements.promptExpand.setAttribute("aria-expanded", "false");
+function renderFrame(experiment, result, viewport, { lazy = false } = {}) {
+  if (experiment.artifactType === "image") {
+    return `<div class="image-box"><img src="${escapeHtml(result.url)}" alt="${escapeHtml(result.label)} 生成的 SVG 原图" ${lazy ? "loading=\"lazy\"" : ""}></div>`;
+  }
+  const size = VIEWPORTS[viewport];
+  return `
+    <div class="frame-box is-${viewport}" style="--vw:${size.width};--vh:${size.height}" data-vw="${size.width}" data-vh="${size.height}">
+      <iframe src="${escapeHtml(result.url)}" title="${escapeHtml(result.label)} 的原始产物" width="${size.width}" height="${size.height}" ${lazy ? "loading=\"lazy\"" : ""}></iframe>
+    </div>`;
+}
 
-  try {
-    if (!promptCache.has(url)) {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      promptCache.set(url, extractPrompt(await response.text()));
+function fitFrame(box) {
+  const width = Number(box.dataset.vw);
+  const height = Number(box.dataset.vh);
+  const inset = box.classList.contains("is-mobile") ? 32 : 0;
+  const scale = Math.min((box.clientWidth - inset) / width, (box.clientHeight - inset) / height);
+  box.style.setProperty("--scale", String(scale));
+}
+
+function renderFocus(experiment, active, viewport, link) {
+  const scored = scoredResults(experiment);
+  const rank = active.score ? scored.findIndex((result) => result.key === active.key) + 1 : null;
+  return `
+    ${renderModelTabs(experiment, active, link)}
+    <div class="stage" role="tabpanel" aria-label="${escapeHtml(active.label)}">
+      <div class="stage-bar">
+        <span class="stage-title">${vendorDot(active.vendor)}${escapeHtml(active.label)}</span>
+        <span class="stage-actions">
+          ${experiment.artifactType === "page" ? `<span class="mono stage-size">${VIEWPORTS[viewport].width}×${VIEWPORTS[viewport].height}</span>` : ""}
+          <button class="stage-button" type="button" data-reload title="重新加载">重新加载</button>
+          <a class="stage-button" href="${escapeHtml(active.url)}" target="_blank" rel="noopener">新窗口打开 ↗</a>
+        </span>
+      </div>
+      ${renderFrame(experiment, active, viewport)}
+    </div>
+
+    <div class="detail-grid">
+      <section class="panel" aria-labelledby="score-heading">
+        <h3 id="score-heading">评分</h3>
+        ${active.score ? `
+          <div class="score-hero">
+            <strong>${active.score.total}</strong><span>/ 100</span>
+            <span class="rank">本实验第 ${rank} / ${scored.length}</span>
+          </div>
+          <ul class="meters">
+            ${active.score.dimensions.map((dimension) => `
+              <li>
+                <div class="meter-label"><span>${escapeHtml(dimension.name)}</span><span class="mono">${dimension.value} / ${dimension.max}</span></div>
+                <div class="meter" role="img" aria-label="${escapeHtml(dimension.name)} ${dimension.value} / ${dimension.max}"><span style="--value:${(dimension.value / dimension.max) * 100}"></span></div>
+              </li>`).join("")}
+          </ul>`
+        : `<p class="pending-note"><strong>待评估</strong>产物已经保存，但还没有正式评分。这不代表失败，也不是零分。</p>`}
+      </section>
+
+      <section class="panel" aria-labelledby="review-heading">
+        <h3 id="review-heading">点评</h3>
+        ${active.review ? `
+          <div class="review">
+            <h4 class="review-good">优点</h4>
+            <ul>${active.review.strengths.map((item) => `<li>${inlineMarkdown(item)}</li>`).join("")}</ul>
+            ${active.review.weaknesses.length ? `
+            <h4 class="review-bad">不足</h4>
+            <ul>${active.review.weaknesses.map((item) => `<li>${inlineMarkdown(item)}</li>`).join("")}</ul>` : ""}
+          </div>`
+        : `<p class="muted">还没有点评。</p>`}
+      </section>
+
+      <details class="panel run-panel">
+        <summary><h3>运行记录</h3><span class="muted">run.yaml</span></summary>
+        <dl class="run-facts">
+          ${[
+            ["Prompt 版本", `v${active.run.prompt_version}`],
+            ["调用渠道", active.run.provider],
+            ["模型", active.run.model],
+            ["运行模式", active.run.mode],
+            ["生成时间", active.run.generated_at],
+            ["入口文件", active.run.entrypoint]
+          ].map(([term, value]) => `<div><dt>${term}</dt><dd class="mono${value === "unknown" ? " muted" : ""}">${escapeHtml(value)}</dd></div>`).join("")}
+        </dl>
+        <p class="muted small">unknown 表示当时没有可靠记录，不是默认值。</p>
+      </details>
+    </div>`;
+}
+
+function renderCompare(experiment, viewport, link) {
+  return `
+    <div class="compare-grid${experiment.artifactType === "image" ? " is-image" : ""}${viewport === "mobile" ? " is-mobile" : ""}">
+      ${experiment.results.map((result) => `
+        <article class="compare-card">
+          <header>
+            <span class="stage-title">${vendorDot(result.vendor)}${escapeHtml(result.label)}</span>
+            <span class="score-pill${result.score ? "" : " is-pending"}">${scoreText(result)}</span>
+          </header>
+          ${renderFrame(experiment, result, viewport, { lazy: true })}
+          <footer>
+            <a href="${link({ m: result.key, view: null })}" data-replace>查看详情</a>
+            <a href="${escapeHtml(result.url)}" target="_blank" rel="noopener">新窗口打开 ↗</a>
+          </footer>
+        </article>`).join("")}
+    </div>`;
+}
+
+function renderMethod(experiment) {
+  const evaluation = experiment.evaluation;
+  return `
+    <section class="section method" aria-labelledby="method-heading">
+      <div class="section-head">
+        <h2 id="method-heading">怎么评</h2>
+        <p>${evaluation
+          ? [evaluation.method, evaluation.environment, evaluation.date !== "unknown" && `评测于 ${evaluation.date}`].filter((item) => item && item !== "unknown").map(escapeHtml).join(" · ")
+          : "这个实验还没有正式评测，下面是观察时建议关注的方面。"}</p>
+      </div>
+      <div class="method-grid">
+        <div class="panel">
+          <h3>看效果时关注</h3>
+          <ul class="check-list">${experiment.focus.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
+        <div class="panel">
+          <h3>评分维度</h3>
+          ${evaluation ? `
+            <ul class="dimension-list">
+              ${evaluation.dimensions.map((dimension) => `
+                <li><div><strong>${escapeHtml(dimension.name)}</strong><p>${escapeHtml(dimension.focus)}</p></div><span class="mono">${dimension.weight}%</span></li>`).join("")}
+            </ul>
+            <a class="text-link" href="${escapeHtml(experiment.evaluationPath)}" target="_blank" rel="noopener">完整评测记录 ↗</a>`
+          : `<p class="muted">尚无评分维度。</p>`}
+        </div>
+      </div>
+      ${evaluation?.conclusion.length ? `
+        <div class="panel conclusion">
+          <h3>评测结论</h3>
+          ${evaluation.conclusion.map((paragraph) => `<p>${inlineMarkdown(paragraph)}</p>`).join("")}
+        </div>` : ""}
+    </section>`;
+}
+
+function inlineMarkdown(text) {
+  return escapeHtml(text)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+}
+
+/* ---------- Router ---------- */
+
+function render() {
+  if (!lab) return;
+  frameObserver.disconnect();
+  const { path, params } = parseRoute();
+  const experiment = lab.experiments.find((item) => item.id === path);
+  const page = experiment ? experiment.id : "home";
+
+  if (experiment) renderExperiment(experiment, params);
+  else renderHome(params);
+
+  document.querySelectorAll("[data-nav]").forEach((link) => {
+    const current = !experiment && (link.dataset.nav === "matrix") === (params.get("section") === "matrix");
+    link.toggleAttribute("aria-current", current);
+  });
+
+  if (page !== lastPage) {
+    if (lastPage !== null && params.get("section") !== "matrix") {
+      window.scrollTo(0, 0);
+      app.focus({ preventScroll: true });
     }
-    if (request !== promptRequest) return;
-    promptContent = promptCache.get(url);
-    elements.promptText.textContent = promptContent;
-    elements.promptLength.textContent = `${promptContent.length.toLocaleString()} 字符`;
-    elements.promptCopy.disabled = false;
-    if (elements.promptText.scrollHeight > 360) {
-      elements.promptShell.classList.add("is-collapsed");
-      elements.promptExpand.hidden = false;
-      elements.promptExpand.innerHTML = "展开完整内容 <span aria-hidden='true'>↓</span>";
-    }
-  } catch (error) {
-    if (request !== promptRequest) return;
-    elements.promptText.textContent = "Prompt 读取失败，请通过本地 HTTP 服务打开实验台后重试。";
-    elements.promptFeedback.textContent = error.message;
+    lastPage = page;
+  }
+  if (pendingFocus) {
+    app.querySelector(pendingFocus)?.focus();
+    pendingFocus = null;
   }
 }
 
-elements.promptExpand.addEventListener("click", () => {
-  const collapsed = elements.promptShell.classList.toggle("is-collapsed");
-  elements.promptExpand.setAttribute("aria-expanded", String(!collapsed));
-  elements.promptExpand.innerHTML = collapsed
-    ? "展开完整内容 <span aria-hidden='true'>↓</span>"
-    : "收起内容 <span aria-hidden='true'>↑</span>";
-});
-
-elements.promptCopy.addEventListener("click", async () => {
-  const content = promptContent;
-  const request = promptRequest;
-  if (!content) return;
-  try {
-    await navigator.clipboard.writeText(content);
-    if (request === promptRequest) elements.promptFeedback.textContent = "完整 Prompt 已复制";
-  } catch {
-    if (request === promptRequest) elements.promptFeedback.textContent = "复制失败，请手动选中文本复制";
+app.addEventListener("click", (event) => {
+  const link = event.target.closest("a[data-replace]");
+  if (link && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
+    event.preventDefault();
+    if (link.matches(".model-tab")) pendingFocus = `.model-tab[data-key="${CSS.escape(link.dataset.key)}"]`;
+    navigate(link.getAttribute("href"), { replace: true });
+    return;
+  }
+  if (event.target.closest("[data-reload]")) {
+    const frame = app.querySelector(".stage iframe, .stage img");
+    if (frame) frame.src = frame.src;
   }
 });
 
-document.querySelectorAll(".view-button").forEach((button) => {
-  button.addEventListener("click", () => setView(button.dataset.view));
-});
-
-elements.reloadPreview.addEventListener("click", () => {
-  if (activeModel) elements.previewFrame.src = activeModel.url;
-});
-
-elements.modelPicker.addEventListener("keydown", (event) => {
-  const keys = ["ArrowLeft", "ArrowRight", "Home", "End"];
-  if (!keys.includes(event.key) || !activeModel) return;
-  event.preventDefault();
-  const index = activeExperiment.models.findIndex((model) => model.id === activeModel.id);
+app.addEventListener("keydown", (event) => {
+  const tab = event.target.closest(".model-tab");
+  if (!tab || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+  const tabs = [...app.querySelectorAll(".model-tab")];
+  const index = tabs.indexOf(tab);
   const next = event.key === "Home" ? 0
-    : event.key === "End" ? activeExperiment.models.length - 1
-    : (index + (event.key === "ArrowRight" ? 1 : -1) + activeExperiment.models.length) % activeExperiment.models.length;
-  activeModel = activeExperiment.models[next];
-  renderModelPicker();
-  renderFocus();
-  elements.modelPicker.querySelector(`[data-model="${activeModel.id}"]`).focus();
+    : event.key === "End" ? tabs.length - 1
+    : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+  event.preventDefault();
+  tabs[next].click();
 });
 
-elements.labCount.innerHTML = `${String(experiments.length).padStart(2, "0")} EXPERIMENTS <span aria-hidden="true">/</span> ${String(experiments.reduce((count, experiment) => count + experiment.models.length, 0)).padStart(2, "0")} OUTPUTS`;
-
-elements.trigger.addEventListener("click", () => {
-  if (elements.panel.hidden) openExperimentPanel();
-  else closeExperimentPanel(true);
-});
-elements.search.addEventListener("input", () => renderExperimentNav(elements.search.value));
-elements.chooser.addEventListener("keydown", (event) => {
-  if (elements.panel.hidden) return;
-  if (event.key === "Escape") {
-    event.preventDefault();
-    closeExperimentPanel(true);
-  } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-    const options = [...elements.nav.querySelectorAll(".experiment-option")];
-    if (!options.length) return;
-    event.preventDefault();
-    const index = options.indexOf(document.activeElement);
-    const next = event.key === "ArrowDown"
-      ? (index + 1) % options.length
-      : (index - 1 + options.length) % options.length;
-    options[next].focus();
-  } else if (event.key === "Enter" && document.activeElement === elements.search) {
-    const first = elements.nav.querySelector(".experiment-option");
-    if (first) {
-      event.preventDefault();
-      first.click();
-    }
-  }
-});
-document.addEventListener("pointerdown", (event) => {
-  if (!elements.panel.hidden && !elements.chooser.contains(event.target)) closeExperimentPanel();
+document.querySelector("#theme-toggle").addEventListener("click", () => {
+  const root = document.documentElement;
+  const current = root.dataset.theme ?? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const next = current === "dark" ? "light" : "dark";
+  root.dataset.theme = next;
+  try { localStorage.setItem("lab-theme", next); } catch {}
 });
 
-selectExperiment(experiments[0].id);
+window.addEventListener("hashchange", render);
+
+fetch("data/lab.json")
+  .then((response) => {
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return response.json();
+  })
+  .then((data) => {
+    lab = data;
+    render();
+  })
+  .catch((error) => {
+    app.innerHTML = `<div class="empty-state"><strong>数据加载失败</strong><p>请通过 HTTP 服务打开本页（例如 <code>python -m http.server</code>）。${escapeHtml(error.message)}</p></div>`;
+  });
