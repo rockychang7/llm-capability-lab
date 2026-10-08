@@ -3,16 +3,55 @@ const VIEWPORTS = {
   desktop: { label: "桌面", width: 1440, height: 900 },
   mobile: { label: "手机", width: 390, height: 844 }
 };
+const ARTIFACT_KIND = { page: "单文件 HTML", image: "独立 SVG" };
+const COVERAGE_DIMENSION = "需求覆盖";
+const TIE_GAP = 5;
+const PROMPT_PREVIEW_LINES = 7;
+const SHEET_LIMIT = 6;
+const RUN_FIELDS = [
+  ["prompt_version", "提示词版本"],
+  ["provider", "调用渠道"],
+  ["model", "模型标识"],
+  ["mode", "推理档位"],
+  ["harness", "运行工具"],
+  ["web_access", "能否联网"],
+  ["turns", "来回轮数"],
+  ["generated_at", "生成时间"],
+  ["entrypoint", "入口文件"]
+];
+const FLOW = [
+  ["固定输入", "提示词按版本冻结。改一个字，就是新版本。"],
+  ["独立生成", "每个模型单独跑，只收到提示词原文，看不到别人的产物和评分。"],
+  ["原样保存", "不修、不润色，失败的结果也留着。"],
+  ["集中评测", "先定标准再打分：硬性检查、需求覆盖、质量评分。"]
+];
+const LAYERS = [
+  ["A · 过 / 不过", "硬性检查", "提示词里写死的要求：单文件、不用外部资源、能把流程走完。不过的标红，并在对应的分里扣掉。"],
+  ["B · 逐条打勾", "需求覆盖", "把提示词拆成一张清单，每条记“做到 / 部分 / 没做到”，算出覆盖了多少。"],
+  ["C · 0–5 分", "质量评分", "写实感、动画、稳定性这类靠眼睛看的项，每一档都提前写好“什么样算几分”。"]
+];
 
 const app = document.querySelector("#app");
+const live = document.querySelector("#live");
 let lab = null;
 let lastPage = null;
 let pendingFocus = null;
+let promptOpen = false;
 const frameObserver = new ResizeObserver((entries) => entries.forEach((entry) => fitFrame(entry.target)));
 
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => (
   { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[char]
 ));
+const formatNumber = (value) => (Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, ""));
+const formatCount = (value) => value.toLocaleString("zh-CN");
+const vendorLabel = (vendor) => lab.vendors[vendor]?.label ?? vendor;
+const runSuffix = (result) => (result.run ? ` · ${result.run}` : "");
+
+function inlineMarkdown(text) {
+  return escapeHtml(text)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+}
 
 function parseRoute() {
   const raw = location.hash.replace(/^#\/?/, "");
@@ -35,241 +74,434 @@ function navigate(hash, { replace = false } = {}) {
   }
 }
 
-function vendorLabel(vendor) {
-  return lab.vendors[vendor]?.label ?? vendor;
+const latestVersion = (experiment) => experiment.versions.find((version) => version.version === experiment.latestVersion) ?? null;
+const failedChecks = (result) => (result.hardChecks ?? []).filter((check) => check.status === "fail").length;
+
+// Ranks are shown only after every result of the version is scored.
+function rankInfo(version, result) {
+  if (!version.stats.allScored || !result.score) return null;
+  const totals = version.results.map((item) => item.score.total).sort((a, b) => b - a);
+  const rank = 1 + totals.filter((total) => total > result.score.total).length;
+  const gap = rank === 1 ? (totals.length > 1 ? result.score.total - totals[1] : null) : totals[0] - result.score.total;
+  return { rank, count: totals.length, gap };
 }
 
-function vendorDot(vendor) {
-  return `<span class="vendor-dot" data-vendor="${escapeHtml(vendor)}" aria-hidden="true"></span>`;
+const isTop = (version, result) => {
+  const info = rankInfo(version, result);
+  return Boolean(info && info.rank === 1 && info.count > 1);
+};
+
+function median(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
 }
 
-function scoreText(result) {
-  return result.score ? String(result.score.total) : "待评";
+function readouts(items) {
+  return `
+    <div class="readouts">
+      ${items.map(([label, value, tone]) => `
+        <div class="readout">
+          <span class="readout-label">${label}</span>
+          <span class="readout-value${tone ? ` is-${tone}` : ""}">${value}</span>
+        </div>`).join("")}
+    </div>`;
 }
 
-function scoredResults(experiment) {
-  return experiment.results.filter((result) => result.score);
+function sectionHead(id, title, note, count) {
+  return `
+    <div class="section-head">
+      <h2 id="${id}">${title}${count === undefined ? "" : ` <span class="count">${count}</span>`}</h2>
+      ${note ? `<p>${note}</p>` : ""}
+    </div>`;
 }
+
+const icons = {
+  pass: `<svg class="icon is-pass" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>`,
+  fail: `<svg class="icon is-fail" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>`,
+  unchecked: `<svg class="icon is-unchecked" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg>`,
+  arrow: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`,
+  replay: `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/></svg>`
+};
 
 /* ---------- Home ---------- */
 
 function renderHome(params) {
-  const experiments = lab.experiments;
-  const totalResults = experiments.reduce((sum, experiment) => sum + experiment.results.length, 0);
-  const models = new Map();
-  experiments.forEach((experiment) => experiment.results.forEach((result) => {
-    if (!models.has(result.model)) models.set(result.model, { model: result.model, label: result.label.replace(/ · Run \d+$/, ""), vendor: result.vendor });
-  }));
-  const modelRows = [...models.values()].sort((a, b) =>
-    vendorLabel(a.vendor).localeCompare(vendorLabel(b.vendor)) || a.label.localeCompare(b.label));
+  const current = lab.experiments.map((experiment) => ({ experiment, version: latestVersion(experiment) }));
+  const results = current.flatMap(({ version }) => version?.results ?? []);
+  const models = new Set(results.map((result) => result.model));
+  const scored = results.filter((result) => result.score).length;
 
   document.title = "LLM Capability Lab · 大模型能力实验台";
   app.innerHTML = `
-    <section class="hero">
-      <p class="eyebrow">大模型能力实验台</p>
-      <h1>同一份 Prompt，看不同模型各自做出了什么</h1>
-      <p class="hero-lead">每个实验只给模型同一段输入，产物原样保存、不做修改。你可以直接打开结果，并排比较，再对照评分看差距在哪。</p>
-      <dl class="stat-row">
-        <div class="stat"><dt>实验</dt><dd>${experiments.length}</dd></div>
-        <div class="stat"><dt>模型</dt><dd>${models.size}</dd></div>
-        <div class="stat"><dt>产物</dt><dd>${totalResults}</dd></div>
-        <div class="stat"><dt>已评分</dt><dd>${experiments.reduce((sum, experiment) => sum + scoredResults(experiment).length, 0)}</dd></div>
-      </dl>
-    </section>
+    <div class="page">
+      <section class="intro">
+        <div class="intro-text">
+          <p class="kicker">实验台 / 索引</p>
+          <h1>同一份提示词，交给不同模型各做一遍。<br>产物原样保存，放在一起看。</h1>
+        </div>
+        ${readouts([
+          ["实验", current.length],
+          ["模型", models.size],
+          ["产物", results.length],
+          ["已评", scored, "accent"],
+          ["待评", results.length - scored, results.length - scored ? "pending" : null]
+        ])}
+      </section>
 
-    <section class="section" aria-labelledby="experiments-heading">
-      <div class="section-head">
-        <h2 id="experiments-heading">全部实验</h2>
-        <p>每个实验考察一种能力，点进去看 Prompt 和所有模型的产物。</p>
-      </div>
-      <div class="experiment-grid">
-        ${experiments.map(renderExperimentCard).join("")}
-      </div>
-    </section>
+      <ol class="flow" aria-label="实验流程">
+        ${FLOW.map(([title, text], index) => `
+          <li>
+            <span class="flow-no"><span>${String(index + 1).padStart(2, "0")}</span><i></i><span aria-hidden="true">${index === FLOW.length - 1 ? "■" : "→"}</span></span>
+            <h3>${title}</h3>
+            <p>${text}</p>
+          </li>`).join("")}
+      </ol>
 
-    <section class="section" id="matrix" aria-labelledby="matrix-heading">
-      <div class="section-head">
-        <h2 id="matrix-heading">模型 × 实验</h2>
-        <p>格子里是该实验内的得分（满分 100）。分数只在同一实验里可比，所以不算跨实验总分。</p>
-      </div>
-      <div class="matrix-scroll" tabindex="0" role="region" aria-label="模型与实验得分对照表，可横向滚动">
+      <section class="block" aria-labelledby="exp-heading">
+        ${sectionHead("exp-heading", "实验", "每个实验考一种能力。点进去看提示词、全部产物和评分。", current.length)}
+        <div class="box scroll" role="region" aria-label="实验列表，可横向滚动" tabindex="0">
+          <div class="exp-table">
+            <div class="exp-row exp-row-head" aria-hidden="true">
+              <span>编号</span><span>实验</span><span>提示词</span><span>产物</span><span>评测进度</span><span>最高分</span><span></span>
+            </div>
+            ${current.map(renderEntry).join("")}
+          </div>
+        </div>
+      </section>
+
+      ${scored ? renderMatrix(current) : ""}
+
+      <section class="block" id="method" aria-labelledby="method-heading">
+        ${sectionHead("method-heading", "怎么评", "评分标准在跑模型之前就定好，跟着提示词版本走。")}
+        <div class="cards">
+          ${LAYERS.map(([tag, title, text]) => `
+            <div class="card">
+              <p class="card-tag">${tag}</p>
+              <h3>${title}</h3>
+              <p>${text}</p>
+            </div>`).join("")}
+        </div>
+      </section>
+    </div>`;
+
+  const section = params.get("section");
+  if (section) requestAnimationFrame(() => document.getElementById(section)?.scrollIntoView());
+}
+
+function renderThumb(experiment, result) {
+  const title = escapeHtml(`${result.label}${runSuffix(result)}`);
+  if (experiment.artifactType === "image") {
+    return `<span class="sheet-item is-image" title="${title}"><img src="${escapeHtml(result.url)}" alt="" loading="lazy"></span>`;
+  }
+  return result.thumb
+    ? `<span class="sheet-item" title="${title}"><img src="${escapeHtml(result.thumb)}" alt="" loading="lazy"></span>`
+    : `<span class="sheet-item is-blank" title="${title}"></span>`;
+}
+
+function renderEntry({ experiment, version }) {
+  const results = version?.results ?? [];
+  const stats = version?.stats ?? { results: 0, scored: 0, pending: 0, allScored: false };
+  const top = stats.allScored ? results[0] : null;
+  const history = experiment.versions.length - 1;
+  const progress = results.length
+    ? `${stats.scored}/${stats.results} 已评${stats.pending ? ` · <span class="is-pending">${stats.pending} 待评</span>` : ""}`
+    : "暂无产物";
+  return `
+    <a class="exp-row" href="${experimentHash(experiment)}">
+      <span class="exp-no">${experiment.number}</span>
+      <span class="exp-main">
+        <span class="chips"><span class="chip">${escapeHtml(experiment.capability)}</span><span class="chip">${ARTIFACT_KIND[experiment.artifactType] ?? "—"}</span></span>
+        <span class="exp-title">${escapeHtml(experiment.title)}</span>
+        <span class="exp-question">${escapeHtml(experiment.question)}</span>
+      </span>
+      <span class="exp-prompt">
+        <span class="exp-version">${version ? `v${version.version}` : "—"}</span>
+        <span class="muted">${version ? `${formatCount(version.prompt.length)} 字` : ""}${history ? ` · 历史 ${history} 版` : ""}</span>
+      </span>
+      <span class="sheet">
+        ${results.slice(0, SHEET_LIMIT).map((result) => renderThumb(experiment, result)).join("")}
+        ${results.length > SHEET_LIMIT ? `<span class="sheet-more">+${results.length - SHEET_LIMIT}</span>` : ""}
+        ${results.length ? `<span class="sheet-count">${results.length} 份</span>` : `<span class="muted">—</span>`}
+      </span>
+      <span class="progress">
+        ${results.length ? `<span class="progress-bar">${results.map((result) => `<i class="${result.score ? "is-done" : "is-pending"}"></i>`).join("")}</span>` : ""}
+        <span class="progress-text">${progress}</span>
+      </span>
+      <span class="exp-top">
+        ${top?.score
+          ? `<span class="exp-top-score">${formatNumber(top.score.total)}</span><span class="muted">${escapeHtml(top.label)}</span>`
+          : `<span class="exp-top-score is-empty">—</span><span class="muted">${stats.scored ? "评完后显示" : ""}</span>`}
+      </span>
+      <span class="exp-arrow">${icons.arrow}</span>
+    </a>`;
+}
+
+function renderMatrix(current) {
+  const models = new Map();
+  current.forEach(({ version }) => (version?.results ?? []).forEach((result) => {
+    if (!models.has(result.model)) models.set(result.model, { model: result.model, label: result.label, vendor: result.vendor });
+  }));
+  const rows = [...models.values()].sort((a, b) => vendorLabel(a.vendor).localeCompare(vendorLabel(b.vendor)) || a.label.localeCompare(b.label));
+
+  // One value per model and experiment: the score, or the median when a model has several scored runs.
+  const cells = new Map();
+  current.forEach(({ experiment, version }) => {
+    const values = new Map();
+    rows.forEach(({ model }) => {
+      const runs = (version?.results ?? []).filter((result) => result.model === model);
+      const scored = runs.filter((result) => result.score);
+      values.set(model, {
+        runs,
+        value: scored.length ? median(scored.map((result) => result.score.total)) : null,
+        scoredRuns: scored.length,
+        fails: runs.reduce((sum, result) => sum + failedChecks(result), 0)
+      });
+    });
+    const ranked = [...values.values()].filter((cell) => cell.value !== null);
+    const best = version?.stats.allScored && ranked.length > 1 ? Math.max(...ranked.map((cell) => cell.value)) : null;
+    cells.set(experiment.id, { values, best });
+  });
+
+  return `
+    <section class="block" id="matrix" aria-labelledby="matrix-heading">
+      ${sectionHead("matrix-heading", "模型 × 实验", `按各实验的当前版本。分数只在同一个实验里比，不算总分；相差 ${TIE_GAP} 分以内算同一档。`)}
+      <div class="box scroll" role="region" aria-label="模型与实验得分对照表，可横向滚动" tabindex="0">
         <table class="matrix">
           <thead>
             <tr>
-              <th scope="col" class="matrix-model">模型</th>
-              ${experiments.map((experiment) => `
-                <th scope="col"><a href="${experimentHash(experiment)}"><span class="mono">${experiment.number}</span> ${escapeHtml(experiment.title)}</a></th>`).join("")}
+              <th scope="col">模型</th>
+              ${current.map(({ experiment, version }) => `<th scope="col"><a href="${experimentHash(experiment)}">${experiment.number} · ${escapeHtml(experiment.title)}</a>${version ? ` <span class="muted">v${version.version}</span>` : ""}</th>`).join("")}
             </tr>
           </thead>
           <tbody>
-            ${modelRows.map((row) => `
+            ${rows.map((row) => `
               <tr>
-                <th scope="row" class="matrix-model">
-                  <span class="model-name">${vendorDot(row.vendor)}${escapeHtml(row.label)}</span>
-                  <span class="model-vendor">${escapeHtml(vendorLabel(row.vendor))}</span>
-                </th>
-                ${experiments.map((experiment) => renderMatrixCell(experiment, row.model)).join("")}
+                <th scope="row">${escapeHtml(row.label)}<span>${escapeHtml(vendorLabel(row.vendor))}</span></th>
+                ${current.map(({ experiment }) => renderMatrixCell(experiment, cells.get(experiment.id), row.model)).join("")}
               </tr>`).join("")}
           </tbody>
         </table>
       </div>
-      <p class="matrix-legend"><span class="cell-pending">待评</span> 已有产物，还没评分　<span class="cell-empty">—</span> 没有参加这个实验</p>
-    </section>
-  `;
-
-  if (params.get("section") === "matrix") requestAnimationFrame(() => document.querySelector("#matrix")?.scrollIntoView());
+      <p class="legend">颜色越深分越高 · 框线 = 本实验最高（全部评完才标） · 虚线“待评” = 有产物还没打分 · — = 没参加</p>
+    </section>`;
 }
 
-function renderExperimentCard(experiment) {
-  const scored = scoredResults(experiment);
-  const top = scored[0];
-  const thumb = experiment.thumb
-    ? `<img src="${escapeHtml(experiment.thumb)}" alt="" loading="lazy" width="720" height="450">`
-    : `<span class="thumb-placeholder mono">${experiment.number}</span>`;
-  return `
-    <a class="experiment-card" href="${experimentHash(experiment)}">
-      <div class="card-thumb${experiment.artifactType === "image" ? " is-image" : ""}">${thumb}</div>
-      <div class="card-body">
-        <div class="card-meta"><span class="mono">${experiment.number}</span><span class="tag">${escapeHtml(experiment.capability)}</span></div>
-        <h3>${escapeHtml(experiment.title)}</h3>
-        <p>${escapeHtml(experiment.question)}</p>
-      </div>
-      <div class="card-foot">
-        <span>${experiment.results.length} 份产物 · 已评 ${scored.length}</span>
-        ${top ? `<span class="card-top">${vendorDot(top.vendor)}${escapeHtml(top.label)} <strong>${top.score.total}</strong></span>` : `<span class="muted">尚未评分</span>`}
-      </div>
-    </a>`;
-}
-
-function renderMatrixCell(experiment, model) {
-  const results = experiment.results.filter((result) => result.model === model);
-  if (!results.length) return `<td><span class="cell-empty" aria-label="未参加">—</span></td>`;
-  const best = results.find((result) => result.score) ?? results[0];
-  const href = experimentHash(experiment, { m: best.key });
-  if (!best.score) return `<td><a class="cell-pending" href="${href}">待评</a></td>`;
-  const scored = scoredResults(experiment);
-  const isTop = scored[0]?.key === best.key && scored.length > 1;
-  return `<td><a class="cell-score${isTop ? " is-top" : ""}" href="${href}" title="${escapeHtml(experiment.title)}：${best.score.total} / 100${isTop ? "（本实验最高）" : ""}">
-    <span class="cell-bar" style="--value:${best.score.total}" aria-hidden="true"></span><strong>${best.score.total}</strong></a></td>`;
+function renderMatrixCell(experiment, column, model) {
+  const cell = column.values.get(model);
+  if (!cell.runs.length) return `<td><span class="cell cell-none" aria-label="没参加">—</span></td>`;
+  const target = cell.runs.find((result) => result.score) ?? cell.runs[0];
+  const href = experimentHash(experiment, { m: target.key });
+  if (cell.value === null) return `<td><a class="cell cell-pending" href="${href}">待评</a></td>`;
+  const top = column.best !== null && cell.value === column.best;
+  const tint = Math.round(Math.min(34, Math.max(4, ((cell.value - 40) / 60) * 34)));
+  const notes = [
+    top ? "最高" : "",
+    cell.scoredRuns > 1 ? `中位数 · ${cell.scoredRuns} 次` : "",
+    cell.runs.length > cell.scoredRuns ? `另有 ${cell.runs.length - cell.scoredRuns} 次待评` : "",
+    cell.fails ? `<span class="is-fail">硬性检查未过 ${cell.fails} 项</span>` : ""
+  ].filter(Boolean).join(" · ");
+  return `<td><a class="cell${top ? " is-top" : ""}" href="${href}" style="--tint:${tint}%">${formatNumber(cell.value)}${notes ? `<span class="cell-note">${notes}</span>` : ""}</a></td>`;
 }
 
 /* ---------- Experiment ---------- */
 
 function renderExperiment(experiment, params) {
-  const results = experiment.results;
+  const latest = latestVersion(experiment);
+  const version = experiment.versions.find((item) => String(item.version) === params.get("v")) ?? latest;
+  if (!version) {
+    app.innerHTML = `<div class="page"><div class="empty"><strong>这个实验还没有提示词</strong></div></div>`;
+    return;
+  }
+  const isLatest = version === latest;
+  const results = version.results;
   const active = results.find((result) => result.key === params.get("m")) ?? results[0] ?? null;
   const view = params.get("view") === "compare" && results.length > 1 ? "compare" : "focus";
   const isPage = experiment.artifactType === "page";
   const viewport = isPage && params.get("vp") === "mobile" ? "mobile" : "desktop";
-  const state = { m: active?.key, view: view === "compare" ? "compare" : null, vp: viewport === "mobile" ? "mobile" : null };
+  const state = {
+    v: isLatest ? null : version.version,
+    m: active?.key,
+    view: view === "compare" ? "compare" : null,
+    vp: viewport === "mobile" ? "mobile" : null
+  };
   const link = (changes) => experimentHash(experiment, { ...state, ...changes });
 
   document.title = `${experiment.number} ${experiment.title} · LLM Capability Lab`;
   app.innerHTML = `
-    <nav class="breadcrumb" aria-label="位置"><a href="#/">全部实验</a><span aria-hidden="true">/</span><span>${experiment.number} ${escapeHtml(experiment.title)}</span></nav>
+    <div class="page">
+      <nav class="crumb" aria-label="位置"><a href="#/">实验索引</a><span aria-hidden="true">/</span><span>EXP-${experiment.number}</span></nav>
 
-    <header class="exp-head">
-      <div class="card-meta"><span class="mono">实验 ${experiment.number}</span><span class="tag">${escapeHtml(experiment.capability)}</span></div>
-      <h1>${escapeHtml(experiment.question)}</h1>
-      <p class="hero-lead">${escapeHtml(experiment.summary)}</p>
-    </header>
+      <header class="exp-head">
+        <div class="exp-head-text">
+          <div class="chips">
+            <span class="chip chip-accent">EXP-${experiment.number}</span>
+            <span class="chip">${escapeHtml(experiment.capability)}</span>
+            <span class="chip">${ARTIFACT_KIND[experiment.artifactType] ?? "—"}</span>
+          </div>
+          <h1>${escapeHtml(experiment.title)}</h1>
+          <p class="exp-head-question">${escapeHtml(experiment.question)}</p>
+          ${isLatest ? `<p class="exp-head-summary">${escapeHtml(experiment.summary)}</p>` : ""}
+        </div>
+        <div class="readouts">
+          <label class="readout readout-select">
+            <span class="readout-label">提示词版本</span>
+            <select data-version>
+              ${experiment.versions.map((item) => `
+                <option value="${item.version}"${item === version ? " selected" : ""}>v${item.version} · ${item === latest ? "当前" : "历史"}（${item.results.length} 份产物）</option>`).join("")}
+            </select>
+          </label>
+          <div class="readout"><span class="readout-label">产物</span><span class="readout-value">${version.stats.results}</span></div>
+          <div class="readout"><span class="readout-label">已评</span><span class="readout-value is-accent">${version.stats.scored}</span></div>
+          <div class="readout"><span class="readout-label">待评</span><span class="readout-value${version.stats.pending ? " is-pending" : ""}">${version.stats.pending}</span></div>
+        </div>
+      </header>
 
-    ${renderPrompt(experiment)}
+      ${isLatest ? "" : `
+        <p class="banner" role="note">
+          <span>你在看<b>历史版本 v${version.version}</b>。当前版本是 v${latest.version}，两个版本的提示词不同，分数不能放在一起比。</span>
+          <a href="${experimentHash(experiment)}">回到当前版本 →</a>
+        </p>`}
 
-    <section class="results" aria-labelledby="results-heading">
-      <div class="results-head">
-        <h2 id="results-heading">模型产物 <span class="count">${results.length}</span></h2>
-        ${results.length ? `
-        <div class="controls">
-          ${results.length > 1 ? `
-          <div class="segmented" role="group" aria-label="查看方式">
-            <a href="${link({ view: null })}" data-replace aria-current="${view === "focus"}">单个</a>
-            <a href="${link({ view: "compare" })}" data-replace aria-current="${view === "compare"}">并排</a>
-          </div>` : ""}
-          ${isPage ? `
-          <div class="segmented" role="group" aria-label="预览尺寸">
-            ${Object.entries(VIEWPORTS).map(([key, value]) => `
-              <a href="${link({ vp: key === "mobile" ? "mobile" : null })}" data-replace aria-current="${viewport === key}" title="按 ${value.width}×${value.height} 渲染后缩放">${value.label}</a>`).join("")}
-          </div>` : ""}
-        </div>` : ""}
-      </div>
+      ${renderPrompt(experiment, version, isLatest)}
 
-      ${!results.length ? `
-        <div class="empty-state"><strong>这个实验还没有模型产物</strong><p>Prompt 已经可以阅读，有产物后会出现在这里。</p></div>`
-      : view === "compare" ? renderCompare(experiment, viewport, link)
-      : renderFocus(experiment, active, viewport, link)}
-    </section>
+      <section class="block bench" id="results" aria-labelledby="results-heading">
+        ${!results.length ? `
+          ${sectionHead("results-heading", "产物", "", 0)}
+          <div class="empty">
+            <strong>这个版本还没有模型产物</strong>
+            <p>把模型的原始产物放进 <code>results/${escapeHtml(experiment.id)}/v${version.version}/outputs/&lt;模型目录&gt;/</code>，补上 <code>run.yaml</code>，再运行 <code>node scripts/build-data.mjs</code>，产物就会出现在这里。</p>
+          </div>`
+        : view === "compare" ? renderCompare(experiment, version, viewport, link)
+        : renderFocus(experiment, version, active, viewport, link)}
+      </section>
 
-    ${renderMethod(experiment)}
-  `;
+      ${renderMethod(experiment, version, isLatest)}
+    </div>`;
 
   app.querySelectorAll(".frame-box").forEach((box) => frameObserver.observe(box));
-  bindPrompt(experiment);
+  bindPrompt(version);
 }
 
-function renderPrompt(experiment) {
-  const long = experiment.prompt.split("\n").length > 8 || experiment.prompt.length > 420;
+function promptLines(text) {
+  return text.split("\n").map((line, index) => {
+    const kind = !line.trim() ? " pl-blank"
+      : /^#{1,3}\s/.test(line) ? " pl-h"
+      : /^\s*[-*]\s/.test(line) ? " pl-li"
+      : /^\s*\d+[.、)]\s/.test(line) ? " pl-ol"
+      : "";
+    return `<div class="pl${kind}"><span class="ln" aria-hidden="true">${index + 1}</span><span class="tx">${escapeHtml(line)}</span></div>`;
+  }).join("");
+}
+
+function renderPrompt(experiment, version, isLatest) {
+  const lines = version.prompt.split("\n");
+  const long = lines.length > PROMPT_PREVIEW_LINES + 5 || version.prompt.length > 1200;
+  const collapsed = long && !promptOpen;
+  const chapters = lines.filter((line) => /^#{1,3}\s/.test(line)).map((line) => line.replace(/^#{1,3}\s+/, "").replace(/^[一二三四五六七八九十]+、/, ""));
+  const sources = isLatest ? experiment.sources ?? [] : [];
+  const file = version.promptPath.split("/").at(-1);
   return `
-    <section class="prompt-card${long ? " is-collapsed" : ""}" aria-labelledby="prompt-heading">
-      <div class="prompt-bar">
-        <h2 id="prompt-heading">Prompt <span class="mono muted">v${experiment.promptVersion} · ${experiment.prompt.length.toLocaleString()} 字符</span></h2>
-        <div class="prompt-actions">
-          <button class="button" type="button" data-copy-prompt>复制</button>
-          <a class="button ghost" href="${escapeHtml(experiment.promptPath)}" target="_blank" rel="noopener">源文件</a>
+    <section class="prompt" id="prompt" aria-labelledby="prompt-heading">
+      <div class="prompt-head">
+        <h2 id="prompt-heading">输入 · ${escapeHtml(file)} <span>· ${formatCount(version.prompt.length)} 字 · ${lines.length} 行${chapters.length ? ` · ${chapters.length} 节` : ""}</span></h2>
+        <div class="actions">
+          <button class="btn" type="button" data-copy-prompt>复制全文</button>
+          <a class="btn" href="${escapeHtml(version.promptPath)}" target="_blank" rel="noopener">源文件 ↗</a>
         </div>
       </div>
-      <pre class="prompt-text" id="prompt-text">${escapeHtml(experiment.prompt)}</pre>
-      ${long ? `<button class="prompt-toggle" type="button" aria-expanded="false" aria-controls="prompt-text" data-toggle-prompt>展开全部</button>` : ""}
+      <div class="prompt-body${collapsed ? " is-collapsed" : ""}" id="prompt-text">${promptLines(version.prompt)}</div>
+      ${long || chapters.length ? `
+        <div class="prompt-foot">
+          ${long ? `<button class="prompt-toggle" type="button" aria-expanded="${!collapsed}" aria-controls="prompt-text" data-toggle-prompt data-more="${lines.length - PROMPT_PREVIEW_LINES}">${collapsed ? `展开全文 · 还有 ${lines.length - PROMPT_PREVIEW_LINES} 行` : "收起"}</button>` : ""}
+          ${chapters.length ? `<span class="prompt-toc">章节：${chapters.map(escapeHtml).join(" · ")}</span>` : ""}
+        </div>` : ""}
+      ${version.change || sources.length ? `
+        <dl class="prompt-meta">
+          ${version.change ? `<div><dt>这一版改了什么</dt><dd>${inlineMarkdown(version.change)}</dd></div>` : ""}
+          ${sources.length ? `<div><dt>来源</dt><dd><ul>${sources.map((source) => `<li><a href="${escapeHtml(source.url)}" target="_blank" rel="noopener">${escapeHtml(source.label)} ↗</a></li>`).join("")}</ul></dd></div>` : ""}
+        </dl>` : ""}
       <p class="sr-only" role="status" data-prompt-status></p>
     </section>`;
 }
 
-function bindPrompt(experiment) {
-  const card = app.querySelector(".prompt-card");
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch { /* fall back below */ }
+  try {
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.cssText = "position:fixed;left:-9999px;top:0";
+    document.body.append(area);
+    area.select();
+    const ok = document.execCommand("copy");
+    area.remove();
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
+function bindPrompt(version) {
+  const body = app.querySelector(".prompt-body");
   const status = app.querySelector("[data-prompt-status]");
   app.querySelector("[data-copy-prompt]")?.addEventListener("click", async (event) => {
     const button = event.currentTarget;
-    try {
-      await navigator.clipboard.writeText(experiment.prompt);
-      button.textContent = "已复制";
-      status.textContent = "Prompt 已复制";
-    } catch {
-      button.textContent = "复制失败";
-      status.textContent = "复制失败，请手动选中文本";
-    }
-    setTimeout(() => { button.textContent = "复制"; }, 1600);
+    const ok = await copyText(version.prompt);
+    button.textContent = ok ? "已复制" : "复制失败";
+    status.textContent = ok ? "提示词已复制" : "复制失败，请手动选中文本";
+    setTimeout(() => { button.textContent = "复制全文"; }, 1600);
   });
   app.querySelector("[data-toggle-prompt]")?.addEventListener("click", (event) => {
-    const collapsed = card.classList.toggle("is-collapsed");
-    event.currentTarget.setAttribute("aria-expanded", String(!collapsed));
-    event.currentTarget.textContent = collapsed ? "展开全部" : "收起";
+    const button = event.currentTarget;
+    const collapsed = body.classList.toggle("is-collapsed");
+    promptOpen = !collapsed;
+    button.setAttribute("aria-expanded", String(!collapsed));
+    button.textContent = collapsed ? `展开全文 · 还有 ${button.dataset.more} 行` : "收起";
   });
 }
 
-function renderModelTabs(experiment, active, link) {
+function renderToolbar(experiment, version, active, view, viewport, link) {
+  const isPage = experiment.artifactType === "page";
+  const segment = (label, items) => `
+    <div class="seg" role="group" aria-label="${label}">
+      ${items.map(([text, href, current, mono]) => `<a class="${mono ? "mono" : ""}" href="${href}" data-replace aria-current="${current}">${text}</a>`).join("")}
+    </div>`;
   return `
-    <div class="model-tabs" role="tablist" aria-label="选择模型">
-      ${experiment.results.map((result) => {
-        const selected = result.key === active.key;
-        return `
-        <a class="model-tab" role="tab" href="${link({ m: result.key })}" data-replace data-key="${escapeHtml(result.key)}"
-           aria-selected="${selected}" tabindex="${selected ? 0 : -1}">
-          ${vendorDot(result.vendor)}
-          <span class="model-tab-name">${escapeHtml(result.label)}</span>
-          <span class="score-pill${result.score ? "" : " is-pending"}">${scoreText(result)}</span>
-        </a>`;
-      }).join("")}
+    <div class="toolbar">
+      <div class="toolbar-group">
+        ${version.results.length > 1 ? segment("查看方式", [
+          ["单个", link({ view: null }), view === "focus"],
+          ["并排", link({ view: "compare" }), view === "compare"]
+        ]) : ""}
+        ${isPage ? segment("预览尺寸", Object.entries(VIEWPORTS).map(([key, size]) => [
+          `${size.label} ${size.width}×${size.height}`, link({ vp: key === "mobile" ? "mobile" : null }), viewport === key, true
+        ])) : ""}
+      </div>
+      <div class="toolbar-group">
+        ${view === "compare" ? `
+          <span class="toolbar-hint">让所有动画同时从头开始播</span>
+          <button class="btn btn-primary" type="button" data-replay-all>${icons.replay}同步重播全部</button>`
+        : `
+          <button class="btn" type="button" data-reload>重播</button>
+          <a class="btn" href="${escapeHtml(active.url)}" target="_blank" rel="noopener">新窗口打开 ↗</a>`}
+      </div>
     </div>`;
 }
 
-function renderFrame(experiment, result, viewport, { lazy = false } = {}) {
+function renderFrame(experiment, result, viewport) {
+  const url = escapeHtml(result.url);
+  const title = escapeHtml(`${result.label}${runSuffix(result)}`);
   if (experiment.artifactType === "image") {
-    return `<div class="image-box"><img src="${escapeHtml(result.url)}" alt="${escapeHtml(result.label)} 生成的 SVG 原图" ${lazy ? "loading=\"lazy\"" : ""}></div>`;
+    return `<div class="image-box"><img class="media" src="${url}" data-src="${url}" alt="${title} 生成的 SVG"></div>`;
   }
   const size = VIEWPORTS[viewport];
   return `
     <div class="frame-box is-${viewport}" style="--vw:${size.width};--vh:${size.height}" data-vw="${size.width}" data-vh="${size.height}">
-      <iframe src="${escapeHtml(result.url)}" title="${escapeHtml(result.label)} 的原始产物" width="${size.width}" height="${size.height}" ${lazy ? "loading=\"lazy\"" : ""}></iframe>
+      <iframe class="media" src="${url}" data-src="${url}" title="${title} 的原始产物" width="${size.width}" height="${size.height}"></iframe>
     </div>`;
 }
 
@@ -279,150 +511,336 @@ function fitFrame(box) {
   const inset = box.classList.contains("is-mobile") ? 32 : 0;
   const scale = Math.min((box.clientWidth - inset) / width, (box.clientHeight - inset) / height);
   box.style.setProperty("--scale", String(scale));
+  const label = box.closest(".stage")?.querySelector("[data-scale]");
+  if (label) label.textContent = scale.toFixed(2);
 }
 
-function renderFocus(experiment, active, viewport, link) {
-  const scored = scoredResults(experiment);
-  const rank = active.score ? scored.findIndex((result) => result.key === active.key) + 1 : null;
+function renderFocus(experiment, version, active, viewport, link) {
+  const isPage = experiment.artifactType === "page";
+  const size = VIEWPORTS[viewport];
   return `
-    ${renderModelTabs(experiment, active, link)}
-    <div class="stage" role="tabpanel" aria-label="${escapeHtml(active.label)}">
-      <div class="stage-bar">
-        <span class="stage-title">${vendorDot(active.vendor)}${escapeHtml(active.label)}</span>
-        <span class="stage-actions">
-          ${experiment.artifactType === "page" ? `<span class="mono stage-size">${VIEWPORTS[viewport].width}×${VIEWPORTS[viewport].height}</span>` : ""}
-          <button class="stage-button" type="button" data-reload title="重新加载">重新加载</button>
-          <a class="stage-button" href="${escapeHtml(active.url)}" target="_blank" rel="noopener">新窗口打开 ↗</a>
-        </span>
-      </div>
-      ${renderFrame(experiment, active, viewport)}
-    </div>
-
-    <div class="detail-grid">
-      <section class="panel" aria-labelledby="score-heading">
-        <h3 id="score-heading">评分</h3>
-        ${active.score ? `
-          <div class="score-hero">
-            <strong>${active.score.total}</strong><span>/ 100</span>
-            <span class="rank">本实验第 ${rank} / ${scored.length}</span>
-          </div>
-          <ul class="meters">
-            ${active.score.dimensions.map((dimension) => `
+    <div class="bench-row">
+      <aside class="bench-list" aria-labelledby="results-heading">
+        <div class="list-head">
+          <h2 id="results-heading">产物 <span class="count">${version.results.length}</span></h2>
+          <span>${version.stats.allScored ? "按总分" : version.stats.pending ? `${version.stats.pending} 份待评，暂不排名` : ""}</span>
+        </div>
+        <ul class="model-list">
+          ${version.results.map((result) => {
+            const selected = result.key === active.key;
+            const rank = rankInfo(version, result)?.rank;
+            const fails = failedChecks(result);
+            return `
               <li>
-                <div class="meter-label"><span>${escapeHtml(dimension.name)}</span><span class="mono">${dimension.value} / ${dimension.max}</span></div>
-                <div class="meter" role="img" aria-label="${escapeHtml(dimension.name)} ${dimension.value} / ${dimension.max}"><span style="--value:${(dimension.value / dimension.max) * 100}"></span></div>
-              </li>`).join("")}
-          </ul>`
-        : `<p class="pending-note"><strong>待评估</strong>产物已经保存，但还没有正式评分。这不代表失败，也不是零分。</p>`}
-      </section>
+                <a class="model-item" href="${link({ m: result.key })}" data-replace data-key="${escapeHtml(result.key)}" aria-current="${selected}">
+                  <span class="model-rank">${rank ? String(rank).padStart(2, "0") : "—"}</span>
+                  <span class="model-name">
+                    <b>${escapeHtml(result.label)}${result.run ? `<span class="model-run">${result.run}</span>` : ""}</b>
+                    <span${fails ? " class=\"is-fail\"" : ""}>${fails ? `硬性检查未过 ${fails} 项` : escapeHtml(vendorLabel(result.vendor))}</span>
+                  </span>
+                  ${result.score ? `<span class="model-score">${formatNumber(result.score.total)}</span>` : `<span class="badge-pending">待评</span>`}
+                </a>
+              </li>`;
+          }).join("")}
+        </ul>
+      </aside>
 
-      <section class="panel" aria-labelledby="review-heading">
-        <h3 id="review-heading">点评</h3>
-        ${active.review ? `
-          <div class="review">
-            <h4 class="review-good">优点</h4>
-            <ul>${active.review.strengths.map((item) => `<li>${inlineMarkdown(item)}</li>`).join("")}</ul>
-            ${active.review.weaknesses.length ? `
-            <h4 class="review-bad">不足</h4>
-            <ul>${active.review.weaknesses.map((item) => `<li>${inlineMarkdown(item)}</li>`).join("")}</ul>` : ""}
-          </div>`
-        : `<p class="muted">还没有点评。</p>`}
-      </section>
-
-      <details class="panel run-panel">
-        <summary><h3>运行记录</h3><span class="muted">run.yaml</span></summary>
-        <dl class="run-facts">
-          ${[
-            ["Prompt 版本", `v${active.run.prompt_version}`],
-            ["调用渠道", active.run.provider],
-            ["模型", active.run.model],
-            ["运行模式", active.run.mode],
-            ["生成时间", active.run.generated_at],
-            ["入口文件", active.run.entrypoint]
-          ].map(([term, value]) => `<div><dt>${term}</dt><dd class="mono${value === "unknown" ? " muted" : ""}">${escapeHtml(value)}</dd></div>`).join("")}
-        </dl>
-        <p class="muted small">unknown 表示当时没有可靠记录，不是默认值。</p>
-      </details>
-    </div>`;
-}
-
-function renderCompare(experiment, viewport, link) {
-  return `
-    <div class="compare-grid${experiment.artifactType === "image" ? " is-image" : ""}${viewport === "mobile" ? " is-mobile" : ""}">
-      ${experiment.results.map((result) => `
-        <article class="compare-card">
-          <header>
-            <span class="stage-title">${vendorDot(result.vendor)}${escapeHtml(result.label)}</span>
-            <span class="score-pill${result.score ? "" : " is-pending"}">${scoreText(result)}</span>
-          </header>
-          ${renderFrame(experiment, result, viewport, { lazy: true })}
-          <footer>
-            <a href="${link({ m: result.key, view: null })}" data-replace>查看详情</a>
-            <a href="${escapeHtml(result.url)}" target="_blank" rel="noopener">新窗口打开 ↗</a>
-          </footer>
-        </article>`).join("")}
-    </div>`;
-}
-
-function renderMethod(experiment) {
-  const evaluation = experiment.evaluation;
-  return `
-    <section class="section method" aria-labelledby="method-heading">
-      <div class="section-head">
-        <h2 id="method-heading">怎么评</h2>
-        <p>${evaluation
-          ? [evaluation.method, evaluation.environment, evaluation.date !== "unknown" && `评测于 ${evaluation.date}`].filter((item) => item && item !== "unknown").map(escapeHtml).join(" · ")
-          : "这个实验还没有正式评测，下面是观察时建议关注的方面。"}</p>
+      <div class="bench-main">
+        ${renderToolbar(experiment, version, active, "focus", viewport, link)}
+        <figure class="stage" aria-label="${escapeHtml(active.label)} 的产物">
+          <figcaption class="stage-bar">
+            <span><b>${escapeHtml(active.label)}</b> · ${escapeHtml(vendorLabel(active.vendor))}${runSuffix(active)}</span>
+            <span>${isPage ? `${size.width} × ${size.height} → 缩放 <span data-scale>—</span>` : "以图片方式显示，脚本不会执行"} · ${escapeHtml(active.record.entrypoint)}</span>
+          </figcaption>
+          ${renderFrame(experiment, active, viewport)}
+        </figure>
+        ${renderScore(version, active)}
+        ${renderReview(active)}
+        ${renderRunlog(version, active)}
       </div>
-      <div class="method-grid">
-        <div class="panel">
-          <h3>看效果时关注</h3>
-          <ul class="check-list">${experiment.focus.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-        </div>
-        <div class="panel">
-          <h3>评分维度</h3>
+    </div>`;
+}
+
+function renderScore(version, result) {
+  const evaluation = version.evaluation;
+  const cards = [];
+  if (result.score) {
+    const info = rankInfo(version, result);
+    const runs = version.results.filter((item) => item.model === result.model).length;
+    const notes = [runs > 1 ? `这个模型跑了 ${runs} 次，这是 ${result.run}` : "单次运行"];
+    if (info?.gap !== null && info?.gap !== undefined) {
+      notes.push(`和第 ${info.rank === 1 ? 2 : 1} 名差 ${formatNumber(info.gap)} 分，${info.gap <= TIE_GAP ? "算同一档" : "不在同一档"}`);
+    }
+    cards.push(`
+      <div class="card card-total">
+        <p class="card-tag">总分</p>
+        <p class="total"><span class="total-value${isTop(version, result) ? " is-top" : ""}">${formatNumber(result.score.total)}</span><span class="total-of"> / 100</span></p>
+        <p class="card-rank">${info ? `本实验第 ${info.rank} 名，共 ${info.count} 份已评` : `还有 ${version.stats.pending} 份待评，评完后再排名`}</p>
+        <p class="card-note">${notes.join("。")}。</p>
+      </div>`);
+  } else {
+    cards.push(`
+      <div class="card card-total">
+        <p class="card-tag">总分</p>
+        <p class="total"><span class="total-value is-pending">待评</span></p>
+        <p class="card-note">产物已经保存，还没有正式评分。这不代表失败，也不是零分。</p>
+      </div>`);
+  }
+
+  if (result.hardChecks) {
+    const passed = result.hardChecks.filter((check) => check.status === "pass").length;
+    const fails = failedChecks(result);
+    cards.push(`
+      <div class="card">
+        <p class="card-tag">A · 硬性检查 <span class="${fails ? "is-fail" : "is-pass"}">${passed}/${result.hardChecks.length} 通过</span></p>
+        <ul class="check-list">
+          ${result.hardChecks.map((check) => `
+            <li class="is-${check.status}">${icons[check.status]}<span>${escapeHtml(check.name)}${check.note ? `：${inlineMarkdown(check.note)}` : check.status === "unchecked" ? "（未检查）" : ""}</span></li>`).join("")}
+        </ul>
+      </div>`);
+  }
+
+  if (result.checklist) {
+    const weight = evaluation?.dimensions.find((dimension) => dimension.name === COVERAGE_DIMENSION)?.weight;
+    cards.push(`
+      <div class="card">
+        <p class="card-tag">B · 需求覆盖 <b>${formatNumber(result.checklist.got)}/${result.checklist.total} 条</b>${weight ? ` · 权重 ${weight}` : ""}</p>
+        <ul class="bar-list">
+          ${result.checklist.sections.map((section) => `
+            <li>
+              <span>${escapeHtml(section.name)}</span>
+              <span class="bar"><i style="width:${(section.got / section.total) * 100}%"></i></span>
+              <span class="mono">${formatNumber(section.got)}/${section.total}</span>
+            </li>`).join("")}
+        </ul>
+      </div>`);
+  }
+
+  const quality = result.score?.dimensions.filter((dimension) => dimension.name !== COVERAGE_DIMENSION) ?? [];
+  if (quality.length) {
+    const weight = quality.reduce((sum, dimension) => sum + dimension.weight, 0);
+    cards.push(`
+      <div class="card">
+        <p class="card-tag">C · 质量评分 · 权重 ${weight}</p>
+        <ul class="pip-list">
+          ${quality.map((dimension) => `
+            <li>
+              <span>${escapeHtml(dimension.name)} <span class="muted mono">${dimension.weight}</span></span>
+              ${dimension.max <= 10
+                ? `<span class="pips" role="img" aria-label="${escapeHtml(dimension.name)} ${formatNumber(dimension.value)} / ${dimension.max}">${Array.from({ length: dimension.max }, (_, index) => `<i class="${index + 1 <= dimension.value ? "is-on" : index < dimension.value ? "is-half" : ""}"></i>`).join("")}</span>`
+                : `<span class="mono">${formatNumber(dimension.value)}/${dimension.max}</span>`}
+            </li>`).join("")}
+        </ul>
+        <p class="card-note">每格 1 分。每一档的标准见下方“怎么评”。</p>
+      </div>`);
+  }
+
+  return `
+    <section class="score" aria-labelledby="score-heading">
+      <h2 class="sub-head" id="score-heading">评分 · ${escapeHtml(result.label)}${runSuffix(result)}</h2>
+      <div class="cards">${cards.join("")}</div>
+    </section>`;
+}
+
+function renderReview(result) {
+  return `
+    <section class="review" aria-labelledby="review-heading">
+      <h2 class="sub-head" id="review-heading">点评</h2>
+      ${result.review ? `
+        <div class="cards">
+          <div class="card">
+            <p class="card-tag is-pass">+ 做得好</p>
+            <ul>${result.review.strengths.map((item) => `<li>${inlineMarkdown(item)}</li>`).join("") || "<li class=\"muted\">—</li>"}</ul>
+          </div>
+          <div class="card">
+            <p class="card-tag is-fail">− 不足</p>
+            <ul>${result.review.weaknesses.map((item) => `<li>${inlineMarkdown(item)}</li>`).join("") || "<li class=\"muted\">—</li>"}</ul>
+          </div>
+        </div>`
+      : `<p class="muted">还没有点评。</p>`}
+    </section>`;
+}
+
+function renderRunlog(version, result) {
+  return `
+    <details class="runlog">
+      <summary><h2>运行记录</h2><span class="mono muted">run.yaml</span></summary>
+      <dl class="cells">
+        ${RUN_FIELDS.map(([key, label]) => {
+          const value = result.record[key] ?? "unknown";
+          return `<div><dt><span class="mono">${key}</span> ${label}</dt><dd class="mono${value === "unknown" ? " muted" : ""}">${escapeHtml(value)}</dd></div>`;
+        }).join("")}
+      </dl>
+      <p class="muted small">unknown 表示当时没有可靠记录，不是默认值。产物位于 <code>${escapeHtml(result.url.replace(/\/[^/]+$/, "/"))}</code>。</p>
+    </details>`;
+}
+
+function renderCompare(experiment, version, viewport, link) {
+  const isImage = experiment.artifactType === "image";
+  return `
+    ${sectionHead("results-heading", "产物", version.stats.allScored ? "按总分排列" : `${version.stats.pending} 份待评，评完后再排名`, version.results.length)}
+    ${renderToolbar(experiment, version, version.results[0], "compare", viewport, link)}
+    <div class="compare-grid${isImage ? " is-image" : ""}${viewport === "mobile" ? " is-mobile" : ""}">
+      ${version.results.map((result) => {
+        const top = isTop(version, result);
+        const passed = (result.hardChecks ?? []).filter((check) => check.status === "pass").length;
+        const fails = failedChecks(result);
+        const meta = [
+          result.hardChecks ? `硬性检查 <span class="${fails ? "is-fail" : "is-pass"}">${passed}/${result.hardChecks.length} 通过</span>` : result.score ? "" : "还没评测",
+          top ? "本实验最高" : ""
+        ].filter(Boolean).join(" · ");
+        return `
+          <article class="compare-card${top ? " is-top" : ""}">
+            <header>
+              <span><b>${escapeHtml(result.label)}</b> <span class="muted">${escapeHtml(vendorLabel(result.vendor))}${runSuffix(result)}</span></span>
+              ${result.score ? `<span class="compare-score${top ? " is-top" : ""}">${formatNumber(result.score.total)}</span>` : `<span class="badge-pending">待评</span>`}
+            </header>
+            ${renderFrame(experiment, result, viewport)}
+            ${meta ? `<p class="compare-meta">${meta}</p>` : ""}
+            <footer>
+              <a href="${link({ m: result.key, view: null })}" data-replace>看详情</a>
+              <a href="${escapeHtml(result.url)}" target="_blank" rel="noopener">新窗口 ↗</a>
+            </footer>
+          </article>`;
+      }).join("")}
+    </div>
+    ${renderDimensionTable(version)}`;
+}
+
+function renderDimensionTable(version) {
+  const dimensions = version.evaluation?.dimensions ?? [];
+  if (!dimensions.length || !version.stats.scored) return "";
+  return `
+    <section class="dims-compare" aria-labelledby="dims-heading">
+      ${sectionHead("dims-heading", "逐项得分", `括号里是权重。相差 ${TIE_GAP} 分以内的总分算同一档。`)}
+      <div class="box scroll" role="region" aria-label="逐项得分，可横向滚动" tabindex="0">
+        <table class="dims-table">
+          <thead>
+            <tr>
+              <th scope="col">模型</th>
+              ${dimensions.map((dimension) => `<th scope="col">${escapeHtml(dimension.name)} <span>(${dimension.weight})</span></th>`).join("")}
+              <th scope="col" class="num">总分</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${version.results.map((result) => `
+              <tr>
+                <th scope="row">${escapeHtml(result.label)}${result.run ? ` <span class="muted">${result.run}</span>` : ""}</th>
+                ${result.score
+                  ? `${result.score.dimensions.map((dimension) => `<td>${formatNumber(dimension.value)}<span class="of">/${dimension.max}</span></td>`).join("")}
+                     <td class="num${isTop(version, result) ? " is-top" : ""}">${formatNumber(result.score.total)}</td>`
+                  : `<td colspan="${dimensions.length}" class="is-pending">待评</td><td class="num muted">—</td>`}
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>`;
+}
+
+function renderMethod(experiment, version, isLatest) {
+  const evaluation = version.evaluation;
+  const focus = isLatest ? experiment.focus ?? [] : [];
+  const meta = evaluation ? [
+    ["评测者", evaluation.evaluator],
+    ["评测日期", evaluation.date],
+    ["评测方式", evaluation.method],
+    ["评测环境", evaluation.environment]
+  ] : [];
+  const levels = (dimension) => {
+    if (dimension.levels.length) {
+      return `
+        <details class="levels">
+          <summary>评分档位</summary>
+          <ol>${dimension.levels.map((level) => `<li><span class="lv">${level.score}</span><span>${inlineMarkdown(level.text)}</span></li>`).join("")}</ol>
+        </details>`;
+    }
+    if (dimension.name === COVERAGE_DIMENSION && evaluation.checklist.length) {
+      return `
+        <details class="levels">
+          <summary>需求清单 · ${evaluation.checklist.length} 条</summary>
+          <ol>${evaluation.checklist.map((item) => `<li><span class="lv">${item.no}</span><span><span class="muted">${escapeHtml(item.section)}</span> ${inlineMarkdown(item.text)}</span></li>`).join("")}</ol>
+        </details>`;
+    }
+    return "";
+  };
+
+  if (!evaluation && !focus.length) return "";
+  return `
+    <section class="block" id="method" aria-labelledby="method-heading">
+      ${sectionHead("method-heading", "怎么评", evaluation ? `v${version.version} 的评分标准在跑模型之前写好，跟着提示词版本走。` : "这个版本还没有评分标准。")}
+      ${focus.length || evaluation ? `
+        <div class="method-grid">
+          ${focus.length ? `
+            <div class="card">
+              <p class="card-tag">看效果时关注</p>
+              <ol class="focus-list">${focus.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ol>
+            </div>` : ""}
           ${evaluation ? `
-            <ul class="dimension-list">
-              ${evaluation.dimensions.map((dimension) => `
-                <li><div><strong>${escapeHtml(dimension.name)}</strong><p>${escapeHtml(dimension.focus)}</p></div><span class="mono">${dimension.weight}%</span></li>`).join("")}
-            </ul>
-            <a class="text-link" href="${escapeHtml(experiment.evaluationPath)}" target="_blank" rel="noopener">完整评测记录 ↗</a>`
-          : `<p class="muted">尚无评分维度。</p>`}
-        </div>
-      </div>
+            <div class="card">
+              <p class="card-tag">评分维度 · 满分 100</p>
+              <ul class="dim-list">
+                ${evaluation.dimensions.map((dimension) => `
+                  <li>
+                    <div class="dim-row">
+                      <div><strong>${escapeHtml(dimension.name)}</strong><p>${inlineMarkdown(dimension.focus)}</p></div>
+                      <span class="dim-weight">${dimension.weight}%</span>
+                    </div>
+                    ${levels(dimension)}
+                  </li>`).join("")}
+              </ul>
+              ${evaluation.hardChecks.length ? `
+                <p class="card-tag card-tag-gap">硬性检查 · 过 / 不过</p>
+                <ul class="hard-list">${evaluation.hardChecks.map((check) => `<li><strong>${escapeHtml(check.name)}</strong><span>${inlineMarkdown(check.how)}</span></li>`).join("")}</ul>` : ""}
+              <a class="text-link" href="${escapeHtml(version.evaluationPath)}" target="_blank" rel="noopener">完整评分标准 ↗</a>
+            </div>` : ""}
+        </div>` : ""}
+      ${evaluation ? `
+        <dl class="cells eval-meta">
+          ${meta.map(([term, value]) => `<div><dt>${term}</dt><dd${["unknown", "未评测"].includes(value) ? " class=\"muted\"" : ""}>${escapeHtml(value)}</dd></div>`).join("")}
+        </dl>` : ""}
       ${evaluation?.conclusion.length ? `
-        <div class="panel conclusion">
-          <h3>评测结论</h3>
+        <div class="conclusion">
+          <p class="card-tag">评测结论</p>
           ${evaluation.conclusion.map((paragraph) => `<p>${inlineMarkdown(paragraph)}</p>`).join("")}
         </div>` : ""}
     </section>`;
 }
 
-function inlineMarkdown(text) {
-  return escapeHtml(text)
-    .replace(/`([^`]+)`/g, "<code>$1</code>")
-    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-}
-
 /* ---------- Router ---------- */
+
+function syncNav(onExperiment, section) {
+  const hasScores = lab.experiments.some((experiment) => latestVersion(experiment)?.stats.scored);
+  document.querySelector('[data-nav="matrix"]').hidden = !hasScores;
+  document.querySelectorAll("[data-nav]").forEach((link) => {
+    const key = link.dataset.nav;
+    const current = onExperiment ? key === "home" : key === "home" ? !section : key === section;
+    if (current) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
+}
 
 function render() {
   if (!lab) return;
   frameObserver.disconnect();
   const { path, params } = parseRoute();
   const experiment = lab.experiments.find((item) => item.id === path);
-  const page = experiment ? experiment.id : "home";
+  const page = experiment ? `${experiment.id}@${params.get("v") ?? ""}` : "home";
+  const pageChanged = page !== lastPage;
+  const section = experiment ? null : params.get("section");
+
+  if (pageChanged) {
+    promptOpen = false;
+    app.dataset.enter = "";
+  } else {
+    delete app.dataset.enter;
+  }
 
   if (experiment) renderExperiment(experiment, params);
   else renderHome(params);
+  syncNav(Boolean(experiment), section);
 
-  document.querySelectorAll("[data-nav]").forEach((link) => {
-    const current = !experiment && (link.dataset.nav === "matrix") === (params.get("section") === "matrix");
-    link.toggleAttribute("aria-current", current);
-  });
-
-  if (page !== lastPage) {
-    if (lastPage !== null && params.get("section") !== "matrix") {
+  if (pageChanged) {
+    if (lastPage !== null && !section) {
       window.scrollTo(0, 0);
       app.focus({ preventScroll: true });
     }
@@ -434,38 +852,41 @@ function render() {
   }
 }
 
+// A fresh query string makes the browser start the artifact (and any SVG animation) from the beginning.
+function restartMedia(element, stamp) {
+  const base = element.dataset.src;
+  element.src = `${base}${base.includes("?") ? "&" : "?"}replay=${stamp}`;
+}
+
 app.addEventListener("click", (event) => {
   const link = event.target.closest("a[data-replace]");
   if (link && !event.metaKey && !event.ctrlKey && !event.shiftKey) {
     event.preventDefault();
-    if (link.matches(".model-tab")) pendingFocus = `.model-tab[data-key="${CSS.escape(link.dataset.key)}"]`;
+    if (link.matches(".model-item")) pendingFocus = `.model-item[data-key="${CSS.escape(link.dataset.key)}"]`;
     navigate(link.getAttribute("href"), { replace: true });
     return;
   }
   if (event.target.closest("[data-reload]")) {
-    const frame = app.querySelector(".stage iframe, .stage img");
-    if (frame) frame.src = frame.src;
+    const media = app.querySelector(".stage .media");
+    if (media) restartMedia(media, Date.now());
+    return;
+  }
+  if (event.target.closest("[data-replay-all]")) {
+    const media = [...app.querySelectorAll(".compare-grid .media")];
+    const stamp = Date.now();
+    media.forEach((element) => restartMedia(element, stamp));
+    live.textContent = `已让 ${media.length} 份产物同时从头开始播放`;
   }
 });
 
-app.addEventListener("keydown", (event) => {
-  const tab = event.target.closest(".model-tab");
-  if (!tab || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
-  const tabs = [...app.querySelectorAll(".model-tab")];
-  const index = tabs.indexOf(tab);
-  const next = event.key === "Home" ? 0
-    : event.key === "End" ? tabs.length - 1
-    : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
-  event.preventDefault();
-  tabs[next].click();
-});
-
-document.querySelector("#theme-toggle").addEventListener("click", () => {
-  const root = document.documentElement;
-  const current = root.dataset.theme ?? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-  const next = current === "dark" ? "light" : "dark";
-  root.dataset.theme = next;
-  try { localStorage.setItem("lab-theme", next); } catch {}
+app.addEventListener("change", (event) => {
+  const select = event.target.closest("[data-version]");
+  if (!select) return;
+  const { path } = parseRoute();
+  const experiment = lab.experiments.find((item) => item.id === path);
+  if (!experiment) return;
+  const version = Number(select.value);
+  navigate(experimentHash(experiment, { v: version === experiment.latestVersion ? null : version }));
 });
 
 window.addEventListener("hashchange", render);
@@ -480,5 +901,5 @@ fetch("data/lab.json")
     render();
   })
   .catch((error) => {
-    app.innerHTML = `<div class="empty-state"><strong>数据加载失败</strong><p>请通过 HTTP 服务打开本页（例如 <code>python -m http.server</code>）。${escapeHtml(error.message)}</p></div>`;
+    app.innerHTML = `<div class="page"><div class="empty"><strong>数据加载失败</strong><p>请通过 HTTP 服务打开本页（例如 <code>python -m http.server</code>）。${escapeHtml(error.message)}</p></div></div>`;
   });

@@ -18,547 +18,593 @@
       "id": "01-rocket-launch",
       "title": "火箭发射动画",
       "capability": "前端动画",
-      "question": "一句“发射火箭”，模型能做到什么程度？",
-      "summary": "Prompt 只描述目标，不给技术方案。看模型能不能自己补齐火箭造型、点火、升空和抵达太空的完整过程。",
-      "promptVersion": 1,
+      "question": "把一次发射写清楚，模型能完整演出来吗？",
+      "summary": "Prompt 写明了火箭的样子、点火、升空和最终抵达的位置，但不限定技术方案。看模型能不能把一份详细的需求，做成连续、写实、可以反复观看的发射过程。",
       "artifactType": "page",
       "focus": [
-        "第一眼能否认出一枚结构合理的火箭",
-        "点击后是否真的经历点火、升空和进入太空",
-        "火焰、烟雾、镜头与场景过渡是否自然",
-        "最后是否给出明确的任务完成反馈"
+        "火箭有没有真实的比例、分段结构和金属质感",
+        "点火到离台：火焰、水汽、烟云和“很重”的缓慢抬升是否到位",
+        "升空途中尾焰、天空颜色、镜头跟随和一二级分离是否连贯",
+        "是否抵达近地轨道，并给出明确的完成画面和重新发射入口"
       ],
       "number": "01",
-      "prompt": "给我实现一个html页面，效果要求可以一键点火 然后 火箭升空\n\n注意细节 首先是火箭本身必须逼真，然后点火发射的提效一定也流畅逼真，最后是火箭升空发射到太空中就完成了",
-      "promptPath": "prompts/01-rocket-launch/prompt-v1.md",
-      "evaluationPath": "results/01-rocket-launch/evaluations/evaluation-v1.md",
-      "evaluation": {
-        "date": "2026-07-28",
-        "method": "单次人工体验评测",
-        "environment": "Chromium、1440 × 900、本地 HTTP、允许联网",
-        "dimensions": [
-          {
-            "name": "指令完成度",
-            "focus": "一键点火、火箭升空、进入太空并明确完成",
-            "max": 5,
-            "weight": 25
-          },
-          {
-            "name": "火箭真实感",
-            "focus": "火箭造型、结构、比例、光影和视觉细节",
-            "max": 5,
-            "weight": 20
-          },
-          {
-            "name": "点火与发射效果",
-            "focus": "尾焰、烟雾、光效、升空反馈和真实感",
-            "max": 5,
-            "weight": 25
-          },
-          {
-            "name": "动画流畅度",
-            "focus": "运动连续性、镜头跟随、场景过渡和稳定性",
-            "max": 5,
-            "weight": 20
-          },
-          {
-            "name": "整体完成质量",
-            "focus": "页面完整度、交互反馈和最终呈现",
-            "max": 5,
-            "weight": 10
-          }
-        ],
-        "conclusion": [
-          "GPT-5.6 · sol-max 在火箭本体、场景完成度、发射流程和太空收尾之间最均衡，综合排名第一。Claude Opus 4.8 · max 的动画连续性和烟雾表现优秀，但火箭本体细节稍弱。Kimi K3 功能完整、信息清楚，视觉风格更偏卡通。AGY · Gemini 3.6 Flash 的模拟信息最丰富，但粒子表现和无法完成轨道插入的问题明显拉低了最终得分。",
-          "本评测基于每个模型的一次现有结果，分数用于比较这些具体产物，不代表对应模型多次运行后的稳定平均能力。"
-        ]
-      },
-      "thumb": "assets/thumbs/01-rocket-launch.png",
-      "results": [
+      "latestVersion": 2,
+      "versions": [
         {
-          "key": "gpt-5-6-sol-max",
-          "model": "gpt-5-6-sol-max",
-          "label": "GPT-5.6 Sol Max",
-          "vendor": "openai",
-          "url": "results/01-rocket-launch/outputs/gpt-5-6-sol-max/gpt-5-6-sol-max.html",
-          "run": {
-            "prompt": "01-rocket-launch",
-            "prompt_version": "1",
-            "provider": "openai",
-            "model": "gpt-5-6",
-            "mode": "sol-max",
-            "generated_at": "unknown",
-            "entrypoint": "gpt-5-6-sol-max.html"
-          },
-          "score": {
-            "total": 91,
+          "version": 2,
+          "promptPath": "prompts/01-rocket-launch/prompt-v2.md",
+          "prompt": "给我实现一个单文件 HTML 页面：画面里有一枚立在发射台上的火箭，点击“点火”按钮后，火箭依次完成点火、起飞、穿越大气层、一二级分离，最后进入近地轨道。整个过程要像一场连续的现场直播：镜头不中断，动作流畅，细节写实。\n\n# 一、火箭长什么样\n\n画一枚现代两级液体运载火箭（外形参考猎鹰 9 号这一类），写实风格，不要卡通、扁平或简笔画。\n\n- 比例：箭体细长，总高约为直径的 12 倍。火箭要显得高大，占画面高度的一半以上。\n- 结构自上而下：尖拱形整流罩、二级箭体、颜色略深且带加强筋的级间段、一级箭体、底部发动机舱。\n- 一级的细节：顶部有四片折叠收拢的栅格舵，箭体两侧贴着四条收起的着陆支腿，发动机舱能看到至少三个黑色钟形喷管和管线。\n- 材质：主体是白色涂装，局部是拉丝金属色和黑色。圆柱面要有明暗渐变（一侧受光，一侧背光），再加上横向的焊缝环线、竖向的面板接缝、铆钉和高光带。发动机舱周围有被烟熏黑的痕迹。不能是一整块平涂的颜色。\n- 低温细节：液氧贮箱位置有一片白霜，箭体侧面不断冒出白色的液氧蒸汽，飘一段就散掉。\n- 标识：箭体上有虚构的任务名称、编号和徽标，不要使用真实机构或公司的标志。\n- 光照：设定一个明确的光源（比如黎明时从左侧斜射过来的太阳），箭体要有对应的受光面和背光面，塔架的泛光灯会在箭体上落下暖色光斑。\n\n# 二、发射场\n\n- 时间是黎明前后：天空从深蓝渐变到地平线上的橘粉色，有少量带边缘光的云，还留着几颗没有消失的星星。\n- 地面是混凝土发射台，中间有导流槽（把火焰引向两侧的凹槽），台面上有焦痕和油渍。远处是平原或海岸线和几座储罐，空气里有一层薄雾，越远越淡。\n- 火箭一侧立着钢桁架的勤务塔，能看清桁架结构、平台和爬梯，顶部有闪烁的红色航空障碍灯，几根脐带臂（给火箭输送燃料和供电的管线臂）伸出来连着箭体。旁边还有避雷塔和泛光灯。\n- 待发时画面是“活”的：灯在闪，水汽在飘，云在缓慢移动，不是一张静止的图片。\n\n# 三、点火与起飞\n\n点击“点火”后，下面这些阶段按顺序发生，每个阶段都要有看得出来的区别。从点击到离开发射台大约 12 到 15 秒。\n\n1. 倒计时：屏幕上从 T-10 开始倒数。T-7 时发射台开始喷出大量水雾（用来降噪的水幕），白色水汽从台面两侧涌出来。临近点火时，脐带臂依次摆开，脱离箭体。\n2. 点火（T-3 到 T-0）：发动机先冒出几簇小而亮的橙色火苗，接着迅速点燃，汇成稳定的火柱。喷口处是接近白色的高亮核心，往外依次是黄、橙、红，边缘是半透明的烟。火焰打在导流槽上被劈开，向两侧喷射，翻涌成一团团灰白色烟云，贴着地面向外扩散，慢慢把箭体底部藏进烟里。火光把发射台、塔架、云底和箭体下半截都映成暖橙色，并且随着火焰强弱闪动。\n3. 离台（T+0）：箭体被释放后先缓缓抬起，要有“很重”的感觉，前 2 到 3 秒才完全离开发射台，随后不断加速。起飞时整个画面轻微震动，震动随推力变化，离地后逐渐减弱。\n4. 离开塔架后，火箭开始向画面一侧缓缓倾斜（重力转弯：为了入轨，箭体会逐渐从竖直转向水平），角度随时间平滑变化。\n\n# 四、升空\n\n从离台到入轨约 40 到 50 秒。\n\n- 镜头：离台后从固定镜头变成跟随镜头。火箭保持在画面中偏下的位置，地面和塔架向下移出画面。不允许切镜头、黑屏或闪帧。\n- 尾焰随高度变化：低空时火焰短、亮、粗，里面有明暗相间的菱形冲击波（马赫盘）；越往上空气越稀薄，火焰变长、变宽、变淡，接近真空时变成又大又淡的蓝白色锥形羽流。\n- 尾迹：低空时留下一条浓密的白色烟迹，被高空风吹得弯曲、扩散，越高越细越淡，最后消失。\n- 天空：颜色随高度由浅蓝过渡到深蓝，再到近乎全黑。云层从火箭旁边依次向下掠过，穿云的瞬间画面略显朦胧。星星随着天空变暗逐渐出现，地平线上浮现一条发光的大气层细线。\n- 最大动压点（Max-Q，火箭承受气动压力最大的时刻）：火箭短暂抖动，接近音速时箭体周围出现一圈白色的凝结云环，随后恢复平稳。\n- 一二级分离：一级发动机关机，尾焰熄灭，火箭滑行片刻；级间段分离，一级箭体向后翻转着脱落，在画面里变小并下落；二级发动机随即点火，火焰换成淡蓝白色，几乎没有烟，只有一束干净、向外扩张的真空羽流。\n- 整流罩分离：整流罩两瓣向两侧张开脱落，露出里面的卫星。\n\n# 五、最终到达哪里\n\n终点是近地轨道，高度约 400 公里。入轨后的收尾（从卫星分离到显示“入轨成功”）约 10 到 20 秒。\n\n- 随着高度增加，画面逐渐过渡为太空。入轨时下方是一道弧形的地球：蓝色海洋、白色云层和陆地，边缘有一层发光的薄薄大气；一侧太阳正在升起，带出镜头光晕；另一侧是夜半球，能看到零星的城市灯光。上方是深黑的太空和满天繁星。\n- 卫星缓缓脱离二级箭体，展开两块太阳能电池板，慢慢飘远。二级发动机关机，镜头缓缓拉远，画面安静下来，和发射时的轰鸣形成对比。\n- 屏幕上显示“入轨成功”，以及最终的遥测数据（高度约 400 km，速度约 7.7 km/s，任务时间）和一个“重新发射”按钮。点击后回到发射前的初始画面，可以反复发射。\n\n# 六、界面与交互\n\n- 初始状态只有一个醒目的“点火”按钮，状态显示“待命”。点击后按钮变为不可点击。\n- 发射过程中有一个简洁的遥测面板：任务时间（T- 或 T+）、高度（km）、速度（km/s）、当前阶段（倒计时、点火、起飞、Max-Q、级间分离、入轨）。数值要和画面里的运动一致，连续变化，不能跳变。\n- 页面不能出现滚动条，窗口大小变化时自动适配，手机竖屏下构图和按钮也要完整可用。\n- 可选加分项：用 Web Audio 现场合成音效（倒计时提示音、发动机轰鸣、分离声），必须在点击之后才开始播放，并提供静音开关。\n\n# 七、技术要求\n\n- 只产出一个 HTML 文件，CSS 和 JavaScript 全部内联，不引用任何外部资源（图片、字体、视频、音频、CDN 一律禁用）。画面用 Canvas、SVG、CSS 或 WebGL 现场绘制，2D 或 3D 都可以，以画面写实为准。\n- 用 requestAnimationFrame 驱动，按真实经过的时间（而不是帧数）推进动画，让 60Hz 和 120Hz 的屏幕上速度一致；适配高分屏。\n- 支持 prefers-reduced-motion：此时减弱震动和闪烁，但仍然可以完整发射。\n- 从点击“点火”到入轨成功，总时长约 60 到 90 秒。\n\n完成后请自己逐项检查：火箭第一眼就像一枚真的两级火箭；点火、离台、加速、尾焰变化、分离、入轨全部出现；全程是一个连续镜头，没有跳变；终点画面明确，并且可以重新发射。",
+          "change": "v1 只有三句话，没有说明火箭的样子、点火过程、升空过程和终点。v2 把这些都写清楚了：火箭的外形与材质、发射场、点火与起飞的先后顺序、升空途中尾焰、天空和分离的变化，以及最终到达的位置（近地轨道）。",
+          "evaluationPath": "results/01-rocket-launch/v2/evaluation.md",
+          "evaluation": {
+            "date": "未评测",
+            "evaluator": "未评测",
+            "method": "人工完整观看，按硬性检查、需求清单和评分档位打分",
+            "environment": "Chrome，本地 HTTP 服务；桌面 1440×900、手机 390×844 各看一遍，每次刷新后从“待命”开始",
             "dimensions": [
               {
-                "name": "指令完成度",
-                "value": 5,
-                "max": 5
+                "name": "需求覆盖",
+                "focus": "按需求清单逐条记分：做到 1，部分做到 0.5，没做到 0",
+                "max": 34,
+                "weight": 40,
+                "levels": []
               },
               {
-                "name": "火箭真实感",
-                "value": 4,
-                "max": 5
+                "name": "写实感",
+                "focus": "火箭和发射场看起来像不像真的：结构、比例、材质和光照",
+                "max": 5,
+                "weight": 20,
+                "levels": [
+                  {
+                    "score": 1,
+                    "text": "简笔画或卡通，结构明显不对"
+                  },
+                  {
+                    "score": 2,
+                    "text": "看得出是火箭，但大面积平涂、比例不对，像插画"
+                  },
+                  {
+                    "score": 3,
+                    "text": "结构和比例基本对，有明暗，但材质和细节明显不足"
+                  },
+                  {
+                    "score": 4,
+                    "text": "结构、材质和光照都到位，静止时接近写实，只有少量破绽"
+                  },
+                  {
+                    "score": 5,
+                    "text": "第一眼像真实发射直播的画面，放大看细节也经得起推敲"
+                  }
+                ]
               },
               {
-                "name": "点火与发射效果",
-                "value": 4,
-                "max": 5
+                "name": "火焰与烟雾",
+                "focus": "点火、尾焰、烟云、水汽和尾迹的质感，以及随时间和高度的变化",
+                "max": 5,
+                "weight": 15,
+                "levels": [
+                  {
+                    "score": 1,
+                    "text": "火焰和烟是静态色块，或者干脆没有"
+                  },
+                  {
+                    "score": 2,
+                    "text": "有粒子效果，但形状规整、颜色单一，看着像贴图"
+                  },
+                  {
+                    "score": 3,
+                    "text": "火焰分层和烟云都有，但变化生硬，或者遮住了火箭主体"
+                  },
+                  {
+                    "score": 4,
+                    "text": "火焰分层自然，烟云有体积感，并随高度明显变化"
+                  },
+                  {
+                    "score": 5,
+                    "text": "接近真实影像，火焰强弱闪动和环境光照联动"
+                  }
+                ]
               },
               {
-                "name": "动画流畅度",
-                "value": 5,
-                "max": 5
+                "name": "镜头与连贯",
+                "focus": "阶段衔接是否连续，镜头跟随是否稳定，运动有没有重量感和加速感",
+                "max": 5,
+                "weight": 15,
+                "levels": [
+                  {
+                    "score": 1,
+                    "text": "有跳变、黑屏或切镜头，阶段之间断开"
+                  },
+                  {
+                    "score": 2,
+                    "text": "能连起来，但有卡顿，运动很机械"
+                  },
+                  {
+                    "score": 3,
+                    "text": "全程连贯没有跳变，但重量感和加速感一般"
+                  },
+                  {
+                    "score": 4,
+                    "text": "一个镜头拍到底，起飞的重量感、加速和转弯都自然"
+                  },
+                  {
+                    "score": 5,
+                    "text": "像真实转播，节奏、重量感和镜头运动都很讲究"
+                  }
+                ]
               },
               {
-                "name": "整体完成质量",
-                "value": 5,
-                "max": 5
+                "name": "稳定与适配",
+                "focus": "能否稳定跑完，桌面和手机尺寸是否正常，能否反复发射",
+                "max": 5,
+                "weight": 10,
+                "levels": [
+                  {
+                    "score": 1,
+                    "text": "硬性检查有没通过的项"
+                  },
+                  {
+                    "score": 2,
+                    "text": "能跑完，但明显掉帧，或手机尺寸下布局坏掉"
+                  },
+                  {
+                    "score": 3,
+                    "text": "能跑完，有少量小问题"
+                  },
+                  {
+                    "score": 4,
+                    "text": "稳定，桌面和手机尺寸都正常"
+                  },
+                  {
+                    "score": 5,
+                    "text": "稳定流畅，连续重新发射多次没有问题，减少动态效果模式下也正常"
+                  }
+                ]
               }
-            ]
-          },
-          "review": {
-            "strengths": [
-              "初始火箭的比例、结构、明暗和发射场景层次是四个结果中最完整的。",
-              "倒计时、塔架撤离、发动机点火、尾焰、烟雾、升空和天空转入太空的流程衔接自然。",
-              "最终提供明确的“已抵达太空”状态、任务数据和再次发射入口，收尾完成度高。"
             ],
-            "weaknesses": [
-              "火箭和火焰仍有明显的矢量插画感，距离照片级真实仍有差距。",
-              "点火尾焰造型较规整，烟雾层次虽然丰富，但物理扩散感还可以更自然。"
-            ]
-          }
+            "hardChecks": [
+              {
+                "name": "单个文件",
+                "how": "只有一个 HTML 文件，没有引用任何外部资源（图片、字体、脚本、音视频、CDN）"
+              },
+              {
+                "name": "跑完全程",
+                "how": "点击“点火”后能一路运行到显示“入轨成功”，中途不卡住、不中断"
+              },
+              {
+                "name": "重新发射",
+                "how": "入轨后有“重新发射”，点击能回到初始画面"
+              },
+              {
+                "name": "控制台无报错",
+                "how": "整个过程浏览器控制台没有报错（本地服务器自己的 favicon 404 不算）"
+              },
+              {
+                "name": "没有滚动条",
+                "how": "1440×900 和 390×844 两种尺寸下都没有滚动条"
+              }
+            ],
+            "checklist": [
+              {
+                "no": 1,
+                "section": "火箭",
+                "text": "写实的两级液体运载火箭，不是卡通、扁平或简笔画"
+              },
+              {
+                "no": 2,
+                "section": "火箭",
+                "text": "箭体细长（总高约为直径的 12 倍），占画面高度一半以上"
+              },
+              {
+                "no": 3,
+                "section": "火箭",
+                "text": "分段完整：尖拱形整流罩、二级、颜色略深带加强筋的级间段、一级、发动机舱"
+              },
+              {
+                "no": 4,
+                "section": "火箭",
+                "text": "一级细节：四片收拢的栅格舵、四条收起的着陆支腿、至少三个钟形喷管和管线"
+              },
+              {
+                "no": 5,
+                "section": "火箭",
+                "text": "材质：圆柱面有明暗渐变，有焊缝、面板接缝、铆钉和高光带，发动机舱周围有烟熏痕迹"
+              },
+              {
+                "no": 6,
+                "section": "火箭",
+                "text": "低温细节：液氧贮箱处有白霜，侧面持续冒出并散开的白色蒸汽"
+              },
+              {
+                "no": 7,
+                "section": "火箭",
+                "text": "有虚构的任务名称、编号和徽标，没有真实机构或公司的标志"
+              },
+              {
+                "no": 8,
+                "section": "火箭",
+                "text": "光照：有明确光源方向对应的受光面和背光面，泛光灯在箭体上落下暖色光斑"
+              },
+              {
+                "no": 9,
+                "section": "发射场",
+                "text": "黎明天空：从深蓝渐变到地平线的橘粉色，有带边缘光的云，还留着几颗星星"
+              },
+              {
+                "no": 10,
+                "section": "发射场",
+                "text": "混凝土发射台和导流槽，台面有焦痕和油渍；远处有平原或海岸线、储罐，以及越远越淡的薄雾"
+              },
+              {
+                "no": 11,
+                "section": "发射场",
+                "text": "钢桁架勤务塔（平台、爬梯、顶部闪烁的红色障碍灯）、连着箭体的脐带臂、避雷塔和泛光灯"
+              },
+              {
+                "no": 12,
+                "section": "发射场",
+                "text": "待发画面是“活”的：灯在闪、水汽在飘、云在缓慢移动"
+              },
+              {
+                "no": 13,
+                "section": "点火与起飞",
+                "text": "从 T-10 开始倒数，T-7 时发射台两侧涌出白色水汽"
+              },
+              {
+                "no": 14,
+                "section": "点火与起飞",
+                "text": "临近点火时脐带臂依次摆开、脱离箭体"
+              },
+              {
+                "no": 15,
+                "section": "点火与起飞",
+                "text": "点火：先冒小火苗再汇成稳定火柱，白、黄、橙、红分层；火焰被导流槽劈向两侧，烟云贴地扩散并遮住箭体底部"
+              },
+              {
+                "no": 16,
+                "section": "点火与起飞",
+                "text": "火光把发射台、塔架、云底和箭体下半截映成暖橙色，并随火焰强弱闪动"
+              },
+              {
+                "no": 17,
+                "section": "点火与起飞",
+                "text": "离台有“很重”的感觉：前 2–3 秒缓慢抬起再不断加速；画面震动随推力变化，离地后逐渐减弱"
+              },
+              {
+                "no": 18,
+                "section": "点火与起飞",
+                "text": "离开塔架后平滑地向画面一侧倾斜（重力转弯）"
+              },
+              {
+                "no": 19,
+                "section": "升空",
+                "text": "镜头从固定变为跟随，火箭保持在画面偏下，地面和塔架移出画面；没有切镜头、黑屏或闪帧"
+              },
+              {
+                "no": 20,
+                "section": "升空",
+                "text": "尾焰随高度变化：低空短、亮、粗并带菱形马赫盘，高空变长变宽变淡，接近真空时成为淡蓝白色锥形羽流"
+              },
+              {
+                "no": 21,
+                "section": "升空",
+                "text": "尾迹：低空留下浓密白色烟迹，被风吹弯、扩散，越高越细越淡，最后消失"
+              },
+              {
+                "no": 22,
+                "section": "升空",
+                "text": "天空由浅蓝到深蓝再到近黑；云层依次向下掠过，穿云时画面略朦胧；星星逐渐出现，地平线浮现大气层亮线"
+              },
+              {
+                "no": 23,
+                "section": "升空",
+                "text": "Max-Q：火箭短暂抖动，周围出现一圈白色凝结云环，随后恢复平稳"
+              },
+              {
+                "no": 24,
+                "section": "升空",
+                "text": "一二级分离：一级关机、尾焰熄灭、短暂滑行，级间分离，一级翻转着变小下落，二级点火换成淡蓝白色、几乎无烟的羽流"
+              },
+              {
+                "no": 25,
+                "section": "升空",
+                "text": "整流罩两瓣向两侧张开脱落，露出里面的卫星"
+              },
+              {
+                "no": 26,
+                "section": "入轨",
+                "text": "弧形地球：海洋、云层、陆地和发光的大气边缘；一侧日出带镜头光晕，另一侧夜半球有城市灯光；上方是繁星"
+              },
+              {
+                "no": 27,
+                "section": "入轨",
+                "text": "卫星脱离二级，展开两块太阳能电池板并飘远；二级关机，镜头拉远，画面安静下来"
+              },
+              {
+                "no": 28,
+                "section": "入轨",
+                "text": "显示“入轨成功”和最终遥测（高度约 400 km、速度约 7.7 km/s、任务时间）"
+              },
+              {
+                "no": 29,
+                "section": "入轨",
+                "text": "“重新发射”回到发射前的初始画面，可以反复发射"
+              },
+              {
+                "no": 30,
+                "section": "界面与技术",
+                "text": "初始只有醒目的“点火”按钮和“待命”状态，点击后按钮不可再点"
+              },
+              {
+                "no": 31,
+                "section": "界面与技术",
+                "text": "遥测面板显示任务时间、高度、速度和当前阶段，数值和画面一致，连续变化不跳变"
+              },
+              {
+                "no": 32,
+                "section": "界面与技术",
+                "text": "页面没有滚动条，窗口大小变化时自动适配，手机竖屏下构图和按钮完整可用"
+              },
+              {
+                "no": 33,
+                "section": "界面与技术",
+                "text": "按真实经过的时间推进（60Hz 和 120Hz 屏幕速度一致），高分屏清晰；减少动态效果模式下减弱震动和闪烁，仍能完整发射"
+              },
+              {
+                "no": 34,
+                "section": "界面与技术",
+                "text": "时长：点火到离台约 12–15 秒，离台到入轨约 40–50 秒，入轨收尾约 10–20 秒，总长约 60–90 秒"
+              }
+            ],
+            "conclusion": []
+          },
+          "stats": {
+            "results": 0,
+            "scored": 0,
+            "pending": 0,
+            "allScored": false
+          },
+          "results": []
         },
         {
-          "key": "claude-opus-4-8-max",
-          "model": "claude-opus-4-8-max",
-          "label": "Claude Opus 4.8 Max",
-          "vendor": "anthropic",
-          "url": "results/01-rocket-launch/outputs/claude-opus-4-8-max/claude-opus-4-8-max.html",
-          "run": {
-            "prompt": "01-rocket-launch",
-            "prompt_version": "1",
-            "provider": "anthropic",
-            "model": "claude-opus-4-8",
-            "mode": "max",
-            "generated_at": "unknown",
-            "entrypoint": "claude-opus-4-8-max.html"
+          "version": 1,
+          "promptPath": "prompts/01-rocket-launch/prompt-v1.md",
+          "prompt": "给我实现一个html页面，效果要求可以一键点火 然后 火箭升空\n\n注意细节 首先是火箭本身必须逼真，然后点火发射的提效一定也流畅逼真，最后是火箭升空发射到太空中就完成了",
+          "change": null,
+          "evaluationPath": null,
+          "evaluation": null,
+          "stats": {
+            "results": 0,
+            "scored": 0,
+            "pending": 0,
+            "allScored": false
           },
-          "score": {
-            "total": 85,
-            "dimensions": [
-              {
-                "name": "指令完成度",
-                "value": 5,
-                "max": 5
-              },
-              {
-                "name": "火箭真实感",
-                "value": 3,
-                "max": 5
-              },
-              {
-                "name": "点火与发射效果",
-                "value": 4,
-                "max": 5
-              },
-              {
-                "name": "动画流畅度",
-                "value": 5,
-                "max": 5
-              },
-              {
-                "name": "整体完成质量",
-                "value": 4,
-                "max": 5
-              }
-            ]
-          },
-          "review": {
-            "strengths": [
-              "从点火倒计时到升空、进入太空和 `COMPLETE` 状态完整跑通，并支持重新发射。",
-              "烟雾、火花和分层尾焰表现较丰富，镜头跟随稳定，动画过程流畅。",
-              "太空星空、地球弧面和遥测面板形成了清楚的完成状态。"
-            ],
-            "weaknesses": [
-              "火箭本体结构较简单，材质和细节弱于 GPT 和 Kimi。",
-              "发射场与火箭整体偏卡通化，真实感主要依靠烟雾、抖动和光效补足。"
-            ]
-          }
-        },
-        {
-          "key": "kimi-k3",
-          "model": "kimi-k3",
-          "label": "Kimi K3",
-          "vendor": "moonshot",
-          "url": "results/01-rocket-launch/outputs/kimi-k3/kimi-k3.html",
-          "run": {
-            "prompt": "01-rocket-launch",
-            "prompt_version": "1",
-            "provider": "moonshot-ai",
-            "model": "kimi-k3",
-            "mode": "unknown",
-            "generated_at": "unknown",
-            "entrypoint": "kimi-k3.html"
-          },
-          "score": {
-            "total": 76,
-            "dimensions": [
-              {
-                "name": "指令完成度",
-                "value": 5,
-                "max": 5
-              },
-              {
-                "name": "火箭真实感",
-                "value": 3,
-                "max": 5
-              },
-              {
-                "name": "点火与发射效果",
-                "value": 3,
-                "max": 5
-              },
-              {
-                "name": "动画流畅度",
-                "value": 4,
-                "max": 5
-              },
-              {
-                "name": "整体完成质量",
-                "value": 4,
-                "max": 5
-              }
-            ]
-          },
-          "review": {
-            "strengths": [
-              "火箭具有多喷口、舷窗、标识和基础明暗，外形辨识度较高。",
-              "点火、升空、穿越云层、到达 100 km 和任务成功状态完整，遥测和阶段文案清楚。",
-              "最终太空页面和再次发射入口明确，功能稳定。"
-            ],
-            "weaknesses": [
-              "发射台、塔架和天空整体较卡通，初始控制按钮与状态提示在视觉上略显拥挤。",
-              "点火阶段的地面光晕接近矩形，烟雾较弱；升空后的尾焰和轨迹也相对简单。"
-            ]
-          }
-        },
-        {
-          "key": "agy-gemini-3-6-flash",
-          "model": "agy-gemini-3-6-flash",
-          "label": "Gemini 3.6 Flash",
-          "vendor": "google",
-          "url": "results/01-rocket-launch/outputs/agy-gemini-3-6-flash/agy-gemini-3-6-flash.html",
-          "run": {
-            "prompt": "01-rocket-launch",
-            "prompt_version": "1",
-            "provider": "agy",
-            "model": "gemini-3-6-flash",
-            "mode": "unknown",
-            "generated_at": "unknown",
-            "entrypoint": "agy-gemini-3-6-flash.html"
-          },
-          "score": {
-            "total": 56,
-            "dimensions": [
-              {
-                "name": "指令完成度",
-                "value": 4,
-                "max": 5
-              },
-              {
-                "name": "火箭真实感",
-                "value": 2,
-                "max": 5
-              },
-              {
-                "name": "点火与发射效果",
-                "value": 2,
-                "max": 5
-              },
-              {
-                "name": "动画流畅度",
-                "value": 3,
-                "max": 5
-              },
-              {
-                "name": "整体完成质量",
-                "value": 3,
-                "max": 5
-              }
-            ]
-          },
-          "review": {
-            "strengths": [
-              "遥测、阶段日志、分级流程、音效、镜头和倍速控制较丰富。",
-              "火箭能够完成点火、升空、一级分离，并超过 100 km 进入太空阶段。"
-            ],
-            "weaknesses": [
-              "火箭本体尺寸较小且结构简单，真实感偏弱。",
-              "发射和真空阶段使用大量放大的圆形粒子，后期会遮挡火箭和主要画面，视觉效果不够自然。",
-              "实际运行在“轨道插入”阶段出现燃料归零、速度转负和高度下降，无法触发可见的成功弹窗及重新发射入口，因此没有完成最终闭环。"
-            ]
-          }
-        },
-        {
-          "key": "gpt-6-astra-xhigh",
-          "model": "gpt-6-astra-xhigh",
-          "label": "GPT-6 Astra XHigh",
-          "vendor": "openai",
-          "url": "results/01-rocket-launch/outputs/gpt-6-astra-xhigh/gpt-6-astra-xhigh.html",
-          "run": {
-            "prompt": "01-rocket-launch",
-            "prompt_version": "1",
-            "provider": "openai",
-            "model": "gpt-6-astra",
-            "mode": "astra-xhigh",
-            "generated_at": "2026-09-22T15:45:15+08:00",
-            "entrypoint": "gpt-6-astra-xhigh.html"
-          },
-          "score": null,
-          "review": null
+          "results": []
         }
       ]
     },
     {
-      "id": "02-vinylformac-replica",
-      "title": "Vinyl 网页复刻",
-      "capability": "规格执行",
-      "question": "面对一份很长的设计规格，模型能还原到什么程度？",
-      "summary": "Prompt 把文案、布局、配色、动效和响应式规则写得很细。看模型能不能一直守住约束，用一个 HTML 文件还原完整产品页。",
-      "promptVersion": 1,
-      "artifactType": "page",
+      "id": "02-pelican-bicycle",
+      "title": "鹈鹕骑自行车",
+      "capability": "SVG 动画",
+      "question": "社区公认的进阶题，再加上动画，模型还画得对吗？",
+      "summary": "提示词用的是这道题的发起人 Simon Willison 的进阶版，开头改成 “animated SVG”，再补一段动画要求：车轮要转、腿要跟着曲柄蹬、无缝循环、不能用脚本和外部文件。看模型能不能既画对又动对。",
+      "artifactType": "image",
+      "sources": [
+        {
+          "label": "Simon Willison 的进阶版提示词（Hacker News，2026 年 2 月）",
+          "url": "https://news.ycombinator.com/item?id=46993923"
+        },
+        {
+          "label": "社区留言：能不能来个动画版？",
+          "url": "https://news.ycombinator.com/item?id=49526455"
+        }
+      ],
       "focus": [
-        "页面结构、文案和尺寸是否按规格落地",
-        "不用外部图片，能否画出可信的黑胶唱机场景",
-        "加载、旋转、悬停和键盘焦点等动效是否齐全",
-        "桌面和手机尺寸下是否都能正常阅读和操作"
+        "长喙、大喉囊、羽毛，以及繁殖期羽色（黄白色头顶、深栗色后颈、红色喉囊）能否让加州褐鹈鹕一眼可认",
+        "车架、辐条、车轮和脚踏是否组成结构正确的自行车",
+        "双腿是否随曲柄同步蹬踏，脚始终踩在踏板上",
+        "动画能否无缝循环，且不依赖脚本和外部文件"
       ],
       "number": "02",
-      "prompt": "请 1:1 复刻网站 vinylformac.com —— macOS 拟真黑胶唱机应用「Vinyl」的产品落地页。下面给出从原站完整提取的设计规格，你的任务是按规格逐值还原整个页面。\n\n# 硬性要求\n\n1. 只产出一个 HTML 文件，所有 CSS、JavaScript 内联；除 Google Fonts（Fraunces）外，禁止引用任何外部资源（图片、视频、图标库、CDN 脚本一律禁用）。所有视觉元素必须用 CSS / SVG / Canvas 绘制。\n2. 页面所有文案必须与下方规格逐字一致（英文原文，注意大小写与标点），不得增删改。\n3. 原站 Hero 区的演示内容是一段视频（demo.mp4）；禁止直接使用该视频或任何外部素材，你必须用代码实时渲染一个拟真黑胶唱机场景作为 Hero 视觉：暖色木纹底座、匀速旋转的黑胶唱片（同心纹沟槽、随旋转流动的光泽反射、黄铜色中心标签）、搭在唱片上的唱臂，并带有细腻动效（例如页面加载后唱臂落下、唱片由静止加速到匀速、唱臂播放中极缓慢向圆心内移、盘面高光流动等）。\n4. 必须实现规格中列出的所有微交互与动效：入场阶梯式上浮淡入、按钮与链接 hover、focus-visible 黄铜描边、响应式断点适配、prefers-reduced-motion 降级。\n5. 整体风格：暗黑极简 + 黑胶复古拟物细节（黄铜点缀、曲目编号、衬线斜体标题）。\n\n# 页面结构（自上而下）\n\n1. Hero（header，min-height 100svh，flex 纵向布局，文字区靠下，演示场景在文字下方）\n2. 社交证明（As seen on Reddit & Twitter）\n3. Liner notes 功能列表\n4. \"No login required\" 说明区\n5. 页脚\n\n# 完整文案（逐字）\n\n## Hero\n- H1 wordmark：Vinyl\n- 副标题两行：\n  - 第一行（纯白高亮）：A photorealistic turntable on your Mac desktop.\n  - 第二行（暗色）：Connects to Spotify and Apple Music. Stays out of your way.\n- CTA 按钮（左侧带 Apple logo SVG，文字 Download，链接 https://shhiv.gumroad.com/l/vinyl ）\n- 按钮下方小字：Requires macOS Sonoma or later\n\n## 社交证明\n- 文案：As seen on [Reddit] & [Twitter]\n- Reddit 带 Reddit 图标，Twitter 带 X 图标（均用 SVG 内联绘制）\n- 链接分别为 https://www.reddit.com/r/SideProject/comments/1v8a8q7/i_built_an_app_that_shows_the_track_youre_playing/ 与 https://x.com/sxhivs/status/2084013870004449326\n\n## Liner notes\n- Eyebrow 小标题：LINER NOTES\n- H2：What's on the record\n- Lede：Everything Vinyl does.\n- 三个功能条目（黑胶曲目编号风格）：\n  - A1 ｜ A photorealistic scene ｜ Spinning platter, tonearm, and original artwork on real wood. The whole scene is rendered live on your desktop.\n  - A2 ｜ Spotify & Apple Music ｜ Vinyl works on its own. Play a track in Spotify or Apple Music and the sleeve and now-playing details update automatically. No login needed.\n  - B1 ｜ Lives in the menu bar ｜ Close the window and Vinyl keeps playing behind a quiet menu bar icon. Launches at login if you want it to.\n\n## 说明区\n- 绿色胶囊徽章（左侧 6px 绿点）：No login required\n- 正文：Vinyl starts with its own artwork. For live album covers, just play or change a track in Spotify or Apple Music while Vinyl is running.\n\n## 页脚\n- 左侧：Built by Shiv（Shiv 链接 https://shivs.me/ ）\n- 右侧：Support · Privacy（原站链接为 /support.html 与 /privacy.html，可用 # 占位）\n\n# 设计规格\n\n## 配色\n- 页面背景：#121212\n- 主文字：#fafafa\n- 次级文字：rgba(255,255,255,0.45)\n- 最弱文字（要求小字/页脚）：rgba(255,255,255,0.28)\n- 黄铜强调色：#C9AD8A（eyebrow、focus 描边、favicon 中心）\n- 绿色状态点：#36D47C\n- CTA 按钮渐变：linear-gradient(180deg, #343434, #222222)，hover 变亮为 #3b3b3b → #272727\n- 绿色胶囊渐变：#1f5233 → #143823\n- 分隔线：rgba(255,255,255,0.07)（功能条目）、rgba(255,255,255,0.06)（页脚）\n- 社交链接 hover：Reddit → #FF6A33，Twitter → #ffffff\n\n## 字体\n- 标题：Fraunces（Google Fonts，italic 400，引入 ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500），fallback Georgia 等衬线\n- 正文/UI：system-ui, -apple-system, \"SF Pro Text\", sans-serif\n- 曲目编号：ui-monospace, \"SF Mono\", Menlo, monospace\n\n## 字号层级\n- H1：clamp(72px, 11vw, 124px)，Fraunces italic，字距 -0.015em，行高 1.05，下间距 40px\n- 副标题：clamp(18px, 2.2vw, 22px)，行高 1.55，最大宽 560px 居中\n- CTA：17px / 600，padding 19px 36px，圆角 50px（全圆角胶囊）\n- 要求小字：13px\n- Eyebrow：11px，字距 0.28em，全大写，黄铜色\n- H2：clamp(30px, 4.6vw, 42px)，Fraunces italic，字距 -0.01em\n- Lede：16px，行高 1.6，下间距 48px\n- 曲目编号：13px 等宽字体，字距 0.06em\n- H3：17px / 590 字重，字距 -0.01em\n- 功能正文：15px，行高 1.65\n- 徽章：13px / 600；说明正文：14px，行高 1.7；页脚：13px\n\n## 布局\n- 全站单列居中；Liner notes 与页脚最大宽 700px；Hero 演示容器宽 min(1280px, 100%)\n- Hero：padding 148px 24px 0，文字区 margin-top auto\n- 功能条目：CSS Grid 52px 1fr 两列（编号列 + 内容列），gap 4px 20px，padding 26px 0，每项顶部 1px 细线，最后一项加底线\n- 页脚：flex 两端分布，顶部 1px 细线\n\n## 阴影（拟物关键）\n- CTA 按钮：inset 0 1.5px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.5), 0 12px 32px rgba(0,0,0,0.4)\n- 演示容器：圆角 26px，三层柔和投影（0 2px 7px / 0 6px 19px / 0 20px 60px，黑色不同透明度）\n- 绿色胶囊：同样的 inset 高光拟物风格\n\n## 动效与交互\n- 入场动画（仅页面加载时一次，无滚动驱动动画）：opacity 0→1 且 translateY(16px)→0，0.9s cubic-bezier(0.2,0.6,0.2,1)；延迟阶梯：副标题 0.08s、CTA 与要求小字 0.18s、演示容器 0.28s\n- Hover：CTA 渐变微变亮；社交链接颜色 0.2s 过渡；页脚链接由暗变白\n- :focus-visible：2px 黄铜色描边 + 3px offset\n- scroll-behavior: smooth；body overflow-x: hidden；-webkit-font-smoothing: antialiased\n- 尊重 prefers-reduced-motion（关闭动画，直接呈现最终状态）\n\n## 响应式断点\n- max-height 820px：hero padding-top 收紧为 100px，H1 缩为 clamp(56px, 8vw, 96px)\n- max-width 640px：CTA 15px / padding 15px 28px；演示容器圆角 18px；页脚改纵向排列\n\n## 其他\n- document.title：Vinyl - A photorealistic turntable for your Mac desktop\n- favicon：内联 SVG data URI（黑胶唱片图标：#141210 底、#332e29 纹路、#C9AD8A 中心）\n- 演示容器宽高比 1280/832，aria-label \"Vinyl running on a Mac desktop\"\n\n完成后请逐字校对全部文案，并逐项检查动效是否齐备。",
-      "promptPath": "prompts/02-vinylformac-replica/prompt-v1.md",
-      "evaluationPath": null,
-      "evaluation": null,
-      "thumb": "assets/thumbs/02-vinylformac-replica.png",
-      "results": [
+      "latestVersion": 2,
+      "versions": [
         {
-          "key": "gpt-5-codex",
-          "model": "gpt-5-codex",
-          "label": "GPT-5 Codex",
-          "vendor": "openai",
-          "url": "results/02-vinylformac-replica/outputs/gpt-5-codex/gpt-5-codex.html",
-          "run": {
-            "prompt": "02-vinylformac-replica",
-            "prompt_version": "1",
-            "provider": "openai",
-            "model": "gpt-5",
-            "mode": "codex",
-            "generated_at": "2026-08-04T13:59:28+08:00",
-            "entrypoint": "gpt-5-codex.html"
-          },
-          "score": null,
-          "review": null
-        },
-        {
-          "key": "gpt-6-astra-xhigh",
-          "model": "gpt-6-astra-xhigh",
-          "label": "GPT-6 Astra XHigh",
-          "vendor": "openai",
-          "url": "results/02-vinylformac-replica/outputs/gpt-6-astra-xhigh/gpt-6-astra-xhigh.html",
-          "run": {
-            "prompt": "02-vinylformac-replica",
-            "prompt_version": "1",
-            "provider": "openai",
-            "model": "gpt-6-astra",
-            "mode": "astra-xhigh",
-            "generated_at": "2026-09-22T15:59:17+08:00",
-            "entrypoint": "gpt-6-astra-xhigh.html"
-          },
-          "score": null,
-          "review": null
-        },
-        {
-          "key": "kimi-k3",
-          "model": "kimi-k3",
-          "label": "Kimi K3",
-          "vendor": "moonshot",
-          "url": "results/02-vinylformac-replica/outputs/kimi-k3/kimi-k3.html",
-          "run": {
-            "prompt": "02-vinylformac-replica",
-            "prompt_version": "1",
-            "provider": "moonshot-ai",
-            "model": "kimi-k3",
-            "mode": "unknown",
-            "generated_at": "2026-08-04",
-            "entrypoint": "kimi-k3.html"
-          },
-          "score": null,
-          "review": null
-        }
-      ]
-    },
-    {
-      "id": "03-pelican-bicycle",
-      "title": "鹈鹕骑自行车",
-      "capability": "SVG 插画",
-      "question": "只给一句英文，模型能画清楚一个复杂动作吗？",
-      "summary": "Prompt 只有“画一只骑自行车的鹈鹕”。没有风格和构图提示，结果直接反映模型对主体、动作和矢量结构的理解。",
-      "promptVersion": 1,
-      "artifactType": "image",
-      "focus": [
-        "长喙、喉囊等特征能否让鹈鹕一眼可认",
-        "车轮、车架、车把和脚踏是否组成合理的自行车",
-        "身体、翅膀和脚的位置能否表达骑行动作",
-        "SVG 是否完整、独立、可缩放且没有外部依赖"
-      ],
-      "number": "03",
-      "prompt": "Generate an SVG of a pelican riding a bicycle",
-      "promptPath": "prompts/03-pelican-bicycle/prompt-v1.md",
-      "evaluationPath": "results/03-pelican-bicycle/evaluations/evaluation-v1.md",
-      "evaluation": {
-        "date": "unknown",
-        "method": "单次人工评测",
-        "environment": "unknown",
-        "dimensions": [
-          {
-            "name": "主题可识别性",
-            "focus": "能否一眼看出主体是鹈鹕，并且正在骑自行车",
-            "max": 30,
-            "weight": 30
-          },
-          {
-            "name": "SVG 完整性",
-            "focus": "是否为可独立打开的 SVG，图形主要由矢量元素组成",
-            "max": 25,
-            "weight": 25
-          },
-          {
-            "name": "造型与细节",
-            "focus": "鹈鹕的长喙、喉囊、羽翼，以及自行车轮组、车架和脚踏是否清楚",
-            "max": 25,
-            "weight": 25
-          },
-          {
-            "name": "构图与视觉完成度",
-            "focus": "层次、配色、动作姿态和整体画面是否完整",
-            "max": 20,
-            "weight": 20
-          }
-        ],
-        "conclusion": [
-          "GPT-5.6 Luna 主题清楚、结构完整，是目前唯一完成评分的结果。其余产物已保存，等待评分。"
-        ]
-      },
-      "thumb": "assets/thumbs/03-pelican-bicycle.png",
-      "results": [
-        {
-          "key": "gpt-5-6-luna",
-          "model": "gpt-5-6-luna",
-          "label": "GPT-5.6 Luna",
-          "vendor": "openai",
-          "url": "results/03-pelican-bicycle/outputs/gpt-5-6-luna/gpt-5-6-luna.svg",
-          "run": {
-            "prompt": "03-pelican-bicycle",
-            "prompt_version": "1",
-            "provider": "github-copilot",
-            "model": "gpt-5.6-luna",
-            "mode": "unknown",
-            "generated_at": "unknown",
-            "entrypoint": "gpt-5-6-luna.svg"
-          },
-          "score": {
-            "total": 94,
+          "version": 2,
+          "promptPath": "prompts/02-pelican-bicycle/prompt-v2.md",
+          "prompt": "Generate an animated SVG of a California brown pelican riding a bicycle. The bicycle must have spokes and a correctly shaped bicycle frame. The pelican must have its characteristic large pouch, and there should be a clear indication of feathers. The pelican must be clearly pedaling the bicycle. The image should show the full breeding plumage of the California brown pelican.\n\nThe animation must be built into the SVG itself using SMIL or CSS animations, and it must loop seamlessly. The wheels must spin and the pelican's legs must pedal in sync with the cranks. Use a viewBox, no JavaScript and no external files.",
+          "change": "v1 只有一句 “Generate an SVG of a pelican riding a bicycle”，这是静态版，社区里已经有人说它是“被解决的基准”。v2 改用社区里更难的进阶版，并要求做成会动的 SVG。",
+          "evaluationPath": "results/02-pelican-bicycle/v2/evaluation.md",
+          "evaluation": {
+            "date": "未评测",
+            "evaluator": "未评测",
+            "method": "人工观看，按硬性检查和评分档位打分",
+            "environment": "Chrome，本地 HTTP 服务；先以图片方式查看（和展示页一致，脚本不会执行），再在新窗口直接打开对照",
             "dimensions": [
               {
-                "name": "主题可识别性",
-                "value": 29,
-                "max": 30
+                "name": "鹈鹕特征与繁殖羽",
+                "focus": "长喙、大喉囊、羽毛示意，以及繁殖期羽色：黄白色头顶、深栗色后颈、红色喉囊",
+                "max": 5,
+                "weight": 25,
+                "levels": [
+                  {
+                    "score": 1,
+                    "text": "看不出是鹈鹕"
+                  },
+                  {
+                    "score": 2,
+                    "text": "是一只鸟，有喙和喉囊，但比例或特征不对"
+                  },
+                  {
+                    "score": 3,
+                    "text": "能认出是鹈鹕，有羽毛示意，但繁殖期羽色缺两项以上"
+                  },
+                  {
+                    "score": 4,
+                    "text": "特征明确，繁殖期羽色基本到位（最多缺一项）"
+                  },
+                  {
+                    "score": 5,
+                    "text": "一眼就是繁殖期的加州褐鹈鹕，羽毛层次清楚"
+                  }
+                ]
               },
               {
-                "name": "SVG 完整性",
-                "value": 25,
-                "max": 25
+                "name": "自行车结构",
+                "focus": "菱形车架、两个带辐条的车轮、车把、座椅、曲柄和踏板，连接关系正确",
+                "max": 5,
+                "weight": 20,
+                "levels": [
+                  {
+                    "score": 1,
+                    "text": "不像自行车"
+                  },
+                  {
+                    "score": 2,
+                    "text": "有两个轮子，但车架形状不对，或缺了很多部件"
+                  },
+                  {
+                    "score": 3,
+                    "text": "结构基本对、有辐条，少数部件缺失或连接不对"
+                  },
+                  {
+                    "score": 4,
+                    "text": "车架形状正确、部件齐全，只有小瑕疵"
+                  },
+                  {
+                    "score": 5,
+                    "text": "结构完全正确，比例合理，细节到位"
+                  }
+                ]
               },
               {
-                "name": "造型与细节",
-                "value": 23,
-                "max": 25
+                "name": "蹬踏联动",
+                "focus": "鹈鹕坐在车上，脚踩在踏板上，双腿随曲柄同步转动",
+                "max": 5,
+                "weight": 25,
+                "levels": [
+                  {
+                    "score": 1,
+                    "text": "没有骑车的姿态"
+                  },
+                  {
+                    "score": 2,
+                    "text": "坐在车上，但腿不动，或者脚不碰踏板"
+                  },
+                  {
+                    "score": 3,
+                    "text": "腿在动，但和曲柄不同步，或者脚明显脱离踏板"
+                  },
+                  {
+                    "score": 4,
+                    "text": "腿和曲柄基本同步，偶尔穿帮"
+                  },
+                  {
+                    "score": 5,
+                    "text": "全程同步，脚始终踩在踏板上，膝盖和脚踝的运动合理"
+                  }
+                ]
               },
               {
-                "name": "构图与视觉完成度",
-                "value": 17,
-                "max": 20
+                "name": "循环与流畅",
+                "focus": "车轮在转，动画无缝循环，节奏自然",
+                "max": 5,
+                "weight": 15,
+                "levels": [
+                  {
+                    "score": 1,
+                    "text": "只有很小的局部在动，车轮不转"
+                  },
+                  {
+                    "score": 2,
+                    "text": "能动，但循环接缝处明显跳一下"
+                  },
+                  {
+                    "score": 3,
+                    "text": "车轮和腿都在动，循环接缝轻微可见"
+                  },
+                  {
+                    "score": 4,
+                    "text": "无缝循环，动作顺畅"
+                  },
+                  {
+                    "score": 5,
+                    "text": "无缝循环，还有额外的生动细节（羽毛飘动、身体起伏、背景移动等）"
+                  }
+                ]
+              },
+              {
+                "name": "构图与完成度",
+                "focus": "画面完整、主体清楚、配色和层次协调",
+                "max": 5,
+                "weight": 15,
+                "levels": [
+                  {
+                    "score": 1,
+                    "text": "元素重叠错乱，看不清画的是什么"
+                  },
+                  {
+                    "score": 2,
+                    "text": "主体太小、被裁掉，或画面明显没画完"
+                  },
+                  {
+                    "score": 3,
+                    "text": "画面完整，但比较平淡"
+                  },
+                  {
+                    "score": 4,
+                    "text": "构图清楚，配色协调"
+                  },
+                  {
+                    "score": 5,
+                    "text": "完成度高，可以直接当插图用"
+                  }
+                ]
               }
-            ]
-          },
-          "review": {
-            "strengths": [
-              "主题可识别性：鹈鹕的长喙、喉囊、长颈和羽翼特征明确；双轮自行车、车架和骑行动作清楚。",
-              "SVG 完整性：文件可独立打开，使用渐变、路径、圆形和滤镜完成画面，没有外部资源依赖。",
-              "造型与细节：自行车包含轮辐、车架、车把、曲柄和脚踏，鹈鹕有分层羽毛和蹼足。",
-              "构图与视觉完成度：夕阳道路、远山、投影和速度线补充了运动感，主体比例和颜色层次协调。"
             ],
-            "weaknesses": [
-              "部分肢体连接仍是插画化处理。"
-            ]
-          }
+            "hardChecks": [
+              {
+                "name": "合法 SVG",
+                "how": "能直接用浏览器打开，根元素带 viewBox"
+              },
+              {
+                "name": "没有脚本",
+                "how": "没有 `<script>`，也没有 onload、onclick 之类的事件属性"
+              },
+              {
+                "name": "没有外部文件",
+                "how": "没有引用外部图片、字体或样式表"
+              },
+              {
+                "name": "内置循环动画",
+                "how": "动画写在 SVG 里（SMIL 或 CSS），并且一直循环"
+              }
+            ],
+            "checklist": [],
+            "conclusion": []
+          },
+          "stats": {
+            "results": 0,
+            "scored": 0,
+            "pending": 0,
+            "allScored": false
+          },
+          "results": []
         },
         {
-          "key": "gpt-5-6-sol-max",
-          "model": "gpt-5-6-sol-max",
-          "label": "GPT-5.6 Sol Max",
-          "vendor": "openai",
-          "url": "results/03-pelican-bicycle/outputs/gpt-5-6-sol-max/gpt-5-6-sol-max.svg",
-          "run": {
-            "prompt": "03-pelican-bicycle",
-            "prompt_version": "1",
-            "provider": "openai",
-            "model": "gpt-5-6",
-            "mode": "sol-max",
-            "generated_at": "2026-09-18T17:10:11+08:00",
-            "entrypoint": "gpt-5-6-sol-max.svg"
+          "version": 1,
+          "promptPath": "prompts/02-pelican-bicycle/prompt-v1.md",
+          "prompt": "Generate an SVG of a pelican riding a bicycle",
+          "change": null,
+          "evaluationPath": null,
+          "evaluation": null,
+          "stats": {
+            "results": 0,
+            "scored": 0,
+            "pending": 0,
+            "allScored": false
           },
-          "score": null,
-          "review": null
-        },
-        {
-          "key": "gpt-5-6-terra",
-          "model": "gpt-5-6-terra",
-          "label": "GPT-5.6 Terra",
-          "vendor": "openai",
-          "url": "results/03-pelican-bicycle/outputs/gpt-5-6-terra/gpt-5-6-terra.svg",
-          "run": {
-            "prompt": "03-pelican-bicycle",
-            "prompt_version": "1",
-            "provider": "github-copilot",
-            "model": "gpt-5.6-terra",
-            "mode": "unknown",
-            "generated_at": "2026-09-18T09:06:28Z",
-            "entrypoint": "gpt-5-6-terra.svg"
-          },
-          "score": null,
-          "review": null
-        },
-        {
-          "key": "gpt-6-astra-xhigh",
-          "model": "gpt-6-astra-xhigh",
-          "label": "GPT-6 Astra XHigh",
-          "vendor": "openai",
-          "url": "results/03-pelican-bicycle/outputs/gpt-6-astra-xhigh/gpt-6-astra-xhigh.svg",
-          "run": {
-            "prompt": "03-pelican-bicycle",
-            "prompt_version": "1",
-            "provider": "openai",
-            "model": "gpt-6-astra",
-            "mode": "astra-xhigh",
-            "generated_at": "2026-09-22T16:02:50+08:00",
-            "entrypoint": "gpt-6-astra-xhigh.svg"
-          },
-          "score": null,
-          "review": null
+          "results": []
         }
       ]
     }

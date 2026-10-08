@@ -5,14 +5,5 @@
     "google": { "label": "Google" },
     "moonshot": { "label": "Moonshot AI" }
   },
-  "models": {
-    "agy-gemini-3-6-flash": { "label": "Gemini 3.6 Flash", "vendor": "google" },
-    "claude-opus-4-8-max": { "label": "Claude Opus 4.8 Max", "vendor": "anthropic" },
-    "gpt-5-codex": { "label": "GPT-5 Codex", "vendor": "openai" },
-    "gpt-5-6-luna": { "label": "GPT-5.6 Luna", "vendor": "openai" },
-    "gpt-5-6-sol-max": { "label": "GPT-5.6 Sol Max", "vendor": "openai" },
-    "gpt-5-6-terra": { "label": "GPT-5.6 Terra", "vendor": "openai" },
-    "gpt-6-astra-xhigh": { "label": "GPT-6 Astra XHigh", "vendor": "openai" },
-    "kimi-k3": { "label": "Kimi K3", "vendor": "moonshot" }
-  }
+  "models": {}
 }

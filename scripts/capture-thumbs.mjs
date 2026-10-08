@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-// Captures one homepage thumbnail per experiment into assets/thumbs/<id>.png.
-// Uses the top-scored result (or the first one) and a local headless Chrome/Edge.
+// Captures a thumbnail for every page-type result into assets/thumbs/<test-id>/v<N>/<model>[--run-NN].png,
+// using a local headless Chrome/Edge. SVG results need no thumbnail: the page shows the SVG itself.
 // Screenshots are derived files; model artifacts are never modified.
 // Usage: node scripts/capture-thumbs.mjs [--force]   then rerun node scripts/build-data.mjs
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { createServer } from "node:http";
-import { extname, join, normalize } from "node:path";
+import { dirname, extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
@@ -39,24 +39,28 @@ await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
 const base = `http://127.0.0.1:${server.address().port}`;
 
 const { experiments } = JSON.parse(readFileSync(join(root, "data/lab.json"), "utf8"));
-mkdirSync(join(root, "assets/thumbs"), { recursive: true });
 
 for (const experiment of experiments) {
-  const target = join(root, "assets/thumbs", `${experiment.id}.png`);
-  const result = experiment.results[0];
-  if (!result) continue;
-  if (existsSync(target) && !force) {
-    console.log(`skip  ${experiment.id}（已存在，--force 可重新截图）`);
-    continue;
+  if (experiment.artifactType !== "page") continue;
+  for (const version of experiment.versions) {
+    for (const result of version.results) {
+      const relative = `assets/thumbs/${experiment.id}/v${version.version}/${result.key.replace("/", "--")}.png`;
+      const target = join(root, relative);
+      if (existsSync(target) && !force) {
+        console.log(`skip  ${relative}（已存在，--force 可重新截图）`);
+        continue;
+      }
+      mkdirSync(dirname(target), { recursive: true });
+      // 1440×900 CSS viewport rendered at 0.25x -> 360×225 image.
+      await promisify(execFile)(browser, [
+        "--headless=new", "--disable-gpu", "--hide-scrollbars", "--mute-audio",
+        "--force-device-scale-factor=0.25", "--window-size=1440,900",
+        "--virtual-time-budget=4000", `--screenshot=${target}`,
+        `${base}/${result.url}`
+      ], { timeout: 60000 });
+      console.log(`ok    ${relative}`);
+    }
   }
-  // 1440×900 CSS viewport rendered at 0.5x -> 720×450 image.
-  await promisify(execFile)(browser, [
-    "--headless=new", "--disable-gpu", "--hide-scrollbars", "--mute-audio",
-    "--force-device-scale-factor=0.5", "--window-size=1440,900",
-    "--virtual-time-budget=4000", `--screenshot=${target}`,
-    `${base}/${result.url}`
-  ], { timeout: 60000 });
-  console.log(`ok    ${experiment.id} ← ${result.key}`);
 }
 
 server.close();
