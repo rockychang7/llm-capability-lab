@@ -39,8 +39,8 @@
 
 | # | 测试能力 | 当前 Prompt | 历史 Prompt | 模型结果 | 评测 |
 |---|---|---|---|---|---|
-| 01 | 前端动画：照着详细需求，做一次从点火到入轨的火箭发射 | [prompt-v2](prompts/01-rocket-launch/prompt-v2.md) | [prompt-v1](prompts/01-rocket-launch/prompt-v1.md) | 暂无 | [评分标准 v2](results/01-rocket-launch/v2/evaluation.md)（未评测） |
-| 02 | SVG 动画：骑自行车的加州褐鹈鹕（进阶版 + 动画） | [prompt-v2](prompts/02-pelican-bicycle/prompt-v2.md) | [prompt-v1](prompts/02-pelican-bicycle/prompt-v1.md) | 暂无 | [评分标准 v2](results/02-pelican-bicycle/v2/evaluation.md)（未评测） |
+| 01 | 前端动画：照着详细需求，做一次从点火到入轨的火箭发射 | [prompt-v2](prompts/01-rocket-launch/prompt-v2.md) | [prompt-v1](prompts/01-rocket-launch/prompt-v1.md) | [Claude Opus 5.5 High](results/01-rocket-launch/v2/outputs/claude-opus-5-5-high/claude-opus-5-5-high.html) | [评分标准 v2](results/01-rocket-launch/v2/evaluation.md)（未评测） |
+| 02 | SVG 动画：骑自行车的加州褐鹈鹕（进阶版 + 动画） | [prompt-v2](prompts/02-pelican-bicycle/prompt-v2.md) | [prompt-v1](prompts/02-pelican-bicycle/prompt-v1.md) | [Claude Opus 5.5 High](results/02-pelican-bicycle/v2/outputs/claude-opus-5-5-high/claude-opus-5-5-high.svg) | [评分标准 v2](results/02-pelican-bicycle/v2/evaluation.md)（未评测） |
 
 v1 的旧结果和评测已从当前版本中移除，需要时可以在 git 历史（提交 `8917597` 及以前）里找到。
 

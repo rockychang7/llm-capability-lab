@@ -1,0 +1,12 @@
+prompt: 01-rocket-launch
+prompt_version: 2
+
+provider: anthropic
+model: claude-opus-5-5
+mode: high
+harness: claude-code
+web_access: yes
+turns: 1
+
+generated_at: 2026-10-09
+entrypoint: claude-opus-5-5-high.html

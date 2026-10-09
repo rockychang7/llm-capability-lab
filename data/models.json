@@ -5,5 +5,7 @@
     "google": { "label": "Google" },
     "moonshot": { "label": "Moonshot AI" }
   },
-  "models": {}
+  "models": {
+    "claude-opus-5-5-high": { "label": "Claude Opus 5.5 High", "vendor": "anthropic" }
+  }
 }
