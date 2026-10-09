@@ -1,0 +1,12 @@
+prompt: 02-pelican-bicycle
+prompt_version: 2
+
+provider: openai
+model: lab-gpt-5.6-sol
+mode: xhigh
+harness: codex-app
+web_access: no
+turns: 1
+
+generated_at: 2026-10-09
+entrypoint: gpt-5-6-sol-xhigh.svg
