@@ -1,0 +1,12 @@
+prompt: 01-rocket-launch
+prompt_version: 2
+
+provider: custom
+model: gpt-6.1-sol
+mode: xhigh
+harness: codex-desktop-subagent
+web_access: yes
+turns: 1
+
+generated_at: 2026-10-09
+entrypoint: gpt-6-1-sol-xhigh.html

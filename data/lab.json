@@ -361,10 +361,10 @@
             ]
           },
           "stats": {
-            "results": 1,
+            "results": 2,
             "scored": 1,
-            "pending": 0,
-            "allScored": true
+            "pending": 1,
+            "allScored": false
           },
           "results": [
             {
@@ -502,6 +502,31 @@
                   }
                 ]
               }
+            },
+            {
+              "key": "gpt-6-1-sol-xhigh",
+              "model": "gpt-6-1-sol-xhigh",
+              "label": "GPT 6.1 Sol Extra High",
+              "run": null,
+              "vendor": "openai",
+              "url": "results/01-rocket-launch/v2/outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.html",
+              "thumb": "assets/thumbs/01-rocket-launch/v2/gpt-6-1-sol-xhigh.png",
+              "record": {
+                "prompt": "01-rocket-launch",
+                "prompt_version": "2",
+                "provider": "custom",
+                "model": "gpt-6.1-sol",
+                "mode": "xhigh",
+                "harness": "codex-desktop-subagent",
+                "web_access": "yes",
+                "turns": "1",
+                "generated_at": "2026-10-09",
+                "entrypoint": "gpt-6-1-sol-xhigh.html"
+              },
+              "score": null,
+              "review": null,
+              "hardChecks": null,
+              "checklist": null
             }
           ]
         },
@@ -556,9 +581,9 @@
           "evaluationPath": "results/02-pelican-bicycle/v2/evaluation.md",
           "evaluation": {
             "date": "2026-10-09",
-            "evaluator": "Claude 子代理（与被测模型同为 Claude 系列，可能存在同源偏差）",
-            "method": "通读 SVG 源码并检查脚本、事件属性和外部引用；用无头 Chrome 以 `<img>` 方式渲染，确认图片模式下动画在跑；再把 SVG 内联进临时页面，用 `pauseAnimations()` + `setCurrentTime()` 定格 t=0、0.4、0.8、1.2、1.6、64 秒等时刻截图，并放大头部、身体、传动系统和前轮检查；另用脚本逐帧核对 48 个关键帧里双脚与踏板的位置、腿长是否恒定、首尾帧是否一致。被测产物由 Claude Opus 5.5（high）在本仓库的 Claude Code 中生成，评测者是同系列模型的子代理，打分可能偏宽，建议人工复核",
-            "environment": "本地 Chrome 无头模式（file:// 打开，原文件未改动），800×600 及局部放大视图",
+            "evaluator": "旧 Claude 记录来自原评测者：Claude 子代理（与被测模型同为 Claude 系列，可能存在同源偏差）；原分数、硬性检查值和点评保留，本轮不重评。新增 GPT 记录由 GPT 6.1 Sol Extra High 独立子代理给出（未参与生成，与生成者不同上下文，但同模型系列，仍可能存在同源偏差）",
+            "method": "旧 Claude 记录（保留原评测者的方法说明，未重新验证）：通读 SVG 源码并检查脚本、事件属性和外部引用；用无头 Chrome 以 `<img>` 方式渲染，确认图片模式下动画在跑；再把 SVG 内联进临时页面，用 `pauseAnimations()` + `setCurrentTime()` 定格 t=0、0.4、0.8、1.2、1.6、64 秒等时刻截图，并放大头部、身体、传动系统和前轮检查；另用脚本逐帧核对 48 个关键帧里双脚与踏板的位置、腿长是否恒定、首尾帧是否一致。被测产物由 Claude Opus 5.5（high）在本仓库的 Claude Code 中生成，评测者是同系列模型的子代理，打分可能偏宽，建议人工复核。新增 GPT 记录：先用脚本只提取“评分维度”整节及硬性检查表前两列，独立确定分数后才读取完整评测文件；未查看生成会话、生成者自检、其他实验或旧模型源码。解析新 SVG 检查合法性、viewBox、脚本、事件属性、外部引用和无限循环；用独立 Playwright 启动自有无头 Chrome，以 `<img>` 加载原文件字节，连续采样约 8.79 秒、81 帧，并阅览覆盖至少三个 2.4 秒循环的连续帧和局部放大图；再在仓库外临时内联页面用 `pauseAnimations()` / `setCurrentTime()` 检查 8 个循环内姿态及 2.399、2.400、2.401 秒接缝，按 0.005 秒间隔核对一个周期的 481 个姿态中双脚、踏板、曲柄端点及腿段长度。分数以 img 模式实际可见效果为准，内联定格和源码只作辅助",
+            "environment": "旧 Claude 记录：本地 Chrome 无头模式（file:// 打开，原文件未改动），800×600 及局部放大视图。新增 GPT 记录：Windows，本机 Chrome 154.0.8037.98 无头模式，Node.js 22.17.0、Playwright 1.62.1，独立浏览器进程及上下文，未使用共享 Playwright MCP 页面；本机临时 HTTP 服务原样提供 SVG，img 视口 1120×860、deviceScaleFactor=1，另检查局部放大和内联定格。验证脚本、页面和截图均在仓库外临时目录，SVG 未改动，SHA-256 为 `3998adef2a8c45e1668dd3cf0c7a7cecb29e57c79cc58ebe2d624b717db61cf5`；未验证其他浏览器、设备或长期运行",
             "dimensions": [
               {
                 "name": "鹈鹕特征与繁殖羽",
@@ -721,16 +746,110 @@
             ],
             "checklist": [],
             "conclusion": [
-              "目前只有一份结果，不排名次。Claude Opus 5.5 High 的 SVG 四项硬性检查全部通过，腿和曲柄的联动经逐帧核对完全同步，循环无缝且细节丰富，是一份完成度很高的结果。扣分在形象细节：羽毛图案偏机械、头部和大腿造型简化，自行车车把、链条等部件画得偏简略。评测者与被测模型同属 Claude 系列，以上分数建议由人工再看一遍确认。"
+              "现有两份结果均已评测：保留原 Claude 评测者给出的 Claude Opus 5.5 High 91 分，本轮独立评测的 GPT 6.1 Sol Extra High 为 96 分。按固定权重，GPT 总分为 5÷5×25 + 4÷5×20 + 5÷5×25 + 5÷5×15 + 5÷5×15 = 96。两者相差正好 5 分，依既定“总分相差 5 分以内算同一档”规则属于同档，不据此宣称 GPT 明显胜出。",
+              "原 Claude 记录认为其蹬踏同步、无缝循环及生动细节表现良好，扣分主要在羽毛和形象细节、自行车局部部件的简化；该分数、硬性检查值和点评原文全部保留，本轮未重新检查 Claude 产物。GPT 的四项硬性检查全部通过，img 模式下繁殖羽色和羽毛层次清楚，双脚、踏板与曲柄在观察中同步，车轮转动及道路移动持续循环，主要扣分是座椅被躯干遮挡、图片中支撑位置不够明确。",
+              "这是不同评测者对各一个原始样本的比较，不是同一评测者的盲评或重复试验。两位评测者分别与对应生成者同属 Claude / GPT 模型系列；GPT 虽与生成者不同上下文且未参与生成，仍可能有同源偏差，评测者尺度差异也可能影响分差。以上结果仅描述这两份产物，不代表模型的稳定能力或统计显著优势，建议同一人工评测者复核后再扩大样本。"
             ]
           },
           "stats": {
-            "results": 1,
-            "scored": 1,
+            "results": 2,
+            "scored": 2,
             "pending": 0,
             "allScored": true
           },
           "results": [
+            {
+              "key": "gpt-6-1-sol-xhigh",
+              "model": "gpt-6-1-sol-xhigh",
+              "label": "GPT 6.1 Sol Extra High",
+              "run": null,
+              "vendor": "openai",
+              "url": "results/02-pelican-bicycle/v2/outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.svg",
+              "thumb": null,
+              "record": {
+                "prompt": "02-pelican-bicycle",
+                "prompt_version": "2",
+                "provider": "custom",
+                "model": "gpt-6.1-sol",
+                "mode": "xhigh",
+                "harness": "codex-desktop-subagent",
+                "web_access": "yes",
+                "turns": "1",
+                "generated_at": "2026-10-09",
+                "entrypoint": "gpt-6-1-sol-xhigh.svg"
+              },
+              "score": {
+                "total": 96,
+                "dimensions": [
+                  {
+                    "name": "鹈鹕特征与繁殖羽",
+                    "value": 5,
+                    "max": 5,
+                    "weight": 25
+                  },
+                  {
+                    "name": "自行车结构",
+                    "value": 4,
+                    "max": 5,
+                    "weight": 20
+                  },
+                  {
+                    "name": "蹬踏联动",
+                    "value": 5,
+                    "max": 5,
+                    "weight": 25
+                  },
+                  {
+                    "name": "循环与流畅",
+                    "value": 5,
+                    "max": 5,
+                    "weight": 15
+                  },
+                  {
+                    "name": "构图与完成度",
+                    "value": 5,
+                    "max": 5,
+                    "weight": 15
+                  }
+                ]
+              },
+              "review": {
+                "strengths": [
+                  "鹈鹕特征与繁殖羽 5 分：img 画面中长喙末端带钩、大红色喉囊和弯曲长颈都清楚；黄色头顶、白色脸及颈侧、深栗色后颈、红色喉囊四项可见。翅膀有分层覆羽、浅色羽缘、长飞羽和展开的尾羽，层次清楚，达到既定 5 分档。",
+                  "自行车结构 4 分：菱形主车架和后轮三角明确，前叉接到前轮轴，两个车轮均有辐条，车把、牙盘、链条、两侧曲柄和踏板可辨，车轮与车架比例合理；座椅遮挡的问题见不足。",
+                  "蹬踏联动 5 分：至少三个 img 循环中，两腿交替弯伸，两脚保持踩在水平踏板上，未见可见脱离或曲柄相位漂移；远侧部件被车架、牙盘或近侧腿局部遮挡时，运动仍连续。辅助核对的 481 个姿态中，两踏板与各自曲柄端点最大偏差约 0.021 SVG 单位，双脚始终与各自踏板一起移动，足底与踏板上沿的接触间隙为 0，脚踝与小腿末端偏差为 0；两踏板保持相反相位，大腿长度约 118、小腿约 116，采样中长度变化均小于 0.01 SVG 单位，膝部和脚踝运动连贯。",
+                  "循环与流畅 5 分：img 连续帧中两轮辐条及气门标记确实转动，曲柄与腿持续蹬踏，道路标线持续向后移动；三个循环未见明显接缝或突跳。辅助定格的首尾姿态及 2.399、2.400、2.401 秒画面连续。鸟体本身没有额外起伏，但道路移动已满足既定 5 分档的背景移动条件，不因缺少其他加分细节扣分。",
+                  "构图与完成度 5 分：长喙、喉囊、尾羽和两个车轮均完整落在 viewBox 内，主体醒目，羽毛、车架、传动系统和海岸背景层次可辨；浅色海岸配青绿车架，红喉囊形成清楚的视觉重点，可直接作为完整插图使用。"
+                ],
+                "weaknesses": [
+                  "座椅及座杆上端被躯干遮住，img 画面不能清楚辨认座面和骑乘支撑位置。源码有座椅不等于图片中展示清楚，因此自行车结构不取 5 分；其余主要部件及连接完整合理，按既定“车架形状正确、部件齐全，只有小瑕疵”的 4 分档处理，不把遮挡误写成未绘制。",
+                  "本轮只验证本机 Chrome 的实际图片显示、三个以上短循环和辅助定格采样；其他浏览器、设备、帧率下的观感及长期运行未验证。有限采样不是对所有连续时刻的数学证明；未见可见脱脚或接缝，不据此宣称跨环境完全无误。"
+                ]
+              },
+              "hardChecks": [
+                {
+                  "name": "合法 SVG",
+                  "status": "pass",
+                  "note": ""
+                },
+                {
+                  "name": "没有脚本",
+                  "status": "pass",
+                  "note": ""
+                },
+                {
+                  "name": "没有外部文件",
+                  "status": "pass",
+                  "note": ""
+                },
+                {
+                  "name": "内置循环动画",
+                  "status": "pass",
+                  "note": ""
+                }
+              ],
+              "checklist": null
+            },
             {
               "key": "claude-opus-5-5-high",
               "model": "claude-opus-5-5-high",
