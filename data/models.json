@@ -7,6 +7,7 @@
   },
   "models": {
     "claude-opus-5-5-high": { "label": "Claude Opus 5.5 High", "vendor": "anthropic" },
+    "claude-opus-5-5-xhigh": { "label": "Claude Opus 5.5 Extra High", "vendor": "anthropic" },
     "gpt-6-1-sol-xhigh": { "label": "GPT 6.1 Sol Extra High", "vendor": "openai" }
   }
 }

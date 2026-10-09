@@ -1,0 +1,12 @@
+prompt: 02-pelican-bicycle
+prompt_version: 2
+
+provider: anthropic
+model: claude-opus-5-5
+mode: xhigh
+harness: claude-code
+web_access: yes
+turns: 1
+
+generated_at: 2026-10-09
+entrypoint: claude-opus-5-5-xhigh.svg
