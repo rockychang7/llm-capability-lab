@@ -1,0 +1,16 @@
+{
+  "name": "llm-capability-lab",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-site.mjs",
+    "test": "node --test tests/evaluation.test.mjs",
+    "check": "node scripts/build-data.mjs --check",
+    "verify": "node scripts/verify-artifacts.mjs",
+    "test:ui": "node scripts/test-ui.mjs",
+    "import-review": "node scripts/import-review.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}

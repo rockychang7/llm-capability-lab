@@ -6,6 +6,7 @@
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, posix } from "node:path";
 import { fileURLToPath } from "node:url";
+import { artifactDigest, parseProtocol, resolveChecks, acceptanceState, validateRecord, validateSession, sections } from "./evaluation.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const checkOnly = process.argv.includes("--check");
@@ -49,17 +50,6 @@ function parsePrompt(path) {
   };
 }
 
-function sections(markdown) {
-  const result = {};
-  let current = "_head";
-  for (const line of markdown.split("\n")) {
-    const heading = line.match(/^## (.+?)\s*$/);
-    if (heading) current = heading[1];
-    else (result[current] ??= []).push(line);
-  }
-  return result;
-}
-
 function tableRows(lines = []) {
   return lines
     .filter((line) => line.trim().startsWith("|"))
@@ -88,8 +78,8 @@ function criteriaTable(lines, fixed, where, label) {
   return { rows: rows.map((cells) => ({ fixed: cells.slice(0, fixed), values: cells.slice(fixed) })), columns };
 }
 
-function parseEvaluation(path, id, version) {
-  const text = readText(path);
+function parseEvaluation(path, id, version, override = null) {
+  const text = override ?? readText(path);
   const parts = sections(text);
   const where = path;
   const meta = {};
@@ -101,6 +91,26 @@ function parseEvaluation(path, id, version) {
   if (!promptLink || !promptLink.endsWith(`prompts/${id}/prompt-v${version}.md`)) {
     errors.push(`${where}: “Prompt”应链接到 prompts/${id}/prompt-v${version}.md`);
   }
+  if (meta["评测协议"] === "2") {
+    let protocol;
+    try {
+      protocol = parseProtocol(text, parsePrompt(`prompts/${id}/prompt-v${version}.md`).prompt);
+    } catch (error) {
+      errors.push(`${where}: ${error.message}`);
+      return null;
+    }
+    const history = (parts["历史评测信息"] ?? []).join("\n") + "\n" +
+      Object.entries(parts).filter(([name]) => name.startsWith("历史") && name !== "历史评测信息")
+        .map(([name, lines]) => `## ${name.slice(2)}\n${lines.join("\n")}`).join("\n");
+    const legacy = parts["历史评分维度"] ? parseEvaluation(path, id, version, history) : null;
+    return {
+      ...protocol, date: meta["评测日期"] ?? "未评测", evaluator: meta["评测者"] ?? "unknown",
+      method: meta["评测方式"] ?? "unknown", environment: meta["评测环境"] ?? "unknown",
+      conclusion: (parts["评测结论"] ?? []).join("\n").trim().split(/\n{2,}/).filter(Boolean),
+      scores: {}, reviews: {}, hardChecks: [], hardCheckResults: {}, checklist: [], checklistResults: {}, legacy
+    };
+  }
+  if (meta["评测协议"] && meta["评测协议"] !== "1") errors.push(`${where}: 不支持的评测协议`);
 
   // Dimensions table and per-dimension score levels ("**维度**" followed by "- N：说明").
   const dimensionLines = parts["评分维度"] ?? [];
@@ -213,6 +223,7 @@ function parseEvaluation(path, id, version) {
   const conclusion = (parts["评测结论"] ?? []).join("\n").trim().split(/\n{2,}/).filter(Boolean);
   return {
     date: meta["评测日期"] ?? "unknown",
+    protocol: 1,
     evaluator: meta["评测者"] ?? "unknown",
     method: meta["评测方式"] ?? "unknown",
     environment: meta["评测环境"] ?? "unknown",
@@ -301,10 +312,13 @@ function buildVersion(config, version) {
         url,
         thumb: existsSync(join(root, thumb)) ? thumb : null,
         record: run,
+        sha256: existsSync(join(root, url)) ? artifactDigest(join(root, url)) : null,
         score: evaluation?.scores[key] ?? null,
         review: evaluation?.reviews[key] ?? null,
         hardChecks: evaluation?.hardCheckResults[key] ?? null,
-        checklist: evaluation ? checklistSummary(evaluation.checklist, evaluation.checklistResults[key]) : null
+        checklist: evaluation ? checklistSummary(evaluation.checklist, evaluation.checklistResults[key]) : null,
+        legacyScore: evaluation?.legacy?.scores[key] ?? (evaluation?.protocol === 1 ? evaluation.scores[key] : null),
+        legacyReview: evaluation?.legacy?.reviews[key] ?? (evaluation?.protocol === 1 ? evaluation.reviews[key] : null)
       });
     }
   }
@@ -316,13 +330,43 @@ function buildVersion(config, version) {
       ...Object.keys(evaluation.hardCheckResults),
       ...Object.keys(evaluation.checklistResults)
     ];
+    if (evaluation.legacy) referenced.push(
+      ...Object.keys(evaluation.legacy.scores), ...Object.keys(evaluation.legacy.reviews),
+      ...Object.keys(evaluation.legacy.hardCheckResults), ...Object.keys(evaluation.legacy.checklistResults)
+    );
     for (const key of new Set(referenced)) {
       if (!results.some((result) => result.key === key)) errors.push(`${evaluationPath}: 引用了不存在的结果 ${key}`);
     }
   }
 
-  results.sort((a, b) => (b.score?.total ?? -1) - (a.score?.total ?? -1) || a.label.localeCompare(b.label) || a.key.localeCompare(b.key));
-  const scored = results.filter((result) => result.score).length;
+  if (evaluation?.protocol === 2) {
+    const hashes = Object.fromEntries(results.map((result) => [result.key, result.sha256]));
+    for (const record of evaluation.records) {
+      try { validateRecord(record, evaluation, hashes); }
+      catch (error) { errors.push(`${evaluationPath}: ${error.message}`); }
+    }
+    const sessionIds = new Set();
+    for (const session of evaluation.sessions) {
+      try {
+        if (sessionIds.has(session.id)) throw new Error("重复的人工会话 ID");
+        sessionIds.add(session.id);
+        if (session.experiment !== id || session.version !== version) throw new Error("比较记录的实验或 Prompt 版本不匹配");
+        validateSession(session, evaluation, hashes);
+      } catch (error) { errors.push(`${evaluationPath}: ${error.message}`); }
+    }
+    for (const result of results) {
+      const checks = resolveChecks(evaluation.criteria, evaluation.records, result.key);
+      result.acceptance = {
+        status: acceptanceState(checks), checks,
+        checked: checks.filter((check) => check.status !== "pending").length,
+        total: checks.length,
+        disputed: checks.filter((check) => check.disputed).length
+      };
+    }
+  }
+  results.sort((a, b) => a.label.localeCompare(b.label) || a.key.localeCompare(b.key));
+  const scored = results.filter((result) => result.acceptance && result.acceptance.status !== "pending").length;
+  const countStatus = (status) => results.filter((result) => result.acceptance?.status === status).length;
 
   return {
     version,
@@ -331,6 +375,7 @@ function buildVersion(config, version) {
     change,
     evaluationPath,
     evaluation: evaluation && {
+      protocol: evaluation.protocol,
       date: evaluation.date,
       evaluator: evaluation.evaluator,
       method: evaluation.method,
@@ -338,9 +383,20 @@ function buildVersion(config, version) {
       dimensions: evaluation.dimensions,
       hardChecks: evaluation.hardChecks,
       checklist: evaluation.checklist,
-      conclusion: evaluation.conclusion
+      conclusion: evaluation.conclusion,
+      ...(evaluation.protocol === 2 ? {
+        criteria: evaluation.criteria, fingerprint: evaluation.fingerprint, sessions: evaluation.sessions,
+        legacy: evaluation.legacy && {
+          date: evaluation.legacy.date, evaluator: evaluation.legacy.evaluator, method: evaluation.legacy.method,
+          environment: evaluation.legacy.environment, dimensions: evaluation.legacy.dimensions,
+          conclusion: evaluation.legacy.conclusion
+        }
+      } : {})
     },
-    stats: { results: results.length, scored, pending: results.length - scored, allScored: results.length > 0 && scored === results.length },
+    stats: { results: results.length, scored, pending: results.length - scored,
+      passed: countStatus("pass"), failed: countStatus("fail"), partial: countStatus("partial"),
+      historical: results.filter((result) => result.legacyScore).length,
+      allScored: false },
     results
   };
 }

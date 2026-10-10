@@ -1,3 +1,7 @@
-scripts/
-.git/
-.playwright-mcp/
+node_modules
+test-results
+tests
+.git
+.github
+.playwright-mcp
+dist

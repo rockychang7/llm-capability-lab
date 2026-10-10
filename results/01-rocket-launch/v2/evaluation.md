@@ -1,12 +1,563 @@
 # 01 · 火箭发射动画：评测（Prompt v2）
 
 - **Prompt**：[prompt-v2.md](../../../prompts/01-rocket-launch/prompt-v2.md)
+- **评测协议**：2
+- **标准冻结日期**：2026-10-10
+- **评测日期**：未完成人工复核
+- **评测者**：统一脚本检查；人工复核者尚未登记
+- **评测方式**：核心验收与细节覆盖分离；视觉质量采用匿名成对比较，不再输出加权总分。历史 AI 分数不参与当前结论。
+- **评测环境**：自动检查使用本机 Chrome、真实时钟；桌面 1440×900 / 手机 390×844，DPR 1、DPR 2、减少动态模式。具体版本和实测范围写在验收证据内；不宣称验证实体 60/120Hz 屏幕或音效听感。
+
+## 协议说明
+
+本次先冻结新标准，再对全部四份原始产物统一复核。旧记录完整保留在历史章节，不将旧“通过”迁移为新协议结论。Prompt 与产物不变。
+
+- 验收状态为 pass（通过）、partial（部分做到）、fail（未通过）、pending（待确认）。未测、不可判断、证据不足均为 pending，不折算为零分或半分。
+- core 项任一 fail 即核心未通过；没有 fail 但有 pending 则待确认；全部已确认但含 partial 则核心部分做到；所有 core 项 pass 才算核心通过。detail 项独立展示，不抵消核心失败。
+- 每条非 pending 结论必须有证据、检查者、时间、原始产物 SHA-256 和标准指纹。代码存在不等于画面可见；文字成功提示不等于完成所有视觉阶段。
+- 自动检查采用统一环境及同一脚本，真实时钟完整运行并复发；截图只证明采样时刻，不证明每一帧无闪烁或真实设备性能。
+- 人工复核先完整观看至少两遍，再逐项填写观察依据。视觉证据应注明点击后的秒数、阶段、视口及可见现象。精细要求允许部分做到，但核心功能缺失不得用精美画面抵消。
+- 匿名会话随机产物顺序、随机比较顺序和左右位置；每个维度允许左优、右优、持平、无法判断。封存前不展示身份和历史分数。匿名声明是评测者自述，不能保证评测者此前未见产物或从画面认不出来源。
+- 不同人工评测者或视口结论冲突时，该项回到 pending，保留双方证据，先复核再下结论。同一评测者、同一视口后续记录更新其旧结论，不同视口不相互覆盖。人工比较同一评测者、同一视口只汇总最新完整会话，旧会话保留，不重复计票。
+- 只有两边均核心通过的人工比较计入正式维度统计；其余比较保留但不纳入。仅报胜 / 负 / 平 / 无法判断次数，不计算跨维度或跨实验总榜。单次生成和单评测者不是统计显著的模型能力排名。
+- AI 可协助找证据，不能冒充人工。未来使用多 AI 评测者时，每个评测者必须独立评完整批产物，不读取旧分数，再由人工裁决分歧。
+
+## 验收标准
+
+| ID | 级别 | 方法 | 要求 | 验证方式 |
+|---|---|---|---|---|
+| standalone | core | auto | 单个自包含 HTML | 扫描 DOM 资源与 CSS 引用，并拦截完整运行及复发期间的资源请求；不替代休眠分支审计 |
+| runtime | core | auto | 点火后能到达成功状态 | 四种固定环境真实运行，120 秒内出现可见入轨成功提示；视觉阶段另由人工验收 |
+| replay | core | auto | 可复位并再次发射成功 | 每种环境成功后复位，成功提示消失，再点火跑到成功 |
+| console | core | auto | 无运行异常 | 收集加载、两次全程中的 pageerror 与 console.error；排除 favicon 404 |
+| viewport | core | auto | 桌面与手机无页面滚动条 | 待命、每 5 秒及成功时检查 document 与 body 的滚动范围 |
+| rocket | core | human | 可辨认的两级液体运载火箭 | 待命及分离阶段能辨认主体分段，不仅看源码 |
+| liftoff | core | human | 火箭确实离开发射台 | 完整观看点火及离台过程，不只核对文字 |
+| staging | core | human | 一级关机并与二级分离 | 观察关机、滑行、分离及脱落一级 |
+| second-engine | core | human | 二级点火继续飞行 | 观察分离后的二级尾焰 |
+| fairing | core | human | 两瓣整流罩脱落 | 观察展开、脱落及卫星显露 |
+| orbit | core | human | 到达地球轨道场景 | 观察弧形地球及轨道画面，不只看成功提示 |
+| deployment | core | human | 卫星从二级脱离 | 观察星箭分离 |
+| solar-panels | core | human | 卫星展开两块太阳能板 | 观察展开过程而非单张静态成品 |
+| continuous | core | human | 全程无明显黑屏或阶段跳断 | 两遍完整观看；记录可复现的时刻及环境 |
+| mobile-controls | core | human | 手机竖屏按钮和遥测可辨认可用 | 390×844 查看点火、复位及关键阶段；缩放预览不证明实体手机体验 |
+| proportions | detail | human | 箭长约直径 12 倍 | 待命画面测量估计比例 |
+| framing | detail | human | 待命火箭占画面高度一半以上 | 在桌面待命画面估计高度 |
+| fins | detail | human | 四片收拢栅格舵 | 画面逐个定位；不可见则注明 |
+| legs | detail | human | 四条收起着陆支腿 | 画面逐个定位 |
+| nozzles | detail | human | 至少三个钟形喷管 | 发动机舱可见部分核对数量 |
+| metal | detail | human | 圆柱明暗与金属高光 | 放大核对明暗及材质 |
+| seams | detail | human | 焊缝、面板缝与铆钉可辨 | 分别定位，缺少部分记 partial 并指明 |
+| soot | detail | human | 发动机舱烟熏痕迹 | 待命放大核对 |
+| frost | detail | human | 液氧段白霜可见 | 不以源码或改变对比度后的画面代替正常观看 |
+| vapor | detail | human | 侧面持续冒白汽并散开 | 观看待命动态 |
+| fictional | detail | human | 虚构任务名称、编号和徽标 | 核对画面，不能有真实机构标志 |
+| illumination | detail | human | 受光背光与暖色泛光灯对应 | 核对光源方向和箭体落光 |
+| dawn | detail | human | 黎明天空及云边缘光 | 待命核对天空、云与星星 |
+| pad | detail | human | 发射台和导流槽可辨 | 待命核对结构 |
+| landscape | detail | human | 远景场地和雾层可辨 | 核对地形、储罐及纵深 |
+| tower | detail | human | 勤务塔结构与障碍灯可辨 | 核对平台、爬梯与闪灯 |
+| countdown | detail | human | T-10 倒计时 | 点火后核对初始倒计时 |
+| deluge | detail | human | T-7 两侧白色水汽 | 核对时刻及两侧水幕 |
+| umbilicals | detail | human | 脐带臂依次摆开 | 核对不是同时消失 |
+| ignition | detail | human | 小火苗汇成分层火柱 | 观看点火变化及颜色层次 |
+| split-flame | detail | human | 导流槽排焰劈向两侧 | 正常帧率下观看两侧而非仅代码逻辑 |
+| ground-smoke | detail | human | 烟云贴地扩散遮住底部 | 观看点火及初段 |
+| fire-light | detail | human | 火光映亮环境并随火焰闪动 | 核对塔架、云底、台面和箭体 |
+| weight | detail | human | 前 2–3 秒缓慢抬升再加速 | 真实时钟观察位移变化 |
+| turn | detail | human | 离塔后平滑重力转弯 | 观察姿态连续性 |
+| tracking | detail | human | 跟随镜头中火箭偏下 | 核对飞行构图 |
+| mach-disks | detail | human | 低空尾焰菱形马赫盘可见 | 正常观看或放大定位，不只看绘制函数 |
+| plume-altitude | detail | human | 尾焰随高度变长变宽变淡 | 比较低空、高空及真空阶段 |
+| trail | detail | human | 低空浓密尾迹随风弯曲扩散 | 观看时序变化 |
+| sky-transition | detail | human | 穿云、天空变暗及星空出现 | 核对变化连续性 |
+| max-q | detail | human | Max-Q 云环和短暂抖动可見 | 观看该阶段，不只看遥测文字 |
+| earth-details | detail | human | 地球陆地、云、大气边缘和昼夜可辨 | 核对入轨细节；缺失部分注明 |
+| final-camera | detail | human | 收尾拉远并平静下来 | 观看部署后的镜头及动作 |
+| telemetry | detail | human | 遥测连续且与画面一致 | 核对各阶段及约 400 km / 7.7 km/s 最终值 |
+| timing | detail | human | 各段及总时长符合 Prompt | 真实计时离台、入轨、收尾；分别记录 12–15 / 40–50 / 10–20 / 60–90 秒 |
+| reduced-motion | detail | human | 减少动态时震动闪烁明显减弱 | 对照同阶段普通与减少动态画面；脚本只检查该模式能运行 |
+| high-dpr | detail | human | 高分屏画面清晰 | DPR 2 下放大核对；不能把画布尺寸当清晰度证据 |
+| physical-refresh | detail | human | 实体 60/120Hz 播放速度一致 | 实体设备真实计时；无设备即 pending，虚拟时间不可替代 |
+
+## 比较维度
+
+| ID | 维度 | 观察重点 |
+|---|---|---|
+| realism | 写实与材质 | 结构比例、金属、光照与地球细节；不把信息量多等同真实 |
+| effects | 火焰与烟雾 | 体积感、湍流、层次及环境联动 |
+| camera | 镜头与运动 | 重量感、加速、构图及阶段连续性 |
+
+## 验收记录
+
+脚本与人工导入只更新此记录块。无记录的检查保持 pending；正式记录绑定原始产物与冻结标准。
+
+```json
+[
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "standalone",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:41:30.369Z",
+    "sha256": "b9f1e2b1eb837f25d56e86adc96dd965e8b38c5c335a97ed72269c549a8a0092",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":70.12,\"samples\":[0.01,5.06,10.08,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.31,\"samples\":[0,5.3,10.28,15.28,20.26,25.27,30.31,35.29,40.29,45.29,50.27,55.28,60.26,65.26]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.94,\"samples\":[0,5.06,10.09,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.28,\"samples\":[0,5.3,10.29,15.25,20.23,25.25,30.28,35.27,40.26,45.26,50.25,55.26,60.24,65.24]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.94,\"samples\":[0.01,5.06,10.08,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.3,\"samples\":[0,5.29,10.28,15.26,20.25,25.26,30.29,35.28,40.27,45.27,50.26,55.27,60.26,65.25]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.01,\"samples\":[0.01,5.06,10.09,15.11,20.1,25.12,30.18,35.2,40.21,45.23,50.23,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":68.93,\"samples\":[0,5.28,10.28,15.28,20.26,25.27,30.27,35.26,40.22,45.21,50.21,55.19,60.19,65.18]}}],\"files\":[\"claude-opus-5-5-xhigh.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "runtime",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:41:30.370Z",
+    "sha256": "b9f1e2b1eb837f25d56e86adc96dd965e8b38c5c335a97ed72269c549a8a0092",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":70.12,\"samples\":[0.01,5.06,10.08,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.31,\"samples\":[0,5.3,10.28,15.28,20.26,25.27,30.31,35.29,40.29,45.29,50.27,55.28,60.26,65.26]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.94,\"samples\":[0,5.06,10.09,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.28,\"samples\":[0,5.3,10.29,15.25,20.23,25.25,30.28,35.27,40.26,45.26,50.25,55.26,60.24,65.24]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.94,\"samples\":[0.01,5.06,10.08,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.3,\"samples\":[0,5.29,10.28,15.26,20.25,25.26,30.29,35.28,40.27,45.27,50.26,55.27,60.26,65.25]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.01,\"samples\":[0.01,5.06,10.09,15.11,20.1,25.12,30.18,35.2,40.21,45.23,50.23,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":68.93,\"samples\":[0,5.28,10.28,15.28,20.26,25.27,30.27,35.26,40.22,45.21,50.21,55.19,60.19,65.18]}}],\"files\":[\"claude-opus-5-5-xhigh.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "replay",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:41:30.370Z",
+    "sha256": "b9f1e2b1eb837f25d56e86adc96dd965e8b38c5c335a97ed72269c549a8a0092",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":70.12,\"samples\":[0.01,5.06,10.08,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.31,\"samples\":[0,5.3,10.28,15.28,20.26,25.27,30.31,35.29,40.29,45.29,50.27,55.28,60.26,65.26]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.94,\"samples\":[0,5.06,10.09,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.28,\"samples\":[0,5.3,10.29,15.25,20.23,25.25,30.28,35.27,40.26,45.26,50.25,55.26,60.24,65.24]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.94,\"samples\":[0.01,5.06,10.08,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.3,\"samples\":[0,5.29,10.28,15.26,20.25,25.26,30.29,35.28,40.27,45.27,50.26,55.27,60.26,65.25]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.01,\"samples\":[0.01,5.06,10.09,15.11,20.1,25.12,30.18,35.2,40.21,45.23,50.23,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":68.93,\"samples\":[0,5.28,10.28,15.28,20.26,25.27,30.27,35.26,40.22,45.21,50.21,55.19,60.19,65.18]}}],\"files\":[\"claude-opus-5-5-xhigh.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "console",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:41:30.370Z",
+    "sha256": "b9f1e2b1eb837f25d56e86adc96dd965e8b38c5c335a97ed72269c549a8a0092",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":70.12,\"samples\":[0.01,5.06,10.08,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.31,\"samples\":[0,5.3,10.28,15.28,20.26,25.27,30.31,35.29,40.29,45.29,50.27,55.28,60.26,65.26]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.94,\"samples\":[0,5.06,10.09,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.28,\"samples\":[0,5.3,10.29,15.25,20.23,25.25,30.28,35.27,40.26,45.26,50.25,55.26,60.24,65.24]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.94,\"samples\":[0.01,5.06,10.08,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.3,\"samples\":[0,5.29,10.28,15.26,20.25,25.26,30.29,35.28,40.27,45.27,50.26,55.27,60.26,65.25]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.01,\"samples\":[0.01,5.06,10.09,15.11,20.1,25.12,30.18,35.2,40.21,45.23,50.23,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":68.93,\"samples\":[0,5.28,10.28,15.28,20.26,25.27,30.27,35.26,40.22,45.21,50.21,55.19,60.19,65.18]}}],\"files\":[\"claude-opus-5-5-xhigh.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "viewport",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:41:30.370Z",
+    "sha256": "b9f1e2b1eb837f25d56e86adc96dd965e8b38c5c335a97ed72269c549a8a0092",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":70.12,\"samples\":[0.01,5.06,10.08,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.31,\"samples\":[0,5.3,10.28,15.28,20.26,25.27,30.31,35.29,40.29,45.29,50.27,55.28,60.26,65.26]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.94,\"samples\":[0,5.06,10.09,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.28,\"samples\":[0,5.3,10.29,15.25,20.23,25.25,30.28,35.27,40.26,45.26,50.25,55.26,60.24,65.24]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.94,\"samples\":[0.01,5.06,10.08,15.11,20.09,25.11,30.17,35.19,40.21,45.22,50.22,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":69.3,\"samples\":[0,5.29,10.28,15.26,20.25,25.26,30.29,35.28,40.27,45.27,50.26,55.27,60.26,65.25]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.01,\"samples\":[0.01,5.06,10.09,15.11,20.1,25.12,30.18,35.2,40.21,45.23,50.23,55.2,60.19,65.18]},\"second\":{\"success\":true,\"seconds\":68.93,\"samples\":[0,5.28,10.28,15.28,20.26,25.27,30.27,35.26,40.22,45.21,50.21,55.19,60.19,65.18]}}],\"files\":[\"claude-opus-5-5-xhigh.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "standalone",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:44:13.078Z",
+    "sha256": "42076058bb04ee338f9cd948b4265b7d8602de5c886ec65a970fadcb480931be",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.95,\"samples\":[0.01,5.04,10.09,15.15,20.16,25.16,30.21,35.23,40.3,45.31,50.3,55.31,60.01,65.03,70.06,75.05]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.03,10.06,15.07,20.16,25.2,30.26,35.3,40.03,45.08,50.1,55.1,60.12,65.11,70.08,75.08]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.7,\"samples\":[0.01,5.31,10.3,15.27,20.28,25.28,30.01,35.03,40.05,45.07,50.05,55.06,60.08,65.1,70.13,75.12]},\"second\":{\"success\":true,\"seconds\":77.22,\"samples\":[0,5.31,10.01,15.03,20.09,25.17,30.22,35.25,40.3,45.03,50.07,55.06,60.07,65.08,70.05,75.03]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.07,10.12,15.17,20.19,25.19,30.24,35.26,40.33,45.02,50,55.02,60.03,65.06,70.09,75.08]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.02,10.05,15.07,20.16,25.2,30.25,35.29,40.03,45.07,50.09,55.09,60.11,65.1,70.07,75.07]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.06,10.12,15.17,20.18,25.19,30.24,35.25,40.32,45.02,50.32,55.02,60.03,65.05,70.08,75.07]},\"second\":{\"success\":true,\"seconds\":77.27,\"samples\":[0,5.05,10.07,15.09,20.18,25.22,30.28,35.32,40.05,45.09,50.12,55.12,60.13,65.12,70.09,75.1]}}],\"files\":[\"claude-opus-5-5-high.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "runtime",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:44:13.078Z",
+    "sha256": "42076058bb04ee338f9cd948b4265b7d8602de5c886ec65a970fadcb480931be",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.95,\"samples\":[0.01,5.04,10.09,15.15,20.16,25.16,30.21,35.23,40.3,45.31,50.3,55.31,60.01,65.03,70.06,75.05]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.03,10.06,15.07,20.16,25.2,30.26,35.3,40.03,45.08,50.1,55.1,60.12,65.11,70.08,75.08]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.7,\"samples\":[0.01,5.31,10.3,15.27,20.28,25.28,30.01,35.03,40.05,45.07,50.05,55.06,60.08,65.1,70.13,75.12]},\"second\":{\"success\":true,\"seconds\":77.22,\"samples\":[0,5.31,10.01,15.03,20.09,25.17,30.22,35.25,40.3,45.03,50.07,55.06,60.07,65.08,70.05,75.03]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.07,10.12,15.17,20.19,25.19,30.24,35.26,40.33,45.02,50,55.02,60.03,65.06,70.09,75.08]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.02,10.05,15.07,20.16,25.2,30.25,35.29,40.03,45.07,50.09,55.09,60.11,65.1,70.07,75.07]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.06,10.12,15.17,20.18,25.19,30.24,35.25,40.32,45.02,50.32,55.02,60.03,65.05,70.08,75.07]},\"second\":{\"success\":true,\"seconds\":77.27,\"samples\":[0,5.05,10.07,15.09,20.18,25.22,30.28,35.32,40.05,45.09,50.12,55.12,60.13,65.12,70.09,75.1]}}],\"files\":[\"claude-opus-5-5-high.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "replay",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:44:13.078Z",
+    "sha256": "42076058bb04ee338f9cd948b4265b7d8602de5c886ec65a970fadcb480931be",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.95,\"samples\":[0.01,5.04,10.09,15.15,20.16,25.16,30.21,35.23,40.3,45.31,50.3,55.31,60.01,65.03,70.06,75.05]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.03,10.06,15.07,20.16,25.2,30.26,35.3,40.03,45.08,50.1,55.1,60.12,65.11,70.08,75.08]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.7,\"samples\":[0.01,5.31,10.3,15.27,20.28,25.28,30.01,35.03,40.05,45.07,50.05,55.06,60.08,65.1,70.13,75.12]},\"second\":{\"success\":true,\"seconds\":77.22,\"samples\":[0,5.31,10.01,15.03,20.09,25.17,30.22,35.25,40.3,45.03,50.07,55.06,60.07,65.08,70.05,75.03]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.07,10.12,15.17,20.19,25.19,30.24,35.26,40.33,45.02,50,55.02,60.03,65.06,70.09,75.08]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.02,10.05,15.07,20.16,25.2,30.25,35.29,40.03,45.07,50.09,55.09,60.11,65.1,70.07,75.07]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.06,10.12,15.17,20.18,25.19,30.24,35.25,40.32,45.02,50.32,55.02,60.03,65.05,70.08,75.07]},\"second\":{\"success\":true,\"seconds\":77.27,\"samples\":[0,5.05,10.07,15.09,20.18,25.22,30.28,35.32,40.05,45.09,50.12,55.12,60.13,65.12,70.09,75.1]}}],\"files\":[\"claude-opus-5-5-high.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "console",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:44:13.078Z",
+    "sha256": "42076058bb04ee338f9cd948b4265b7d8602de5c886ec65a970fadcb480931be",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.95,\"samples\":[0.01,5.04,10.09,15.15,20.16,25.16,30.21,35.23,40.3,45.31,50.3,55.31,60.01,65.03,70.06,75.05]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.03,10.06,15.07,20.16,25.2,30.26,35.3,40.03,45.08,50.1,55.1,60.12,65.11,70.08,75.08]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.7,\"samples\":[0.01,5.31,10.3,15.27,20.28,25.28,30.01,35.03,40.05,45.07,50.05,55.06,60.08,65.1,70.13,75.12]},\"second\":{\"success\":true,\"seconds\":77.22,\"samples\":[0,5.31,10.01,15.03,20.09,25.17,30.22,35.25,40.3,45.03,50.07,55.06,60.07,65.08,70.05,75.03]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.07,10.12,15.17,20.19,25.19,30.24,35.26,40.33,45.02,50,55.02,60.03,65.06,70.09,75.08]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.02,10.05,15.07,20.16,25.2,30.25,35.29,40.03,45.07,50.09,55.09,60.11,65.1,70.07,75.07]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.06,10.12,15.17,20.18,25.19,30.24,35.25,40.32,45.02,50.32,55.02,60.03,65.05,70.08,75.07]},\"second\":{\"success\":true,\"seconds\":77.27,\"samples\":[0,5.05,10.07,15.09,20.18,25.22,30.28,35.32,40.05,45.09,50.12,55.12,60.13,65.12,70.09,75.1]}}],\"files\":[\"claude-opus-5-5-high.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "viewport",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:44:13.078Z",
+    "sha256": "42076058bb04ee338f9cd948b4265b7d8602de5c886ec65a970fadcb480931be",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.95,\"samples\":[0.01,5.04,10.09,15.15,20.16,25.16,30.21,35.23,40.3,45.31,50.3,55.31,60.01,65.03,70.06,75.05]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.03,10.06,15.07,20.16,25.2,30.26,35.3,40.03,45.08,50.1,55.1,60.12,65.11,70.08,75.08]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.7,\"samples\":[0.01,5.31,10.3,15.27,20.28,25.28,30.01,35.03,40.05,45.07,50.05,55.06,60.08,65.1,70.13,75.12]},\"second\":{\"success\":true,\"seconds\":77.22,\"samples\":[0,5.31,10.01,15.03,20.09,25.17,30.22,35.25,40.3,45.03,50.07,55.06,60.07,65.08,70.05,75.03]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.07,10.12,15.17,20.19,25.19,30.24,35.26,40.33,45.02,50,55.02,60.03,65.06,70.09,75.08]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.02,10.05,15.07,20.16,25.2,30.25,35.29,40.03,45.07,50.09,55.09,60.11,65.1,70.07,75.07]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.06,10.12,15.17,20.18,25.19,30.24,35.25,40.32,45.02,50.32,55.02,60.03,65.05,70.08,75.07]},\"second\":{\"success\":true,\"seconds\":77.27,\"samples\":[0,5.05,10.07,15.09,20.18,25.22,30.28,35.32,40.05,45.09,50.12,55.12,60.13,65.12,70.09,75.1]}}],\"files\":[\"claude-opus-5-5-high.html\"]}"
+  },
+  {
+    "key": "gpt-5-6-sol-xhigh",
+    "id": "standalone",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:46:48.328Z",
+    "sha256": "94bb21d78dd81c48b0b94e39f65f8c7dd18ec057a4e3be67afde5ed1f940e941",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.76,\"samples\":[0,5.02,10.02,15.03,20.04,25.07,30.09,35.13,40.17,45.19,50.24,55.23,60.31,65.03,70.05]},\"second\":{\"success\":true,\"seconds\":74.68,\"samples\":[0,5.02,10.01,15.06,20.08,25.14,30.14,35.15,40.19,45.24,50.26,55.25,60.27,65.29,70.3]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.78,\"samples\":[0,5.04,10.04,15.05,20.06,25.09,30.12,35.16,40.19,45.22,50.26,55.26,60.01,65.06,70.08]},\"second\":{\"success\":true,\"seconds\":74.65,\"samples\":[0,5.3,10.29,15.03,20.05,25.1,30.11,35.12,40.16,45.21,50.23,55.22,60.24,65.26,70.27]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.78,\"samples\":[0,5.04,10.04,15.05,20.06,25.09,30.11,35.15,40.19,45.21,50.26,55.25,60.32,65.05,70.07]},\"second\":{\"success\":true,\"seconds\":74.66,\"samples\":[0,5.31,10.3,15.03,20.06,25.11,30.12,35.13,40.17,45.21,50.24,55.23,60.25,65.27,70.28]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.17,\"samples\":[0,5.04,10.05,15.05,20.07,25.1,30.12,35.16,40.2,45.22,50.27,55.26,60.01,65.06,70.08]},\"second\":{\"success\":true,\"seconds\":74.32,\"samples\":[0,5.28,10.28,15.02,20.03,25.09,30.1,35.1,40.14,45.19,50.2,55.21,60.22,65.24,70.26]}}],\"files\":[\"gpt-5-6-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-5-6-sol-xhigh",
+    "id": "runtime",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:46:48.329Z",
+    "sha256": "94bb21d78dd81c48b0b94e39f65f8c7dd18ec057a4e3be67afde5ed1f940e941",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.76,\"samples\":[0,5.02,10.02,15.03,20.04,25.07,30.09,35.13,40.17,45.19,50.24,55.23,60.31,65.03,70.05]},\"second\":{\"success\":true,\"seconds\":74.68,\"samples\":[0,5.02,10.01,15.06,20.08,25.14,30.14,35.15,40.19,45.24,50.26,55.25,60.27,65.29,70.3]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.78,\"samples\":[0,5.04,10.04,15.05,20.06,25.09,30.12,35.16,40.19,45.22,50.26,55.26,60.01,65.06,70.08]},\"second\":{\"success\":true,\"seconds\":74.65,\"samples\":[0,5.3,10.29,15.03,20.05,25.1,30.11,35.12,40.16,45.21,50.23,55.22,60.24,65.26,70.27]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.78,\"samples\":[0,5.04,10.04,15.05,20.06,25.09,30.11,35.15,40.19,45.21,50.26,55.25,60.32,65.05,70.07]},\"second\":{\"success\":true,\"seconds\":74.66,\"samples\":[0,5.31,10.3,15.03,20.06,25.11,30.12,35.13,40.17,45.21,50.24,55.23,60.25,65.27,70.28]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.17,\"samples\":[0,5.04,10.05,15.05,20.07,25.1,30.12,35.16,40.2,45.22,50.27,55.26,60.01,65.06,70.08]},\"second\":{\"success\":true,\"seconds\":74.32,\"samples\":[0,5.28,10.28,15.02,20.03,25.09,30.1,35.1,40.14,45.19,50.2,55.21,60.22,65.24,70.26]}}],\"files\":[\"gpt-5-6-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-5-6-sol-xhigh",
+    "id": "replay",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:46:48.329Z",
+    "sha256": "94bb21d78dd81c48b0b94e39f65f8c7dd18ec057a4e3be67afde5ed1f940e941",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.76,\"samples\":[0,5.02,10.02,15.03,20.04,25.07,30.09,35.13,40.17,45.19,50.24,55.23,60.31,65.03,70.05]},\"second\":{\"success\":true,\"seconds\":74.68,\"samples\":[0,5.02,10.01,15.06,20.08,25.14,30.14,35.15,40.19,45.24,50.26,55.25,60.27,65.29,70.3]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.78,\"samples\":[0,5.04,10.04,15.05,20.06,25.09,30.12,35.16,40.19,45.22,50.26,55.26,60.01,65.06,70.08]},\"second\":{\"success\":true,\"seconds\":74.65,\"samples\":[0,5.3,10.29,15.03,20.05,25.1,30.11,35.12,40.16,45.21,50.23,55.22,60.24,65.26,70.27]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.78,\"samples\":[0,5.04,10.04,15.05,20.06,25.09,30.11,35.15,40.19,45.21,50.26,55.25,60.32,65.05,70.07]},\"second\":{\"success\":true,\"seconds\":74.66,\"samples\":[0,5.31,10.3,15.03,20.06,25.11,30.12,35.13,40.17,45.21,50.24,55.23,60.25,65.27,70.28]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.17,\"samples\":[0,5.04,10.05,15.05,20.07,25.1,30.12,35.16,40.2,45.22,50.27,55.26,60.01,65.06,70.08]},\"second\":{\"success\":true,\"seconds\":74.32,\"samples\":[0,5.28,10.28,15.02,20.03,25.09,30.1,35.1,40.14,45.19,50.2,55.21,60.22,65.24,70.26]}}],\"files\":[\"gpt-5-6-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-5-6-sol-xhigh",
+    "id": "console",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:46:48.329Z",
+    "sha256": "94bb21d78dd81c48b0b94e39f65f8c7dd18ec057a4e3be67afde5ed1f940e941",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.76,\"samples\":[0,5.02,10.02,15.03,20.04,25.07,30.09,35.13,40.17,45.19,50.24,55.23,60.31,65.03,70.05]},\"second\":{\"success\":true,\"seconds\":74.68,\"samples\":[0,5.02,10.01,15.06,20.08,25.14,30.14,35.15,40.19,45.24,50.26,55.25,60.27,65.29,70.3]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.78,\"samples\":[0,5.04,10.04,15.05,20.06,25.09,30.12,35.16,40.19,45.22,50.26,55.26,60.01,65.06,70.08]},\"second\":{\"success\":true,\"seconds\":74.65,\"samples\":[0,5.3,10.29,15.03,20.05,25.1,30.11,35.12,40.16,45.21,50.23,55.22,60.24,65.26,70.27]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.78,\"samples\":[0,5.04,10.04,15.05,20.06,25.09,30.11,35.15,40.19,45.21,50.26,55.25,60.32,65.05,70.07]},\"second\":{\"success\":true,\"seconds\":74.66,\"samples\":[0,5.31,10.3,15.03,20.06,25.11,30.12,35.13,40.17,45.21,50.24,55.23,60.25,65.27,70.28]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.17,\"samples\":[0,5.04,10.05,15.05,20.07,25.1,30.12,35.16,40.2,45.22,50.27,55.26,60.01,65.06,70.08]},\"second\":{\"success\":true,\"seconds\":74.32,\"samples\":[0,5.28,10.28,15.02,20.03,25.09,30.1,35.1,40.14,45.19,50.2,55.21,60.22,65.24,70.26]}}],\"files\":[\"gpt-5-6-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-5-6-sol-xhigh",
+    "id": "viewport",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:46:48.329Z",
+    "sha256": "94bb21d78dd81c48b0b94e39f65f8c7dd18ec057a4e3be67afde5ed1f940e941",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.76,\"samples\":[0,5.02,10.02,15.03,20.04,25.07,30.09,35.13,40.17,45.19,50.24,55.23,60.31,65.03,70.05]},\"second\":{\"success\":true,\"seconds\":74.68,\"samples\":[0,5.02,10.01,15.06,20.08,25.14,30.14,35.15,40.19,45.24,50.26,55.25,60.27,65.29,70.3]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.78,\"samples\":[0,5.04,10.04,15.05,20.06,25.09,30.12,35.16,40.19,45.22,50.26,55.26,60.01,65.06,70.08]},\"second\":{\"success\":true,\"seconds\":74.65,\"samples\":[0,5.3,10.29,15.03,20.05,25.1,30.11,35.12,40.16,45.21,50.23,55.22,60.24,65.26,70.27]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.78,\"samples\":[0,5.04,10.04,15.05,20.06,25.09,30.11,35.15,40.19,45.21,50.26,55.25,60.32,65.05,70.07]},\"second\":{\"success\":true,\"seconds\":74.66,\"samples\":[0,5.31,10.3,15.03,20.06,25.11,30.12,35.13,40.17,45.21,50.24,55.23,60.25,65.27,70.28]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.17,\"samples\":[0,5.04,10.05,15.05,20.07,25.1,30.12,35.16,40.2,45.22,50.27,55.26,60.01,65.06,70.08]},\"second\":{\"success\":true,\"seconds\":74.32,\"samples\":[0,5.28,10.28,15.02,20.03,25.09,30.1,35.1,40.14,45.19,50.2,55.21,60.22,65.24,70.26]}}],\"files\":[\"gpt-5-6-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-6-1-sol-xhigh",
+    "id": "standalone",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:49:31.923Z",
+    "sha256": "a7d94a526261dd09f0449f7ddd4c37f74e5d1e7db67df10fb03af6c75c3b00af",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.54,\"samples\":[0,5.32,10.02,15.04,20.03,25.06,30.08,35.06,40.07,45.08,50.08,55.08,60.07,65.11,70.1,75.1]},\"second\":{\"success\":true,\"seconds\":78.75,\"samples\":[0,5,10.01,15.02,20.01,25.01,30.01,35.02,40.31,45.02,50.01,55.31,60.03,65.01,70.3,75.3]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.51,\"samples\":[0.01,5.3,10.29,15.32,20.3,25.02,30.04,35.03,40.03,45.04,50.04,55.04,60.03,65.07,70.06,75.06]},\"second\":{\"success\":true,\"seconds\":78.75,\"samples\":[0,5.31,10.29,15.3,20.3,25.3,30.3,35.29,40.28,45.28,50.27,55.29,60.3,65.3,70.29,75.32]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.53,\"samples\":[0,5.31,10.01,15.03,20.02,25.05,30.07,35.05,40.06,45.07,50.07,55.07,60.06,65.1,70.09,75.09]},\"second\":{\"success\":true,\"seconds\":78.72,\"samples\":[0,5.3,10.31,15.01,20.31,25.31,30.3,35.01,40.31,45.01,50.32,55.3,60.02,65.31,70.29,75.28]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":77.28,\"samples\":[0,5.3,10.31,15.02,20.32,25.03,30.06,35.04,40.05,45.05,50.06,55.06,60.05,65.08,70.08,75.08]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.01,10.31,15.03,20.03,25.03,30.03,35.04,40.03,45.02,50.02,55.02,60.04,65.05,70.04,75.06]}}],\"files\":[\"gpt-6-1-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-6-1-sol-xhigh",
+    "id": "runtime",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:49:31.923Z",
+    "sha256": "a7d94a526261dd09f0449f7ddd4c37f74e5d1e7db67df10fb03af6c75c3b00af",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.54,\"samples\":[0,5.32,10.02,15.04,20.03,25.06,30.08,35.06,40.07,45.08,50.08,55.08,60.07,65.11,70.1,75.1]},\"second\":{\"success\":true,\"seconds\":78.75,\"samples\":[0,5,10.01,15.02,20.01,25.01,30.01,35.02,40.31,45.02,50.01,55.31,60.03,65.01,70.3,75.3]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.51,\"samples\":[0.01,5.3,10.29,15.32,20.3,25.02,30.04,35.03,40.03,45.04,50.04,55.04,60.03,65.07,70.06,75.06]},\"second\":{\"success\":true,\"seconds\":78.75,\"samples\":[0,5.31,10.29,15.3,20.3,25.3,30.3,35.29,40.28,45.28,50.27,55.29,60.3,65.3,70.29,75.32]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.53,\"samples\":[0,5.31,10.01,15.03,20.02,25.05,30.07,35.05,40.06,45.07,50.07,55.07,60.06,65.1,70.09,75.09]},\"second\":{\"success\":true,\"seconds\":78.72,\"samples\":[0,5.3,10.31,15.01,20.31,25.31,30.3,35.01,40.31,45.01,50.32,55.3,60.02,65.31,70.29,75.28]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":77.28,\"samples\":[0,5.3,10.31,15.02,20.32,25.03,30.06,35.04,40.05,45.05,50.06,55.06,60.05,65.08,70.08,75.08]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.01,10.31,15.03,20.03,25.03,30.03,35.04,40.03,45.02,50.02,55.02,60.04,65.05,70.04,75.06]}}],\"files\":[\"gpt-6-1-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-6-1-sol-xhigh",
+    "id": "replay",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:49:31.923Z",
+    "sha256": "a7d94a526261dd09f0449f7ddd4c37f74e5d1e7db67df10fb03af6c75c3b00af",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.54,\"samples\":[0,5.32,10.02,15.04,20.03,25.06,30.08,35.06,40.07,45.08,50.08,55.08,60.07,65.11,70.1,75.1]},\"second\":{\"success\":true,\"seconds\":78.75,\"samples\":[0,5,10.01,15.02,20.01,25.01,30.01,35.02,40.31,45.02,50.01,55.31,60.03,65.01,70.3,75.3]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.51,\"samples\":[0.01,5.3,10.29,15.32,20.3,25.02,30.04,35.03,40.03,45.04,50.04,55.04,60.03,65.07,70.06,75.06]},\"second\":{\"success\":true,\"seconds\":78.75,\"samples\":[0,5.31,10.29,15.3,20.3,25.3,30.3,35.29,40.28,45.28,50.27,55.29,60.3,65.3,70.29,75.32]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.53,\"samples\":[0,5.31,10.01,15.03,20.02,25.05,30.07,35.05,40.06,45.07,50.07,55.07,60.06,65.1,70.09,75.09]},\"second\":{\"success\":true,\"seconds\":78.72,\"samples\":[0,5.3,10.31,15.01,20.31,25.31,30.3,35.01,40.31,45.01,50.32,55.3,60.02,65.31,70.29,75.28]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":77.28,\"samples\":[0,5.3,10.31,15.02,20.32,25.03,30.06,35.04,40.05,45.05,50.06,55.06,60.05,65.08,70.08,75.08]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.01,10.31,15.03,20.03,25.03,30.03,35.04,40.03,45.02,50.02,55.02,60.04,65.05,70.04,75.06]}}],\"files\":[\"gpt-6-1-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-6-1-sol-xhigh",
+    "id": "console",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:49:31.923Z",
+    "sha256": "a7d94a526261dd09f0449f7ddd4c37f74e5d1e7db67df10fb03af6c75c3b00af",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.54,\"samples\":[0,5.32,10.02,15.04,20.03,25.06,30.08,35.06,40.07,45.08,50.08,55.08,60.07,65.11,70.1,75.1]},\"second\":{\"success\":true,\"seconds\":78.75,\"samples\":[0,5,10.01,15.02,20.01,25.01,30.01,35.02,40.31,45.02,50.01,55.31,60.03,65.01,70.3,75.3]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.51,\"samples\":[0.01,5.3,10.29,15.32,20.3,25.02,30.04,35.03,40.03,45.04,50.04,55.04,60.03,65.07,70.06,75.06]},\"second\":{\"success\":true,\"seconds\":78.75,\"samples\":[0,5.31,10.29,15.3,20.3,25.3,30.3,35.29,40.28,45.28,50.27,55.29,60.3,65.3,70.29,75.32]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.53,\"samples\":[0,5.31,10.01,15.03,20.02,25.05,30.07,35.05,40.06,45.07,50.07,55.07,60.06,65.1,70.09,75.09]},\"second\":{\"success\":true,\"seconds\":78.72,\"samples\":[0,5.3,10.31,15.01,20.31,25.31,30.3,35.01,40.31,45.01,50.32,55.3,60.02,65.31,70.29,75.28]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":77.28,\"samples\":[0,5.3,10.31,15.02,20.32,25.03,30.06,35.04,40.05,45.05,50.06,55.06,60.05,65.08,70.08,75.08]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.01,10.31,15.03,20.03,25.03,30.03,35.04,40.03,45.02,50.02,55.02,60.04,65.05,70.04,75.06]}}],\"files\":[\"gpt-6-1-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-6-1-sol-xhigh",
+    "id": "viewport",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T14:49:31.923Z",
+    "sha256": "a7d94a526261dd09f0449f7ddd4c37f74e5d1e7db67df10fb03af6c75c3b00af",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.54,\"samples\":[0,5.32,10.02,15.04,20.03,25.06,30.08,35.06,40.07,45.08,50.08,55.08,60.07,65.11,70.1,75.1]},\"second\":{\"success\":true,\"seconds\":78.75,\"samples\":[0,5,10.01,15.02,20.01,25.01,30.01,35.02,40.31,45.02,50.01,55.31,60.03,65.01,70.3,75.3]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.51,\"samples\":[0.01,5.3,10.29,15.32,20.3,25.02,30.04,35.03,40.03,45.04,50.04,55.04,60.03,65.07,70.06,75.06]},\"second\":{\"success\":true,\"seconds\":78.75,\"samples\":[0,5.31,10.29,15.3,20.3,25.3,30.3,35.29,40.28,45.28,50.27,55.29,60.3,65.3,70.29,75.32]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.53,\"samples\":[0,5.31,10.01,15.03,20.02,25.05,30.07,35.05,40.06,45.07,50.07,55.07,60.06,65.1,70.09,75.09]},\"second\":{\"success\":true,\"seconds\":78.72,\"samples\":[0,5.3,10.31,15.01,20.31,25.31,30.3,35.01,40.31,45.01,50.32,55.3,60.02,65.31,70.29,75.28]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":77.28,\"samples\":[0,5.3,10.31,15.02,20.32,25.03,30.06,35.04,40.05,45.05,50.06,55.06,60.05,65.08,70.08,75.08]},\"second\":{\"success\":true,\"seconds\":77.25,\"samples\":[0,5.01,10.31,15.03,20.03,25.03,30.03,35.04,40.03,45.02,50.02,55.02,60.04,65.05,70.04,75.06]}}],\"files\":[\"gpt-6-1-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "standalone",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:10:35.174Z",
+    "sha256": "b9f1e2b1eb837f25d56e86adc96dd965e8b38c5c335a97ed72269c549a8a0092",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.08,20.07,25.1,30.14,35.26,40.3,45.31,50.31,55.03,60.02,65.02,69.1]},\"second\":{\"success\":true,\"seconds\":69.14,\"samples\":[0,5.3,10.3,15.29,20.28,25.29,30.3,35.04,40.04,45.05,50.05,55.06,60.06,65.07,69.14]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.08,20.06,25.1,30.14,35.26,40.3,45.31,50.32,55.03,60.03,65.02,69.1]},\"second\":{\"success\":true,\"seconds\":69.13,\"samples\":[0,5.29,10.29,15.29,20.28,25.29,30.3,35.03,40.04,45.04,50.05,55.06,60.06,65.06,69.13]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.07,20.06,25.1,30.13,35.26,40.29,45.31,50.31,55.03,60.02,65.01,69.1]},\"second\":{\"success\":true,\"seconds\":69.15,\"samples\":[0,5.31,10.31,15.3,20.29,25.3,30.31,35.05,40.06,45.06,50.06,55.07,60.07,65.08,69.15]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.16,\"samples\":[0.01,5.07,10.07,15.08,20.06,25.1,30.14,35.26,40.29,45.31,50.31,55.03,60.03,65.01,68.16]},\"second\":{\"success\":true,\"seconds\":68.68,\"samples\":[0,5.01,10.31,15.29,20.29,25.25,30.24,35.28,40.28,45.26,50.26,55.25,60.24,65.26,68.68]}}],\"files\":[\"claude-opus-5-5-xhigh.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "runtime",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:10:35.175Z",
+    "sha256": "b9f1e2b1eb837f25d56e86adc96dd965e8b38c5c335a97ed72269c549a8a0092",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.08,20.07,25.1,30.14,35.26,40.3,45.31,50.31,55.03,60.02,65.02,69.1]},\"second\":{\"success\":true,\"seconds\":69.14,\"samples\":[0,5.3,10.3,15.29,20.28,25.29,30.3,35.04,40.04,45.05,50.05,55.06,60.06,65.07,69.14]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.08,20.06,25.1,30.14,35.26,40.3,45.31,50.32,55.03,60.03,65.02,69.1]},\"second\":{\"success\":true,\"seconds\":69.13,\"samples\":[0,5.29,10.29,15.29,20.28,25.29,30.3,35.03,40.04,45.04,50.05,55.06,60.06,65.06,69.13]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.07,20.06,25.1,30.13,35.26,40.29,45.31,50.31,55.03,60.02,65.01,69.1]},\"second\":{\"success\":true,\"seconds\":69.15,\"samples\":[0,5.31,10.31,15.3,20.29,25.3,30.31,35.05,40.06,45.06,50.06,55.07,60.07,65.08,69.15]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.16,\"samples\":[0.01,5.07,10.07,15.08,20.06,25.1,30.14,35.26,40.29,45.31,50.31,55.03,60.03,65.01,68.16]},\"second\":{\"success\":true,\"seconds\":68.68,\"samples\":[0,5.01,10.31,15.29,20.29,25.25,30.24,35.28,40.28,45.26,50.26,55.25,60.24,65.26,68.68]}}],\"files\":[\"claude-opus-5-5-xhigh.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "replay",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:10:35.175Z",
+    "sha256": "b9f1e2b1eb837f25d56e86adc96dd965e8b38c5c335a97ed72269c549a8a0092",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.08,20.07,25.1,30.14,35.26,40.3,45.31,50.31,55.03,60.02,65.02,69.1]},\"second\":{\"success\":true,\"seconds\":69.14,\"samples\":[0,5.3,10.3,15.29,20.28,25.29,30.3,35.04,40.04,45.05,50.05,55.06,60.06,65.07,69.14]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.08,20.06,25.1,30.14,35.26,40.3,45.31,50.32,55.03,60.03,65.02,69.1]},\"second\":{\"success\":true,\"seconds\":69.13,\"samples\":[0,5.29,10.29,15.29,20.28,25.29,30.3,35.03,40.04,45.04,50.05,55.06,60.06,65.06,69.13]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.07,20.06,25.1,30.13,35.26,40.29,45.31,50.31,55.03,60.02,65.01,69.1]},\"second\":{\"success\":true,\"seconds\":69.15,\"samples\":[0,5.31,10.31,15.3,20.29,25.3,30.31,35.05,40.06,45.06,50.06,55.07,60.07,65.08,69.15]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.16,\"samples\":[0.01,5.07,10.07,15.08,20.06,25.1,30.14,35.26,40.29,45.31,50.31,55.03,60.03,65.01,68.16]},\"second\":{\"success\":true,\"seconds\":68.68,\"samples\":[0,5.01,10.31,15.29,20.29,25.25,30.24,35.28,40.28,45.26,50.26,55.25,60.24,65.26,68.68]}}],\"files\":[\"claude-opus-5-5-xhigh.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "console",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:10:35.175Z",
+    "sha256": "b9f1e2b1eb837f25d56e86adc96dd965e8b38c5c335a97ed72269c549a8a0092",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.08,20.07,25.1,30.14,35.26,40.3,45.31,50.31,55.03,60.02,65.02,69.1]},\"second\":{\"success\":true,\"seconds\":69.14,\"samples\":[0,5.3,10.3,15.29,20.28,25.29,30.3,35.04,40.04,45.05,50.05,55.06,60.06,65.07,69.14]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.08,20.06,25.1,30.14,35.26,40.3,45.31,50.32,55.03,60.03,65.02,69.1]},\"second\":{\"success\":true,\"seconds\":69.13,\"samples\":[0,5.29,10.29,15.29,20.28,25.29,30.3,35.03,40.04,45.04,50.05,55.06,60.06,65.06,69.13]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.07,20.06,25.1,30.13,35.26,40.29,45.31,50.31,55.03,60.02,65.01,69.1]},\"second\":{\"success\":true,\"seconds\":69.15,\"samples\":[0,5.31,10.31,15.3,20.29,25.3,30.31,35.05,40.06,45.06,50.06,55.07,60.07,65.08,69.15]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.16,\"samples\":[0.01,5.07,10.07,15.08,20.06,25.1,30.14,35.26,40.29,45.31,50.31,55.03,60.03,65.01,68.16]},\"second\":{\"success\":true,\"seconds\":68.68,\"samples\":[0,5.01,10.31,15.29,20.29,25.25,30.24,35.28,40.28,45.26,50.26,55.25,60.24,65.26,68.68]}}],\"files\":[\"claude-opus-5-5-xhigh.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "viewport",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:10:35.175Z",
+    "sha256": "b9f1e2b1eb837f25d56e86adc96dd965e8b38c5c335a97ed72269c549a8a0092",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.08,20.07,25.1,30.14,35.26,40.3,45.31,50.31,55.03,60.02,65.02,69.1]},\"second\":{\"success\":true,\"seconds\":69.14,\"samples\":[0,5.3,10.3,15.29,20.28,25.29,30.3,35.04,40.04,45.05,50.05,55.06,60.06,65.07,69.14]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.08,20.06,25.1,30.14,35.26,40.3,45.31,50.32,55.03,60.03,65.02,69.1]},\"second\":{\"success\":true,\"seconds\":69.13,\"samples\":[0,5.29,10.29,15.29,20.28,25.29,30.3,35.03,40.04,45.04,50.05,55.06,60.06,65.06,69.13]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":69.1,\"samples\":[0.01,5.07,10.07,15.07,20.06,25.1,30.13,35.26,40.29,45.31,50.31,55.03,60.02,65.01,69.1]},\"second\":{\"success\":true,\"seconds\":69.15,\"samples\":[0,5.31,10.31,15.3,20.29,25.3,30.31,35.05,40.06,45.06,50.06,55.07,60.07,65.08,69.15]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":68.16,\"samples\":[0.01,5.07,10.07,15.08,20.06,25.1,30.14,35.26,40.29,45.31,50.31,55.03,60.03,65.01,68.16]},\"second\":{\"success\":true,\"seconds\":68.68,\"samples\":[0,5.01,10.31,15.29,20.29,25.25,30.24,35.28,40.28,45.26,50.26,55.25,60.24,65.26,68.68]}}],\"files\":[\"claude-opus-5-5-xhigh.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "standalone",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:13:17.592Z",
+    "sha256": "42076058bb04ee338f9cd948b4265b7d8602de5c886ec65a970fadcb480931be",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.66,\"samples\":[0.01,5.11,10.15,15.18,20.3,25.08,30.15,35.17,40.3,45.08,50.09,55.1,60.09,65.09,70.07,75.09,76.66]},\"second\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.02,10.03,15.06,20.07,25.07,30.07,35.07,40.16,45.17,50.14,55.13,60.12,65.1,70.11,75.1,76.97]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.08,10.12,15.15,20.27,25.05,30.13,35.14,40.27,45.05,50.07,55.07,60.06,65.06,70.04,75.06,76.97]},\"second\":{\"success\":true,\"seconds\":76.69,\"samples\":[0,5.31,10.02,15.01,20.31,25.3,30.29,35.28,40.12,45.17,50.18,55.16,60.16,65.14,70.13,75.12,76.69]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.99,\"samples\":[0.01,5.09,10.13,15.16,20.28,25.06,30.14,35.16,40.29,45.08,50.08,55.09,60.08,65.07,70.06,75.07,76.99]},\"second\":{\"success\":true,\"seconds\":76.74,\"samples\":[0,5.31,10.33,15.03,20.03,25.01,30.01,35.02,40.19,45.24,50.24,55.22,60.22,65.2,70.19,75.19,76.74]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.98,\"samples\":[0.01,5.08,10.12,15.16,20.27,25.06,30.13,35.15,40.28,45.06,50.07,55.08,60.07,65.07,70.05,75.07,76.98]},\"second\":{\"success\":true,\"seconds\":76.78,\"samples\":[0,5,10.02,15,20,25.03,30.05,35.07,40.23,45.28,50.28,55.27,60.26,65.24,70.23,75.23,76.78]}}],\"files\":[\"claude-opus-5-5-high.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "runtime",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:13:17.592Z",
+    "sha256": "42076058bb04ee338f9cd948b4265b7d8602de5c886ec65a970fadcb480931be",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.66,\"samples\":[0.01,5.11,10.15,15.18,20.3,25.08,30.15,35.17,40.3,45.08,50.09,55.1,60.09,65.09,70.07,75.09,76.66]},\"second\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.02,10.03,15.06,20.07,25.07,30.07,35.07,40.16,45.17,50.14,55.13,60.12,65.1,70.11,75.1,76.97]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.08,10.12,15.15,20.27,25.05,30.13,35.14,40.27,45.05,50.07,55.07,60.06,65.06,70.04,75.06,76.97]},\"second\":{\"success\":true,\"seconds\":76.69,\"samples\":[0,5.31,10.02,15.01,20.31,25.3,30.29,35.28,40.12,45.17,50.18,55.16,60.16,65.14,70.13,75.12,76.69]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.99,\"samples\":[0.01,5.09,10.13,15.16,20.28,25.06,30.14,35.16,40.29,45.08,50.08,55.09,60.08,65.07,70.06,75.07,76.99]},\"second\":{\"success\":true,\"seconds\":76.74,\"samples\":[0,5.31,10.33,15.03,20.03,25.01,30.01,35.02,40.19,45.24,50.24,55.22,60.22,65.2,70.19,75.19,76.74]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.98,\"samples\":[0.01,5.08,10.12,15.16,20.27,25.06,30.13,35.15,40.28,45.06,50.07,55.08,60.07,65.07,70.05,75.07,76.98]},\"second\":{\"success\":true,\"seconds\":76.78,\"samples\":[0,5,10.02,15,20,25.03,30.05,35.07,40.23,45.28,50.28,55.27,60.26,65.24,70.23,75.23,76.78]}}],\"files\":[\"claude-opus-5-5-high.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "replay",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:13:17.592Z",
+    "sha256": "42076058bb04ee338f9cd948b4265b7d8602de5c886ec65a970fadcb480931be",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.66,\"samples\":[0.01,5.11,10.15,15.18,20.3,25.08,30.15,35.17,40.3,45.08,50.09,55.1,60.09,65.09,70.07,75.09,76.66]},\"second\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.02,10.03,15.06,20.07,25.07,30.07,35.07,40.16,45.17,50.14,55.13,60.12,65.1,70.11,75.1,76.97]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.08,10.12,15.15,20.27,25.05,30.13,35.14,40.27,45.05,50.07,55.07,60.06,65.06,70.04,75.06,76.97]},\"second\":{\"success\":true,\"seconds\":76.69,\"samples\":[0,5.31,10.02,15.01,20.31,25.3,30.29,35.28,40.12,45.17,50.18,55.16,60.16,65.14,70.13,75.12,76.69]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.99,\"samples\":[0.01,5.09,10.13,15.16,20.28,25.06,30.14,35.16,40.29,45.08,50.08,55.09,60.08,65.07,70.06,75.07,76.99]},\"second\":{\"success\":true,\"seconds\":76.74,\"samples\":[0,5.31,10.33,15.03,20.03,25.01,30.01,35.02,40.19,45.24,50.24,55.22,60.22,65.2,70.19,75.19,76.74]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.98,\"samples\":[0.01,5.08,10.12,15.16,20.27,25.06,30.13,35.15,40.28,45.06,50.07,55.08,60.07,65.07,70.05,75.07,76.98]},\"second\":{\"success\":true,\"seconds\":76.78,\"samples\":[0,5,10.02,15,20,25.03,30.05,35.07,40.23,45.28,50.28,55.27,60.26,65.24,70.23,75.23,76.78]}}],\"files\":[\"claude-opus-5-5-high.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "console",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:13:17.592Z",
+    "sha256": "42076058bb04ee338f9cd948b4265b7d8602de5c886ec65a970fadcb480931be",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.66,\"samples\":[0.01,5.11,10.15,15.18,20.3,25.08,30.15,35.17,40.3,45.08,50.09,55.1,60.09,65.09,70.07,75.09,76.66]},\"second\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.02,10.03,15.06,20.07,25.07,30.07,35.07,40.16,45.17,50.14,55.13,60.12,65.1,70.11,75.1,76.97]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.08,10.12,15.15,20.27,25.05,30.13,35.14,40.27,45.05,50.07,55.07,60.06,65.06,70.04,75.06,76.97]},\"second\":{\"success\":true,\"seconds\":76.69,\"samples\":[0,5.31,10.02,15.01,20.31,25.3,30.29,35.28,40.12,45.17,50.18,55.16,60.16,65.14,70.13,75.12,76.69]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.99,\"samples\":[0.01,5.09,10.13,15.16,20.28,25.06,30.14,35.16,40.29,45.08,50.08,55.09,60.08,65.07,70.06,75.07,76.99]},\"second\":{\"success\":true,\"seconds\":76.74,\"samples\":[0,5.31,10.33,15.03,20.03,25.01,30.01,35.02,40.19,45.24,50.24,55.22,60.22,65.2,70.19,75.19,76.74]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.98,\"samples\":[0.01,5.08,10.12,15.16,20.27,25.06,30.13,35.15,40.28,45.06,50.07,55.08,60.07,65.07,70.05,75.07,76.98]},\"second\":{\"success\":true,\"seconds\":76.78,\"samples\":[0,5,10.02,15,20,25.03,30.05,35.07,40.23,45.28,50.28,55.27,60.26,65.24,70.23,75.23,76.78]}}],\"files\":[\"claude-opus-5-5-high.html\"]}"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "viewport",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:13:17.592Z",
+    "sha256": "42076058bb04ee338f9cd948b4265b7d8602de5c886ec65a970fadcb480931be",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.66,\"samples\":[0.01,5.11,10.15,15.18,20.3,25.08,30.15,35.17,40.3,45.08,50.09,55.1,60.09,65.09,70.07,75.09,76.66]},\"second\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.02,10.03,15.06,20.07,25.07,30.07,35.07,40.16,45.17,50.14,55.13,60.12,65.1,70.11,75.1,76.97]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.97,\"samples\":[0,5.08,10.12,15.15,20.27,25.05,30.13,35.14,40.27,45.05,50.07,55.07,60.06,65.06,70.04,75.06,76.97]},\"second\":{\"success\":true,\"seconds\":76.69,\"samples\":[0,5.31,10.02,15.01,20.31,25.3,30.29,35.28,40.12,45.17,50.18,55.16,60.16,65.14,70.13,75.12,76.69]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.99,\"samples\":[0.01,5.09,10.13,15.16,20.28,25.06,30.14,35.16,40.29,45.08,50.08,55.09,60.08,65.07,70.06,75.07,76.99]},\"second\":{\"success\":true,\"seconds\":76.74,\"samples\":[0,5.31,10.33,15.03,20.03,25.01,30.01,35.02,40.19,45.24,50.24,55.22,60.22,65.2,70.19,75.19,76.74]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":76.98,\"samples\":[0.01,5.08,10.12,15.16,20.27,25.06,30.13,35.15,40.28,45.06,50.07,55.08,60.07,65.07,70.05,75.07,76.98]},\"second\":{\"success\":true,\"seconds\":76.78,\"samples\":[0,5,10.02,15,20,25.03,30.05,35.07,40.23,45.28,50.28,55.27,60.26,65.24,70.23,75.23,76.78]}}],\"files\":[\"claude-opus-5-5-high.html\"]}"
+  },
+  {
+    "key": "gpt-5-6-sol-xhigh",
+    "id": "standalone",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:15:53.117Z",
+    "sha256": "94bb21d78dd81c48b0b94e39f65f8c7dd18ec057a4e3be67afde5ed1f940e941",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.6,\"samples\":[0,5.03,10.11,15.15,20.19,25.25,30.27,35.32,40.05,45.13,50.17,55.17,60.23,65.23,70.24,74.6]},\"second\":{\"success\":true,\"seconds\":74.76,\"samples\":[0,5.02,10,15.03,20.05,25.08,30.08,35.15,40.21,45.22,50.24,55.25,60.28,65.04,70.06,74.76]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.62,\"samples\":[0,5.04,10.13,15.16,20.2,25.26,30.28,35.01,40.06,45.14,50.18,55.19,60.24,65.24,70.25,74.62]},\"second\":{\"success\":true,\"seconds\":74.77,\"samples\":[0,5.31,10.02,15.04,20.06,25.09,30.09,35.16,40.22,45.23,50.25,55.26,60.29,65.06,70.07,74.77]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.59,\"samples\":[0.01,5.02,10.1,15.15,20.18,25.24,30.26,35.31,40.04,45.12,50.15,55.16,60.21,65.22,70.22,74.59]},\"second\":{\"success\":true,\"seconds\":74.75,\"samples\":[0,5.01,10.31,15.02,20.04,25.07,30.07,35.14,40.19,45.21,50.23,55.24,60.27,65.03,70.05,74.75]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.32,\"samples\":[0,5.01,10.01,15.31,20.03,25.04,30.03,35.06,40.07,45.15,50.19,55.2,60.24,65.25,70.26,74.32]},\"second\":{\"success\":true,\"seconds\":74.14,\"samples\":[0,5.31,10.02,15.04,20.07,25.09,30.1,35.15,40.21,45.24,50.26,55.27,60.29,65.05,70.07,74.14]}}],\"files\":[\"gpt-5-6-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-5-6-sol-xhigh",
+    "id": "runtime",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:15:53.117Z",
+    "sha256": "94bb21d78dd81c48b0b94e39f65f8c7dd18ec057a4e3be67afde5ed1f940e941",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.6,\"samples\":[0,5.03,10.11,15.15,20.19,25.25,30.27,35.32,40.05,45.13,50.17,55.17,60.23,65.23,70.24,74.6]},\"second\":{\"success\":true,\"seconds\":74.76,\"samples\":[0,5.02,10,15.03,20.05,25.08,30.08,35.15,40.21,45.22,50.24,55.25,60.28,65.04,70.06,74.76]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.62,\"samples\":[0,5.04,10.13,15.16,20.2,25.26,30.28,35.01,40.06,45.14,50.18,55.19,60.24,65.24,70.25,74.62]},\"second\":{\"success\":true,\"seconds\":74.77,\"samples\":[0,5.31,10.02,15.04,20.06,25.09,30.09,35.16,40.22,45.23,50.25,55.26,60.29,65.06,70.07,74.77]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.59,\"samples\":[0.01,5.02,10.1,15.15,20.18,25.24,30.26,35.31,40.04,45.12,50.15,55.16,60.21,65.22,70.22,74.59]},\"second\":{\"success\":true,\"seconds\":74.75,\"samples\":[0,5.01,10.31,15.02,20.04,25.07,30.07,35.14,40.19,45.21,50.23,55.24,60.27,65.03,70.05,74.75]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.32,\"samples\":[0,5.01,10.01,15.31,20.03,25.04,30.03,35.06,40.07,45.15,50.19,55.2,60.24,65.25,70.26,74.32]},\"second\":{\"success\":true,\"seconds\":74.14,\"samples\":[0,5.31,10.02,15.04,20.07,25.09,30.1,35.15,40.21,45.24,50.26,55.27,60.29,65.05,70.07,74.14]}}],\"files\":[\"gpt-5-6-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-5-6-sol-xhigh",
+    "id": "replay",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:15:53.117Z",
+    "sha256": "94bb21d78dd81c48b0b94e39f65f8c7dd18ec057a4e3be67afde5ed1f940e941",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.6,\"samples\":[0,5.03,10.11,15.15,20.19,25.25,30.27,35.32,40.05,45.13,50.17,55.17,60.23,65.23,70.24,74.6]},\"second\":{\"success\":true,\"seconds\":74.76,\"samples\":[0,5.02,10,15.03,20.05,25.08,30.08,35.15,40.21,45.22,50.24,55.25,60.28,65.04,70.06,74.76]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.62,\"samples\":[0,5.04,10.13,15.16,20.2,25.26,30.28,35.01,40.06,45.14,50.18,55.19,60.24,65.24,70.25,74.62]},\"second\":{\"success\":true,\"seconds\":74.77,\"samples\":[0,5.31,10.02,15.04,20.06,25.09,30.09,35.16,40.22,45.23,50.25,55.26,60.29,65.06,70.07,74.77]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.59,\"samples\":[0.01,5.02,10.1,15.15,20.18,25.24,30.26,35.31,40.04,45.12,50.15,55.16,60.21,65.22,70.22,74.59]},\"second\":{\"success\":true,\"seconds\":74.75,\"samples\":[0,5.01,10.31,15.02,20.04,25.07,30.07,35.14,40.19,45.21,50.23,55.24,60.27,65.03,70.05,74.75]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.32,\"samples\":[0,5.01,10.01,15.31,20.03,25.04,30.03,35.06,40.07,45.15,50.19,55.2,60.24,65.25,70.26,74.32]},\"second\":{\"success\":true,\"seconds\":74.14,\"samples\":[0,5.31,10.02,15.04,20.07,25.09,30.1,35.15,40.21,45.24,50.26,55.27,60.29,65.05,70.07,74.14]}}],\"files\":[\"gpt-5-6-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-5-6-sol-xhigh",
+    "id": "console",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:15:53.117Z",
+    "sha256": "94bb21d78dd81c48b0b94e39f65f8c7dd18ec057a4e3be67afde5ed1f940e941",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.6,\"samples\":[0,5.03,10.11,15.15,20.19,25.25,30.27,35.32,40.05,45.13,50.17,55.17,60.23,65.23,70.24,74.6]},\"second\":{\"success\":true,\"seconds\":74.76,\"samples\":[0,5.02,10,15.03,20.05,25.08,30.08,35.15,40.21,45.22,50.24,55.25,60.28,65.04,70.06,74.76]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.62,\"samples\":[0,5.04,10.13,15.16,20.2,25.26,30.28,35.01,40.06,45.14,50.18,55.19,60.24,65.24,70.25,74.62]},\"second\":{\"success\":true,\"seconds\":74.77,\"samples\":[0,5.31,10.02,15.04,20.06,25.09,30.09,35.16,40.22,45.23,50.25,55.26,60.29,65.06,70.07,74.77]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.59,\"samples\":[0.01,5.02,10.1,15.15,20.18,25.24,30.26,35.31,40.04,45.12,50.15,55.16,60.21,65.22,70.22,74.59]},\"second\":{\"success\":true,\"seconds\":74.75,\"samples\":[0,5.01,10.31,15.02,20.04,25.07,30.07,35.14,40.19,45.21,50.23,55.24,60.27,65.03,70.05,74.75]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.32,\"samples\":[0,5.01,10.01,15.31,20.03,25.04,30.03,35.06,40.07,45.15,50.19,55.2,60.24,65.25,70.26,74.32]},\"second\":{\"success\":true,\"seconds\":74.14,\"samples\":[0,5.31,10.02,15.04,20.07,25.09,30.1,35.15,40.21,45.24,50.26,55.27,60.29,65.05,70.07,74.14]}}],\"files\":[\"gpt-5-6-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-5-6-sol-xhigh",
+    "id": "viewport",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:15:53.117Z",
+    "sha256": "94bb21d78dd81c48b0b94e39f65f8c7dd18ec057a4e3be67afde5ed1f940e941",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.6,\"samples\":[0,5.03,10.11,15.15,20.19,25.25,30.27,35.32,40.05,45.13,50.17,55.17,60.23,65.23,70.24,74.6]},\"second\":{\"success\":true,\"seconds\":74.76,\"samples\":[0,5.02,10,15.03,20.05,25.08,30.08,35.15,40.21,45.22,50.24,55.25,60.28,65.04,70.06,74.76]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.62,\"samples\":[0,5.04,10.13,15.16,20.2,25.26,30.28,35.01,40.06,45.14,50.18,55.19,60.24,65.24,70.25,74.62]},\"second\":{\"success\":true,\"seconds\":74.77,\"samples\":[0,5.31,10.02,15.04,20.06,25.09,30.09,35.16,40.22,45.23,50.25,55.26,60.29,65.06,70.07,74.77]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.59,\"samples\":[0.01,5.02,10.1,15.15,20.18,25.24,30.26,35.31,40.04,45.12,50.15,55.16,60.21,65.22,70.22,74.59]},\"second\":{\"success\":true,\"seconds\":74.75,\"samples\":[0,5.01,10.31,15.02,20.04,25.07,30.07,35.14,40.19,45.21,50.23,55.24,60.27,65.03,70.05,74.75]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":74.32,\"samples\":[0,5.01,10.01,15.31,20.03,25.04,30.03,35.06,40.07,45.15,50.19,55.2,60.24,65.25,70.26,74.32]},\"second\":{\"success\":true,\"seconds\":74.14,\"samples\":[0,5.31,10.02,15.04,20.07,25.09,30.1,35.15,40.21,45.24,50.26,55.27,60.29,65.05,70.07,74.14]}}],\"files\":[\"gpt-5-6-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-6-1-sol-xhigh",
+    "id": "standalone",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:18:36.880Z",
+    "sha256": "a7d94a526261dd09f0449f7ddd4c37f74e5d1e7db67df10fb03af6c75c3b00af",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.59,\"samples\":[0,5.3,10.31,15.31,20.03,25.02,30.01,35.02,40.05,45.04,50.07,55.08,60.12,65.11,70.13,75.14,78.59]},\"second\":{\"success\":true,\"seconds\":78.72,\"samples\":[0,5.3,10.27,15.25,20.25,25.29,30.28,35.29,40.28,45.26,50.24,55.25,60.26,65.25,70.25,75.27,78.72]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.58,\"samples\":[0,5.29,10.3,15.29,20.02,25.01,30.31,35.01,40.03,45.03,50.06,55.07,60.11,65.1,70.12,75.12,78.58]},\"second\":{\"success\":true,\"seconds\":78.66,\"samples\":[0,5.01,10.29,15.3,20.28,25.29,30.27,35.27,40.26,45.24,50.22,55.2,60.2,65.2,70.21,75.22,78.66]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.61,\"samples\":[0,5.01,10.02,15.02,20.05,25.04,30.03,35.04,40.07,45.07,50.09,55.11,60.14,65.14,70.16,75.16,78.61]},\"second\":{\"success\":true,\"seconds\":78.63,\"samples\":[0,5.01,10.04,15.06,20.07,25.1,30.09,35.08,40.09,45.09,50.1,55.11,60.11,65.1,70.07,75.1,78.63]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":77.06,\"samples\":[0.01,5.03,10.04,15.04,20.07,25.09,30.11,35.14,40.14,45.13,50.14,55.12,60.16,65.15,70.17,75.17,77.06]},\"second\":{\"success\":true,\"seconds\":77.18,\"samples\":[0,5.03,10.31,15.31,20.31,25,30.31,35.3,40.3,45.29,50.3,55.31,60.31,65.31,70.29,75.28,77.18]}}],\"files\":[\"gpt-6-1-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-6-1-sol-xhigh",
+    "id": "runtime",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:18:36.880Z",
+    "sha256": "a7d94a526261dd09f0449f7ddd4c37f74e5d1e7db67df10fb03af6c75c3b00af",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.59,\"samples\":[0,5.3,10.31,15.31,20.03,25.02,30.01,35.02,40.05,45.04,50.07,55.08,60.12,65.11,70.13,75.14,78.59]},\"second\":{\"success\":true,\"seconds\":78.72,\"samples\":[0,5.3,10.27,15.25,20.25,25.29,30.28,35.29,40.28,45.26,50.24,55.25,60.26,65.25,70.25,75.27,78.72]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.58,\"samples\":[0,5.29,10.3,15.29,20.02,25.01,30.31,35.01,40.03,45.03,50.06,55.07,60.11,65.1,70.12,75.12,78.58]},\"second\":{\"success\":true,\"seconds\":78.66,\"samples\":[0,5.01,10.29,15.3,20.28,25.29,30.27,35.27,40.26,45.24,50.22,55.2,60.2,65.2,70.21,75.22,78.66]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.61,\"samples\":[0,5.01,10.02,15.02,20.05,25.04,30.03,35.04,40.07,45.07,50.09,55.11,60.14,65.14,70.16,75.16,78.61]},\"second\":{\"success\":true,\"seconds\":78.63,\"samples\":[0,5.01,10.04,15.06,20.07,25.1,30.09,35.08,40.09,45.09,50.1,55.11,60.11,65.1,70.07,75.1,78.63]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":77.06,\"samples\":[0.01,5.03,10.04,15.04,20.07,25.09,30.11,35.14,40.14,45.13,50.14,55.12,60.16,65.15,70.17,75.17,77.06]},\"second\":{\"success\":true,\"seconds\":77.18,\"samples\":[0,5.03,10.31,15.31,20.31,25,30.31,35.3,40.3,45.29,50.3,55.31,60.31,65.31,70.29,75.28,77.18]}}],\"files\":[\"gpt-6-1-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-6-1-sol-xhigh",
+    "id": "replay",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:18:36.880Z",
+    "sha256": "a7d94a526261dd09f0449f7ddd4c37f74e5d1e7db67df10fb03af6c75c3b00af",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.59,\"samples\":[0,5.3,10.31,15.31,20.03,25.02,30.01,35.02,40.05,45.04,50.07,55.08,60.12,65.11,70.13,75.14,78.59]},\"second\":{\"success\":true,\"seconds\":78.72,\"samples\":[0,5.3,10.27,15.25,20.25,25.29,30.28,35.29,40.28,45.26,50.24,55.25,60.26,65.25,70.25,75.27,78.72]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.58,\"samples\":[0,5.29,10.3,15.29,20.02,25.01,30.31,35.01,40.03,45.03,50.06,55.07,60.11,65.1,70.12,75.12,78.58]},\"second\":{\"success\":true,\"seconds\":78.66,\"samples\":[0,5.01,10.29,15.3,20.28,25.29,30.27,35.27,40.26,45.24,50.22,55.2,60.2,65.2,70.21,75.22,78.66]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.61,\"samples\":[0,5.01,10.02,15.02,20.05,25.04,30.03,35.04,40.07,45.07,50.09,55.11,60.14,65.14,70.16,75.16,78.61]},\"second\":{\"success\":true,\"seconds\":78.63,\"samples\":[0,5.01,10.04,15.06,20.07,25.1,30.09,35.08,40.09,45.09,50.1,55.11,60.11,65.1,70.07,75.1,78.63]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":77.06,\"samples\":[0.01,5.03,10.04,15.04,20.07,25.09,30.11,35.14,40.14,45.13,50.14,55.12,60.16,65.15,70.17,75.17,77.06]},\"second\":{\"success\":true,\"seconds\":77.18,\"samples\":[0,5.03,10.31,15.31,20.31,25,30.31,35.3,40.3,45.29,50.3,55.31,60.31,65.31,70.29,75.28,77.18]}}],\"files\":[\"gpt-6-1-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-6-1-sol-xhigh",
+    "id": "console",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:18:36.880Z",
+    "sha256": "a7d94a526261dd09f0449f7ddd4c37f74e5d1e7db67df10fb03af6c75c3b00af",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.59,\"samples\":[0,5.3,10.31,15.31,20.03,25.02,30.01,35.02,40.05,45.04,50.07,55.08,60.12,65.11,70.13,75.14,78.59]},\"second\":{\"success\":true,\"seconds\":78.72,\"samples\":[0,5.3,10.27,15.25,20.25,25.29,30.28,35.29,40.28,45.26,50.24,55.25,60.26,65.25,70.25,75.27,78.72]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.58,\"samples\":[0,5.29,10.3,15.29,20.02,25.01,30.31,35.01,40.03,45.03,50.06,55.07,60.11,65.1,70.12,75.12,78.58]},\"second\":{\"success\":true,\"seconds\":78.66,\"samples\":[0,5.01,10.29,15.3,20.28,25.29,30.27,35.27,40.26,45.24,50.22,55.2,60.2,65.2,70.21,75.22,78.66]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.61,\"samples\":[0,5.01,10.02,15.02,20.05,25.04,30.03,35.04,40.07,45.07,50.09,55.11,60.14,65.14,70.16,75.16,78.61]},\"second\":{\"success\":true,\"seconds\":78.63,\"samples\":[0,5.01,10.04,15.06,20.07,25.1,30.09,35.08,40.09,45.09,50.1,55.11,60.11,65.1,70.07,75.1,78.63]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":77.06,\"samples\":[0.01,5.03,10.04,15.04,20.07,25.09,30.11,35.14,40.14,45.13,50.14,55.12,60.16,65.15,70.17,75.17,77.06]},\"second\":{\"success\":true,\"seconds\":77.18,\"samples\":[0,5.03,10.31,15.31,20.31,25,30.31,35.3,40.3,45.29,50.3,55.31,60.31,65.31,70.29,75.28,77.18]}}],\"files\":[\"gpt-6-1-sol-xhigh.html\"]}"
+  },
+  {
+    "key": "gpt-6-1-sol-xhigh",
+    "id": "viewport",
+    "status": "pass",
+    "source": "auto",
+    "reviewer": "artifact-checker-v2",
+    "at": "2026-10-10T15:18:36.881Z",
+    "sha256": "a7d94a526261dd09f0449f7ddd4c37f74e5d1e7db67df10fb03af6c75c3b00af",
+    "fingerprint": "97658194b6a7ec268b25043501aa84357e5968afdf74a0256aaed03f3b6eeecf",
+    "evidence": "{\"browser\":\"154.0.8037.98\",\"platform\":\"win32\",\"node\":\"v22.17.0\",\"profiles\":[{\"name\":\"desktop\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"mobile\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"no-preference\"},{\"name\":\"dpr2\",\"viewport\":{\"width\":1440,\"height\":900},\"deviceScaleFactor\":2,\"reducedMotion\":\"no-preference\"},{\"name\":\"reduced\",\"viewport\":{\"width\":390,\"height\":844},\"deviceScaleFactor\":1,\"reducedMotion\":\"reduce\"}],\"clock\":\"real\",\"concurrency\":4,\"checkerSha256\":\"ce87ae646ff3963388e57750bbfcca8029d94ba205a8be679fb0d71b678166e8\",\"limit\":\"功能检查；不测实体帧率、视觉语义或音效\",\"observations\":[{\"profile\":\"desktop\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.59,\"samples\":[0,5.3,10.31,15.31,20.03,25.02,30.01,35.02,40.05,45.04,50.07,55.08,60.12,65.11,70.13,75.14,78.59]},\"second\":{\"success\":true,\"seconds\":78.72,\"samples\":[0,5.3,10.27,15.25,20.25,25.29,30.28,35.29,40.28,45.26,50.24,55.25,60.26,65.25,70.25,75.27,78.72]}},{\"profile\":\"mobile\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.58,\"samples\":[0,5.29,10.3,15.29,20.02,25.01,30.31,35.01,40.03,45.03,50.06,55.07,60.11,65.1,70.12,75.12,78.58]},\"second\":{\"success\":true,\"seconds\":78.66,\"samples\":[0,5.01,10.29,15.3,20.28,25.29,30.27,35.27,40.26,45.24,50.22,55.2,60.2,65.2,70.21,75.22,78.66]}},{\"profile\":\"dpr2\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":78.61,\"samples\":[0,5.01,10.02,15.02,20.05,25.04,30.03,35.04,40.07,45.07,50.09,55.11,60.14,65.14,70.16,75.16,78.61]},\"second\":{\"success\":true,\"seconds\":78.63,\"samples\":[0,5.01,10.04,15.06,20.07,25.1,30.09,35.08,40.09,45.09,50.1,55.11,60.11,65.1,70.07,75.1,78.63]}},{\"profile\":\"reduced\",\"runtime\":true,\"replay\":true,\"errors\":[],\"resources\":[],\"overflow\":[],\"first\":{\"success\":true,\"seconds\":77.06,\"samples\":[0.01,5.03,10.04,15.04,20.07,25.09,30.11,35.14,40.14,45.13,50.14,55.12,60.16,65.15,70.17,75.17,77.06]},\"second\":{\"success\":true,\"seconds\":77.18,\"samples\":[0,5.03,10.31,15.31,20.31,25,30.31,35.3,40.3,45.29,50.3,55.31,60.31,65.31,70.29,75.28,77.18]}}],\"files\":[\"gpt-6-1-sol-xhigh.html\"]}"
+  }
+]
+```
+
+## 人工比较
+
+只导入网站已封存的人工会话；浏览器本地草稿不是已发布结论。
+
+```json
+[]
+```
+
+## 评测结论
+
+协议 2 已冻结，全部结果进入统一复核。视觉核心验收和人工比较尚未完成，不发布当前总分或胜者。生成工具、联网权限并不完全相同，只比较这批原始样本，不把差异全部归因于模型。
+
+## 历史评测信息
+
+- **Prompt**：[prompt-v2.md](../../../prompts/01-rocket-launch/prompt-v2.md)
 - **评测日期**：2026-10-09；Claude Opus 5.5 Extra High、GPT 5.6 Sol Extra High 两列于 2026-10-09 补评
 - **评测者**：旧 Claude 记录来自原评测者：Claude 子代理（与被测模型同为 Claude 系列，可能存在同源偏差）；原分数、硬性检查值、需求勾选值和点评保留，本轮不重评。新增 GPT 6.1 记录由 GPT 6.1 Sol Extra High 独立子代理给出（未参与生成，与生成者不同上下文，但同模型系列，仍可能存在同源偏差）；主代理仅按其封存的最终报告整合文档，不改变分数。新增 Claude Opus 5.5 Extra High 一列由 Claude Opus 5.5 子代理评分：与被测产物是同一个模型，同源偏差风险最高；未查看生成会话或生成者自检，按既定标准逐条记分，建议人工复核。新增 GPT 5.6 Sol Extra High 一列由 GPT 5.6 Sol Extra High 独立子代理评分：未参与生成且使用独立上下文，但与被测产物是同一个模型，仍存在同源偏差；主代理仅按其封存报告整合，不改变分数
 - **评测方式**：旧 Claude 记录（保留原评测者的方法说明，未重新验证）：通读全部源码，再用无头 Chrome 截图逐段核对：注入脚本把页面时钟换成虚拟时间，按“点击点火后第 N 秒”截取待命、倒计时、水幕、脐带臂、点火、离台前 3 秒、离塔、穿云、Max-Q、一级关机与分离、二级点火、整流罩分离、入轨、星箭分离、入轨成功等 30 多帧，并测试“重新发射”后再发射一次。截图证明不了的部分（音效、真实 60/120Hz 下的流畅度、窗口实时缩放）只按源码判断，点评里注明。被测产物由 Claude Opus 5.5（high）在本仓库的 Claude Code 中生成，评测者是同系列模型的子代理，打分可能偏宽，建议人工复核。新增 GPT 6.1 记录：先只提取固定评分维度、档位、硬性检查前两列和需求清单前三列，未查看生成会话、生成者自检、其他实验或旧模型源码；独立封存分数后才读取完整评测文件。使用自有无头 Chrome 与 Playwright 进程，真实时钟下完整观看桌面发射、手机连续两次发射及复位、减弱动态桌面完整发射及复位，核对点火、离台、Max-Q、分离、入轨和遥测；另做真实窗口缩放、高分屏待命与倒计时抽查。桌面第二遍及手机高分屏序列使用虚拟时钟逐阶段核对，仅作为阶段与构图的辅助证据，不作为真实耗时、音效或设备帧率证据。同步长跳步出现的黑底未在真实时钟手机复核中复现，不据此判定原产物缺陷；未完成的检查在点评中明确注明。新增 Claude Opus 5.5 Extra High 记录：评分前已按要求通读完整评测文件（含另两列的分数和点评），并为校准“白霜”可见度看过 High 产物的待命帧；通读全部源码后，用注入虚拟时钟的临时副本（每帧 1/60 秒，避开页面自带的掉帧降画质逻辑）截取待命、T-9.5 至 T+65 共 50 余帧画布，另拍含界面层的全页截图（待命、T-1、入轨成功）和 390×844 竖屏 8 帧；再用逐帧完整绘制的脚本跑“发射→重新发射→再发射→再复位”，分别按 60 fps、120 fps、25 fps 和减少动态效果各跑一遍，记录遥测、按钮状态、页面报错以及画布是否整帧空白；马赫盘用关闭菱形绘制后的差分对比确认。音效、真实屏幕刷新率和窗口实时拖拽缩放只按源码判断。新增 GPT 5.6 记录：封存前只读取固定标准，未查看其他模型产物、旧分数、生成过程或生成者自检；使用真实时钟和 `requestAnimationFrame` 语义完整观看桌面正常动态、手机减弱动态及手机重放，逐段核对待命、倒计时、水幕、点火、离台、Max-Q、两级分离、整流罩分离、入轨、卫星部署、成功和重新发射，并检查源码、控制台、页面尺寸及 DPR 2 画布；全部新分数封存后才读取旧分数用于比较
 - **评测环境**：旧 Claude 记录：本地 Chrome 无头模式（file:// 打开临时副本，原文件未改动）；桌面 1280×800、1440×900 及 2 倍像素密度，手机 390×844（放在 iframe 里），另跑一遍 `--force-prefers-reduced-motion`；页面级报错用注入的 error/unhandledrejection/console.error 监听和 Chrome 控制台日志收集。新增 GPT 6.1 记录：Windows，本机 Chrome 无头模式、独立 Playwright 浏览器实例，file:// 打开原始 HTML；真实时钟完整运行使用桌面 1440×900、手机 390×844、deviceScaleFactor=1，减弱动态完整运行使用桌面 DPR1；DPR2 抽查待命、倒计时及窗口缩放，虚拟手机序列使用 DPR3。脚本、截图及记录均在仓库外临时目录，HTML 未改动，SHA-256 为 `a7d94a526261dd09f0449f7ddd4c37f74e5d1e7db67df10fb03af6c75c3b00af`；未验证其他浏览器、完整高分屏实时发射、实体 60/120Hz 屏幕、实际设备帧率及音效听感。新增 Claude Opus 5.5 Extra High 记录：Windows 本机 Chrome 无头模式（`--disable-gpu`），file:// 打开注入脚本的临时副本，原文件未改动（SHA-256 `b9f1e2b1eb837f25d56e86adc96dd965e8b38c5c335a97ed72269c549a8a0092`）；桌面 1440×900（画布 1424×805）及 2 倍像素密度，手机 390×844 放在 iframe 里，120 fps 一遍用 500×900 窗口，另用 `--force-prefers-reduced-motion` 跑一遍；脚本和截图都在仓库外临时目录；没有用真实时钟完整观看，未验证实体设备帧率和音效听感。新增 GPT 5.6 记录：Windows、本地 HTTP 服务、Playwright 控制的 Chrome 154；桌面 1440×900、手机 390×844，并检查 DPR 2，原 HTML 未改动（SHA-256 `94bb21d78dd81c48b0b94e39f65f8c7dd18ec057a4e3be67afde5ed1f940e941`）；未验证其他浏览器、实体 60/120Hz 屏幕、真实高分屏设备或音效质量
 
-## 评分维度
+## 历史评分维度
 
 评分标准在运行模型之前写好。开始评分后不改维度、权重和档位；确实要改，先改这份标准，再把已评的产物全部重评。
 
@@ -61,7 +612,7 @@
 - 4：稳定，桌面和手机尺寸都正常
 - 5：稳定流畅，连续重新发射多次没有问题，减少动态效果模式下也正常
 
-## 硬性检查
+## 历史硬性检查
 
 | 检查项 | 怎么查 | [Claude Opus 5.5 High](outputs/claude-opus-5-5-high/claude-opus-5-5-high.html) | [GPT 6.1 Sol Extra High](outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.html) | [Claude Opus 5.5 Extra High](outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.html) | [GPT 5.6 Sol Extra High](outputs/gpt-5-6-sol-xhigh/gpt-5-6-sol-xhigh.html) |
 |---|---|---|---|---|---|
@@ -71,7 +622,7 @@
 | 控制台无报错 | 整个过程浏览器控制台没有报错（本地服务器自己的 favicon 404 不算） | 通过 | 通过 | 通过 | 通过 |
 | 没有滚动条 | 1440×900 和 390×844 两种尺寸下都没有滚动条 | 通过 | 通过 | 通过 | 通过 |
 
-## 需求清单
+## 历史需求清单
 
 | # | 章节 | 要求 | [Claude Opus 5.5 High](outputs/claude-opus-5-5-high/claude-opus-5-5-high.html) | [GPT 6.1 Sol Extra High](outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.html) | [Claude Opus 5.5 Extra High](outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.html) | [GPT 5.6 Sol Extra High](outputs/gpt-5-6-sol-xhigh/gpt-5-6-sol-xhigh.html) |
 |---:|---|---|---:|---:|---:|---:|
@@ -110,7 +661,7 @@
 | 33 | 界面与技术 | 按真实经过的时间推进（60Hz 和 120Hz 屏幕速度一致），高分屏清晰；减少动态效果模式下减弱震动和闪烁，仍能完整发射 | 1 | 0.5 | 1 | 1 |
 | 34 | 界面与技术 | 时长：点火到离台约 12–15 秒，离台到入轨约 40–50 秒，入轨收尾约 10–20 秒，总长约 60–90 秒 | 1 | 0.5 | 1 | 0.5 |
 
-## 评分结果
+## 历史评分结果
 
 | 模型 | 需求覆盖 | 写实感 | 火焰与烟雾 | 镜头与连贯 | 稳定与适配 | 总分 |
 |---|---:|---:|---:|---:|---:|---:|
@@ -119,7 +670,7 @@
 | [Claude Opus 5.5 Extra High](outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.html) | 31.5 | 4 | 4 | 4 | 4 | 85.1 |
 | [GPT 5.6 Sol Extra High](outputs/gpt-5-6-sol-xhigh/gpt-5-6-sol-xhigh.html) | 29 | 3 | 3 | 3 | 5 | 74.1 |
 
-## 模型点评
+## 历史模型点评
 
 ### [Claude Opus 5.5 High](outputs/claude-opus-5-5-high/claude-opus-5-5-high.html)
 
@@ -192,7 +743,7 @@
 - 起飞初段加速过快，重量感不足；脐带臂不是依次摆开，火焰没有明确被导流槽劈向两侧，环境橙光也没有随尾焰明显闪动。
 - 只清楚画出两侧栅格舵和两组支腿；发射台污渍、远景层次和部署阶段镜头拉远等细节未完全满足要求。
 
-## 评测结论
+## 历史评测结论
 
 四份结果均已评测：原 Claude 评测者给出的 Claude Opus 5.5 High 为 85.6 分（保留），Claude Opus 5.5 Extra High 为 85.1 分，GPT 5.6 Sol Extra High 为 74.1 分，GPT 6.1 Sol Extra High 为 69.5 分。GPT 5.6 总分按固定权重计算为 29÷34×40 + 3÷5×20 + 3÷5×15 + 3÷5×15 + 5÷5×10 = 74.1；GPT 6.1 为 28.5÷34×40 + 3÷5×20 + 3÷5×15 + 3÷5×15 + 3÷5×10 = 69.5；Claude Extra High 为 31.5÷34×40 + 4÷5×20 + 4÷5×15 + 4÷5×15 + 4÷5×10 = 85.1（均保留一位小数）。两份 Claude 结果只差 0.5 分，属于同档；两份 GPT 结果相差 4.6 分，也属于同档。GPT 5.6 与两份 Claude 分别相差 11.5 和 11.0 分，均超过同档阈值。以上只描述四份已评分样本，不据此推出模型的普遍能力差异。
 
