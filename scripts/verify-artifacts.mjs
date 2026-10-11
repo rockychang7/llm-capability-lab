@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, readdirSync, mkdirSync } from "node:fs";
-import { resolve, dirname } from "node:path";
+import { resolve, dirname, relative } from "node:path";
 import { performance } from "node:perf_hooks";
 import { localServer, launchBrowser, root } from "./browser-tools.mjs";
 import { artifactDigest, digest, parseProtocol, replaceJsonSection } from "./evaluation.mjs";
@@ -18,10 +18,23 @@ const browser = await launchBrowser();
 const environment = { browser: browser.version(), platform: process.platform, node: process.version, profiles, clock: "real", concurrency: 4,
   checkerSha256: artifactDigest(resolve(root, "scripts/verify-artifacts.mjs")), limit: "功能检查；不测实体帧率、视觉语义或音效" };
 const report = { environment, experiments: [] };
+const captureId = new Date().toISOString().replace(/[^0-9]/g, "");
+let mediaDir;
+const mediaFile = (path, kind, seconds) => ({ path: relative(root, path).replaceAll("\\", "/"),
+  sha256: artifactDigest(path), kind, ...(seconds !== undefined ? { seconds } : {}) });
+const recording = (profile) => ["desktop", "mobile"].includes(profile.name) ?
+  { recordVideo: { dir: out, size: profile.name === "desktop" ? { width: 960, height: 600 } : profile.viewport } } : {};
 
 async function htmlProfile(result, profile) {
-  const context = await browser.newContext(profile);
+  const context = await browser.newContext({ ...profile, ...recording(profile) });
   const page = await context.newPage();
+  const files = [];
+  const screenshotBase = resolve(mediaDir, `${result.key.replaceAll("/", "--")}-${profile.name}`);
+  const capture = async (suffix, seconds) => {
+    const path = `${screenshotBase}-${suffix}.png`;
+    await page.screenshot({ path });
+    files.push(mediaFile(path, "frame", seconds));
+  };
   const errors = [];
   const resources = new Set();
   const overflow = [];
@@ -57,7 +70,7 @@ async function htmlProfile(result, profile) {
     }
     return true;
   }));
-  const run = async () => {
+  const run = async (recordFrames = false) => {
     await page.getByRole("button", { name: "点火", exact: true }).click({ timeout: 5000 });
     const start = performance.now();
     const samples = [];
@@ -67,6 +80,9 @@ async function htmlProfile(result, profile) {
         await sample();
         samples.push(Number(((performance.now() - start) / 1000).toFixed(2)));
         nextSample += 5000;
+        if (recordFrames && ["desktop", "mobile"].includes(profile.name) && samples.length % 2 === 1) {
+          await capture(`t${Math.round(samples.at(-1))}`, samples.at(-1));
+        }
       }
       if (await completed()) {
         await sample();
@@ -92,11 +108,10 @@ async function htmlProfile(result, profile) {
       return refs.filter((ref) => ref && !ref.startsWith("#") && !ref.startsWith("data:"));
     });
     declarations.forEach((ref) => resources.add(ref));
-    const screenshotBase = resolve(out, `${result.key.replaceAll("/", "--")}-${profile.name}`);
-    await page.screenshot({ path: `${screenshotBase}-ready.png` });
-    resultData.first = await run();
+    await capture("ready", 0);
+    resultData.first = await run(true);
     resultData.runtime = resultData.first.success;
-    await page.screenshot({ path: `${screenshotBase}-complete.png` });
+    await capture("complete", resultData.first.seconds);
     if (resultData.runtime) {
       await page.getByRole("button", { name: "重新发射", exact: true }).click({ timeout: 5000 });
       await page.waitForTimeout(3000);
@@ -112,14 +127,21 @@ async function htmlProfile(result, profile) {
   } finally {
     resultData.resources = [...resources];
     await context.close();
+    if (page.video()) {
+      const path = `${screenshotBase}-timeline.webm`;
+      await page.video().saveAs(path);
+      files.push(mediaFile(path, "video"));
+    }
   }
-  return resultData;
+  return { ...resultData, files };
 }
 
 async function svgProfile(result, profile) {
-  const context = await browser.newContext(profile);
+  const context = await browser.newContext({ ...profile, ...recording(profile) });
   const page = await context.newPage();
   const resources = [];
+  const files = [];
+  const screenshotBase = resolve(mediaDir, `${result.key.replaceAll("/", "--")}-${profile.name}`);
   page.on("request", (request) => {
     if (request.url() !== `${server.url}/${result.url}` && !request.url().startsWith("data:")) resources.push(request.url());
   });
@@ -155,13 +177,24 @@ async function svgProfile(result, profile) {
     const start = performance.now();
     for (let i = 0; i < 25; i++) {
       frames.push(digest(await page.locator("img").screenshot()));
+      if (i % 6 === 0) {
+        const path = `${screenshotBase}-t${i}.png`;
+        await page.screenshot({ path });
+        files.push(mediaFile(path, "frame", Number(((performance.now() - start) / 1000).toFixed(2))));
+      }
       await page.waitForTimeout(500);
     }
-    await page.screenshot({ path: resolve(out, `${result.key.replaceAll("/", "--")}-${profile.name}-svg.png`) });
     return { profile: profile.name, ...structure, resources, uniqueFrames: new Set(frames).size,
-      samples: frames.length, seconds: Number(((performance.now() - start) / 1000).toFixed(2)) };
-  } catch (error) { return { profile: profile.name, harnessError: error.message }; }
-  finally { await context.close(); }
+      samples: frames.length, seconds: Number(((performance.now() - start) / 1000).toFixed(2)), files };
+  } catch (error) { return { profile: profile.name, harnessError: error.message, files }; }
+  finally {
+    await context.close();
+    if (page.video()) {
+      const path = `${screenshotBase}-timeline.webm`;
+      await page.video().saveAs(path);
+      files.push(mediaFile(path, "video"));
+    }
+  }
 }
 
 try {
@@ -169,11 +202,14 @@ try {
   if (filter && !lab.experiments.some((item) => item.id === filter)) throw new Error("未知实验 ID");
   for (const experiment of lab.experiments.filter((item) => !filter || item.id === filter)) {
     const version = experiment.versions.find((item) => item.version === experiment.latestVersion);
-    if (version.evaluation?.protocol !== 2) continue;
+    if (version.evaluation?.protocol !== 3) continue;
+    mediaDir = resolve(root, `assets/evidence/${experiment.id}/v${version.version}/${captureId}`);
+    mkdirSync(mediaDir, { recursive: true });
     let text = readFileSync(resolve(root, version.evaluationPath), "utf8");
     const protocol = parseProtocol(text, version.prompt);
     const records = [];
     const items = [];
+    const browserEvidence = [];
     for (const result of version.results) {
       console.log(`run   ${experiment.id}/${result.key}：4 环境并行，真实时钟`);
       const hash = artifactDigest(resolve(root, result.url));
@@ -181,6 +217,12 @@ try {
       const observations = await Promise.all(profiles.map((profile) =>
         experiment.artifactType === "page" ? htmlProfile(result, profile) : svgProfile(result, profile)));
       if (hash !== artifactDigest(resolve(root, result.url))) throw new Error(`原始产物被修改：${result.url}`);
+      for (const observation of observations.filter((item) => item.files?.length)) {
+        browserEvidence.push({ id: `${captureId}-${result.key.replaceAll("/", "--")}-${observation.profile}`,
+          key: result.key, sha256: hash, fingerprint: protocol.fingerprint, viewport: observation.profile,
+          at: new Date().toISOString(), environment, files: observation.files,
+          harnessError: observation.harnessError ?? null });
+      }
       const files = readdirSync(dirname(resolve(root, result.url))).filter((name) => name !== "run.yaml");
       for (const criterion of protocol.criteria.filter((item) => item.method === "auto")) {
         let passed;
@@ -196,7 +238,7 @@ try {
         const status = !complete || passed === undefined ? "pending" : passed ? "pass" : "fail";
         const evidence = JSON.stringify({ ...environment, observations, files });
         records.push({ key: result.key, id: criterion.id, status, source: "auto",
-          reviewer: "artifact-checker-v2", at: new Date().toISOString(), sha256: hash, fingerprint: protocol.fingerprint, evidence });
+          reviewer: "artifact-checker-v3", at: new Date().toISOString(), sha256: hash, fingerprint: protocol.fingerprint, evidence });
         console.log(`      ${criterion.id}: ${status}`);
       }
       items.push({ key: result.key, sha256: hash, observations });
@@ -204,6 +246,7 @@ try {
     report.experiments.push({ id: experiment.id, version: version.version, items });
     if (process.argv.includes("--write")) {
       text = replaceJsonSection(text, "验收记录", [...protocol.records, ...records]);
+      text = replaceJsonSection(text, "浏览器证据", [...protocol.browserEvidence, ...browserEvidence]);
       writeFileSync(resolve(root, version.evaluationPath), text);
       console.log(`write ${version.evaluationPath}`);
     }

@@ -16,15 +16,17 @@ export function importReview(root, session, { write = false } = {}) {
   const protocol = parseProtocol(text, prompt);
   const hashes = Object.fromEntries(version.results.map((result) => [result.key, artifactDigest(resolve(root, result.url))]));
   validateSession(session, protocol, hashes);
-  if (protocol.sessions.some((item) => item.id === session.id)) throw new Error("该会话已经导入，不能重复计数");
+  if ([...protocol.sessions, ...protocol.aiReviews].some((item) => item.id === session.id)) throw new Error("该会话已经导入，不能重复计数");
   const records = [...protocol.records];
-  for (const key of session.order) {
-    for (const item of protocol.criteria.filter((item) => item.method === "human")) {
-      const answer = session.assessments[key].checks[item.id];
+  for (const [key, assessment] of Object.entries(session.assessments)) {
+    for (const [id, answer] of Object.entries(assessment.checks)) {
+      const reference = protocol.records.find((record) => JSON.stringify([record.source, record.reviewer, record.at, record.key, record.id, record.viewport]) === answer.evidenceRef);
       records.push({
-        key, id: item.id, status: answer.status, source: "human", reviewer: session.reviewer,
-        at: session.sealedAt, sha256: hashes[key], fingerprint: protocol.fingerprint,
-        evidence: `${answer.note.trim()}（${session.viewport}；会话 ${session.id}）`, session: session.id, viewport: session.viewport
+        key, id, status: answer.status, source: "human", reviewer: session.reviewer,
+        at: answer.at, sha256: hashes[key], fingerprint: protocol.fingerprint,
+        evidence: answer.note.trim() || `人工独立观察后确认；引用：${reference.evidence}`,
+        session: session.id, viewport: session.viewport,
+        ...(answer.evidenceRef ? { evidenceRef: answer.evidenceRef, initialStatus: answer.initialStatus, revealedAt: answer.revealedAt } : {})
       });
     }
   }

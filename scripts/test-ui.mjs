@@ -63,6 +63,23 @@ async function anonymous(page) {
     nodes.some((node) => /Claude|GPT|opus|gpt/i.test(node.getAttribute("title") ?? node.getAttribute("alt") ?? ""))), false);
   checks++;
 }
+async function localDraft(page) {
+  return page.evaluate(() => {
+    const key = Object.keys(localStorage).find((key) => key.startsWith("llm-lab-review:"));
+    return key ? JSON.parse(localStorage.getItem(key)) : null;
+  });
+}
+async function startReview(page) {
+  await page.goto(`${base}/#/${experiment.id}?view=blind`);
+  await page.locator('input[name="reviewer"]').fill("UI-test-only-do-not-publish");
+  await page.locator('input[name="blind"]').check();
+  await page.getByRole("button", { name: /开始复核/ }).click();
+}
+async function answerCurrent(page) {
+  await page.locator("#observed").check();
+  await page.locator("select[data-check]").selectOption("pending");
+  await page.locator("textarea[data-check]").fill("Synthetic UI test; not a human observation.");
+}
 try {
   for (const [name, viewport] of [["desktop", { width: 1440, height: 900 }], ["mobile", { width: 390, height: 844 }]]) {
     const context = await browser.newContext({ viewport });
@@ -86,10 +103,7 @@ try {
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.goto(`${base}/#/${experiment.id}?view=blind`);
-  await page.locator('input[name="reviewer"]').fill("UI-test-only-do-not-publish");
-  await page.locator('input[name="blind"]').check();
-  await page.getByRole("button", { name: /开始复核/ }).click();
+  await startReview(page);
   await anonymous(page);
   // Real pixels from original SVG in img mode, not a substitute illustration.
   const image = page.locator(".image-box img");
@@ -108,13 +122,31 @@ try {
   const first = digest(await image.screenshot());
   await page.waitForTimeout(800);
   assert.notEqual(digest(await image.screenshot()), first, "SVG animation is blank/static");
-  for (let i = 0; i < version.results.length; i++) {
+  const initial = await localDraft(page);
+  assert.ok(initial.queue.length + initial.tasks.length <= 16, "routine queue still requires a full checklist");
+  assert.equal(initial.tasks.length, 4);
+  if (await page.getByText("统一浏览器录像", { exact: true }).count()) {
+    await page.getByText("统一浏览器录像", { exact: true }).click();
+    const metadata = await page.locator("video").evaluate(async (video) => {
+      if (video.readyState < 1) await new Promise((resolve, reject) => {
+        video.addEventListener("loadedmetadata", resolve, { once: true });
+        video.addEventListener("error", () => reject(new Error("Evidence video failed to decode")), { once: true });
+        video.load();
+      });
+      return { width: video.videoWidth, height: video.videoHeight, duration: video.duration };
+    });
+    assert.ok(metadata.width > 100 && metadata.height > 100 && metadata.duration >= 12, "evidence video is blank or too short");
+    checks++;
+  }
+  const firstId = initial.queue[0].id;
+  await page.getByRole("button", { name: /下一步/ }).click();
+  assert.ok((await page.locator("#review-error").innerText()).length > 0, "incomplete answer advanced");
+  for (let i = 0; i < initial.queue.length; i++) {
     await anonymous(page);
-    await page.locator("#observed").check();
-    for (const item of version.evaluation.criteria.filter((item) => item.method === "human")) {
-      await page.locator(`select[data-check="${item.id}"]`).selectOption("pending");
-      await page.locator(`textarea[data-check="${item.id}"]`).fill("Synthetic UI test; not a human observation.");
-    }
+    assert.equal(await page.locator("select[data-check]").count(), 1, "review presents a full per-artifact checklist");
+    const id = await page.locator("select[data-check]").getAttribute("data-check");
+    assert.notEqual(version.evaluation.criteria.find((item) => item.id === id).method, "auto");
+    await answerCurrent(page);
     if (i === 0) {
       const downloadPromise = page.waitForEvent("download");
       await page.getByRole("button", { name: "导出草稿" }).click();
@@ -128,12 +160,12 @@ try {
       await page.reload();
       await page.locator("#restore-review").setInputFiles(path);
       await page.locator("#observed").waitFor();
-      assert.equal(await page.locator('textarea[data-check="pelican"]').inputValue(), "Synthetic UI test; not a human observation.");
+      assert.equal(await page.locator(`textarea[data-check="${firstId}"]`).inputValue(), "Synthetic UI test; not a human observation.");
       checks++;
     }
     await page.getByRole("button", { name: /下一步/ }).click();
   }
-  const taskCount = version.results.length * (version.results.length - 1) / 2 * version.evaluation.dimensions.length;
+  const taskCount = initial.tasks.length;
   for (let i = 0; i < taskCount; i++) {
     await anonymous(page);
     await page.locator('input[name="choice"][value="left"]').check();
@@ -163,10 +195,86 @@ try {
   const sealed = await downloadPromise;
   const sealedPath = resolve(out, "sealed-test-only.json");
   await sealed.saveAs(sealedPath);
-  validateSession(JSON.parse(readFileSync(sealedPath, "utf8")), version.evaluation, Object.fromEntries(version.results.map((result) => [result.key, result.sha256])));
+  const sealedSession = JSON.parse(readFileSync(sealedPath, "utf8"));
+  validateSession(sealedSession, version.evaluation, Object.fromEntries(version.results.map((result) => [result.key, result.sha256])));
+  assert.equal(Object.values(sealedSession.assessments).reduce((sum, item) => sum + Object.keys(item.checks).length, 0), initial.queue.length);
   await stable(page, "desktop-sealed-test-only");
   assert.deepEqual(errors, []);
   await context.close();
+
+  // Partial and comparison-only sessions must not manufacture unobserved checks.
+  for (const mode of ["partial", "comparison-only"]) {
+    const partialContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const partialPage = await partialContext.newPage();
+    await startReview(partialPage);
+    if (mode === "partial") {
+      await partialPage.getByRole("button", { name: "跳过", exact: true }).click();
+      assert.equal(Object.keys((await localDraft(partialPage)).assessments).length, 0);
+      await answerCurrent(partialPage);
+    } else {
+      await partialPage.getByRole("button", { name: "进入比较", exact: true }).click();
+      await partialPage.locator('input[name="choice"][value="unknown"]').check();
+      await partialPage.locator("#comparison-note").fill("Synthetic comparison only.");
+    }
+    await partialPage.getByRole("button", { name: "封存已完成项", exact: true }).click();
+    await partialPage.getByText("记录已封存", { exact: true }).waitFor();
+    const session = await localDraft(partialPage);
+    validateSession(session, version.evaluation, Object.fromEntries(version.results.map((result) => [result.key, result.sha256])));
+    assert.equal(Object.values(session.assessments).reduce((sum, item) => sum + Object.keys(item.checks).length, 0), mode === "partial" ? 1 : 0);
+    assert.equal(session.tasks.length, mode === "comparison-only" ? 1 : 0);
+    await stable(partialPage, `mobile-${mode}-sealed`);
+    await partialContext.close();
+  }
+
+  // Inject clearly synthetic AI evidence only into this isolated browser response.
+  const assistedLab = structuredClone(lab);
+  const assistedVersion = assistedLab.experiments.find((item) => item.id === experiment.id).versions.find((item) => item.version === version.version);
+  for (const result of assistedVersion.results) for (const check of result.acceptance.checks.filter((item) => item.method === "ai")) {
+    const record = { key: result.key, id: check.id, source: "ai", reviewer: "synthetic-ui-judge", status: "pass",
+      viewport: "desktop", at: new Date().toISOString(), evidence: "Synthetic UI evidence; never published." };
+    assistedVersion.evaluation.records.push(record);
+    check.viewports.desktop.evidence = [record];
+  }
+  const assistedContext = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await assistedContext.route("**/data/lab.json", (route) => route.fulfill({ json: assistedLab }));
+  const assistedPage = await assistedContext.newPage();
+  await startReview(assistedPage);
+  await anonymous(assistedPage);
+  const reveal = assistedPage.getByRole("button", { name: "查看 AI 证据", exact: true });
+  assert.equal(await reveal.isDisabled(), true);
+  assert.equal(await assistedPage.getByText("Synthetic UI evidence; never published.", { exact: true }).count(), 0);
+  await assistedPage.locator("#observed").check();
+  await assistedPage.locator("select[data-check]").selectOption("pass");
+  await reveal.click();
+  await assistedPage.locator('input[name="evidence-ref"]').check();
+  assert.equal(await assistedPage.locator("textarea[data-check]").inputValue(), "");
+  await assistedPage.getByRole("button", { name: "封存已完成项", exact: true }).click();
+  const assistedSession = await localDraft(assistedPage);
+  validateSession(assistedSession, assistedVersion.evaluation, Object.fromEntries(version.results.map((result) => [result.key, result.sha256])));
+  const answer = Object.values(assistedSession.assessments).flatMap((item) => Object.values(item.checks))[0];
+  assert.equal(answer.initialStatus, "pass");
+  assert.ok(answer.evidenceRef && answer.revealedAt);
+  checks++;
+  await assistedContext.close();
+
+  const reviewedLab = structuredClone(lab);
+  const reviewedVersion = reviewedLab.experiments.find((item) => item.id === experiment.id).versions.find((item) => item.version === version.version);
+  for (const result of reviewedVersion.results) for (const check of result.acceptance.checks.filter((item) => item.method !== "auto")) {
+    check.viewports.desktop.audited = true;
+    check.viewports.desktop.disputed = false;
+  }
+  const reviewedContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await reviewedContext.route("**/data/lab.json", (route) => route.fulfill({ json: reviewedLab }));
+  const reviewedPage = await reviewedContext.newPage();
+  await startReview(reviewedPage);
+  assert.equal((await localDraft(reviewedPage)).queue.length, 0);
+  assert.equal(await reviewedPage.getByRole("button", { name: "上一步", exact: true }).isDisabled(), true);
+  await reviewedPage.locator('input[name="choice"][value="unknown"]').check();
+  await reviewedPage.locator("#comparison-note").fill("Synthetic empty-queue comparison.");
+  await reviewedPage.getByRole("button", { name: "封存已完成项", exact: true }).click();
+  await reviewedPage.getByText("记录已封存", { exact: true }).waitFor();
+  checks++;
+  await reviewedContext.close();
 
   // Verify an actual original HTML canvas through the sandboxed website preview.
   const rocket = lab.experiments.find((item) => item.artifactType === "page");

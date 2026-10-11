@@ -453,8 +453,8 @@ a.exp-row:hover .exp-arrow { color: var(--accent); transform: translateX(4px); }
 .evidence { margin: 8px 0; }
 .evidence summary { cursor: pointer; overflow-wrap: anywhere; color: var(--ink-2); font-size: 12px; }
 .evidence pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 360px; overflow-y: auto; padding: 12px; background: var(--panel-2); font: 11px/1.7 var(--mono); }
-.history-record h3 { font-size: 14px; margin-top: 16px; }
-.history-record ul { color: var(--ink-2); font-size: 13px; padding-left: 20px; }
+.evidence-video { display: block; width: 100%; max-height: 480px; background: #111418; }
+.reveal-ai { margin-top: 16px; }
 .comparison-dimension { margin-top: 24px; }
 .comparison-dimension > h3 { font-size: 16px; }
 .comparison-dimension > p { font-size: 13px; margin-bottom: 10px; }

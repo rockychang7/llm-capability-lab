@@ -1,190 +1,258 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync, existsSync } from "node:fs";
 import { resolve, join, sep } from "node:path";
 import { tmpdir } from "node:os";
 import { execFileSync } from "node:child_process";
-import { digest, parseProtocol, validateRecord, validateSession, resolveChecks, acceptanceState, replaceJsonSection, sections } from "../scripts/evaluation.mjs";
-import { createSession, sessionComplete, sessionMatches, validDraft, comparisonSummary, shuffle } from "../review.js";
+import { digest, parseProtocol, validateRecord, validateRecordSession, validateSession, validateAIReview, resolveChecks, acceptanceState, replaceJsonSection, sections } from "../scripts/evaluation.mjs";
+import { createSession, createQueue, sealSession, sessionMatches, validDraft, comparisonSummary, expandAudit, recordRef } from "../review.js";
 import { importReview } from "../scripts/import-review.mjs";
+import { importAI } from "../scripts/import-ai.mjs";
+import { localServer } from "../scripts/browser-tools.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const lab = JSON.parse(readFileSync(join(root, "data/lab.json"), "utf8"));
-const experiment = lab.experiments[1];
-const version = experiment.versions[0];
+const experiment = lab.experiments[1], version = experiment.versions[0];
 const text = readFileSync(join(root, version.evaluationPath), "utf8").replace(/\r\n/g, "\n");
 const protocol = parseProtocol(text, version.prompt);
-const hashes = Object.fromEntries(version.results.map((result) => [result.key, result.sha256]));
-function completeSession() {
-  const session = createSession(experiment, version, "test-only-reviewer", true, "desktop", () => 0.3);
-  for (const key of session.order) session.assessments[key] = {
-    observed: true,
-    checks: Object.fromEntries(protocol.criteria.filter((item) => item.method === "human").map((item) => [
-      item.id, { status: "pending", note: "Synthetic fixture; not an actual human observation" }
-    ]))
-  };
-  session.tasks.forEach((task) => { task.choice = "unknown"; task.note = "Synthetic fixture"; task.at = "2026-10-10T00:00:00Z"; });
-  session.sealedAt = "2026-10-10T01:00:00Z"; session.phase = "sealed"; session.index = 0;
-  return session;
-}
+const hashes = Object.fromEntries(version.results.map((item) => [item.key, item.sha256]));
 function record(overrides = {}) {
-  return {
-    key: version.results[0].key, id: "pelican", source: "human", reviewer: "test-reviewer",
-    status: "pass", at: "2026-10-10T00:00:00Z", fingerprint: protocol.fingerprint,
-    sha256: version.results[0].sha256, evidence: "Test-only evidence", ...overrides
-  };
+  return { key: version.results[0].key, id: "pelican", source: "ai", reviewer: "judge-a", model: "test-model",
+    family: "family-a", independentDeclared: true, viewport: "desktop", session: "test-batch", refs: ["test-media"],
+    status: "pass", at: "2026-10-11T00:00:00Z", fingerprint: protocol.fingerprint,
+    sha256: version.results[0].sha256, evidence: "Synthetic test observation, never published", ...overrides };
 }
-
-test("protocol parsing produces stable IDs and frozen fingerprint", () => {
-  assert.equal(protocol.protocol, 2);
-  assert.equal(protocol.fingerprint, version.evaluation.fingerprint);
-  assert.equal(new Set(protocol.criteria.map((item) => item.id)).size, protocol.criteria.length);
-});
-test("invalid or duplicate criterion IDs are rejected", () => {
+function humanSession() {
+  const session = createSession(experiment, version, "test-only-reviewer", true, "desktop", () => 0.3);
+  const task = session.queue[0];
+  session.assessments[task.key] = { observed: true, checks: { [task.id]: {
+    status: "pending", note: "Synthetic fixture; not an actual human observation", at: new Date().toISOString()
+  } } };
+  return sealSession(session);
+}
+function aiFixture() {
+  const fixture = structuredClone(protocol);
+  fixture.browserEvidence = Object.keys(hashes).flatMap((key) => ["desktop", "mobile"].map((viewport) => ({
+    id: `${key}-${viewport}`, key, viewport, sha256: hashes[key], fingerprint: protocol.fingerprint,
+    at: new Date().toISOString(), files: [{ path: "assets/evidence/fixture.png", kind: "frame", sha256: digest("fixture") }]
+  })));
+  const batch = { protocol: 3, source: "ai", id: crypto.randomUUID(), experiment: experiment.id, version: version.version,
+    reviewer: "synthetic-judge", model: "synthetic-model", family: "synthetic-family", independentDeclared: true,
+    fingerprint: protocol.fingerprint, hashes, sealedAt: new Date().toISOString(), comparisons: [],
+    checks: Object.keys(hashes).flatMap((key) => ["desktop", "mobile"].flatMap((viewport) =>
+      protocol.criteria.filter((item) => item.method === "ai").map((item) => ({
+        key, id: item.id, viewport, status: "pending", evidence: "Synthetic only", refs: [`${key}-${viewport}`]
+      })))) };
+  return { fixture, batch };
+}
+test("protocol 3 fingerprint freezes criteria, dimensions, prompt and policy", () => {
+  assert.equal(protocol.protocol, 3); assert.equal(protocol.fingerprint, version.evaluation.fingerprint);
+  assert.notEqual(parseProtocol(text.replace("大喉囊可见", "changed"), version.prompt).fingerprint, protocol.fingerprint);
   assert.throws(() => parseProtocol(text.replace("| pouch |", "| pelican |"), version.prompt), /重复/);
-  assert.throws(() => parseProtocol(text.replace("| core |", "| wrong |"), version.prompt), /无效/);
+  assert.throws(() => parseProtocol(text.replace("**评测协议**：3", "**评测协议**：2"), version.prompt), /协议/);
 });
-test("missing and non-array canonical records are rejected", () => {
-  assert.throws(() => parseProtocol(text.replace("## 验收记录", "## removed"), version.prompt), /缺少/);
-  assert.throws(() => parseProtocol(replaceJsonSection(text, "人工比较", {}), version.prompt), /数组/);
+test("fenced headings and canonical record arrays are parsed safely", () => {
+  assert.equal(sections("## A\n```json\n## not-heading\n```\n## B\ntext")["not-heading"], undefined);
+  assert.throws(() => parseProtocol(replaceJsonSection(text, "AI 评审", {}), version.prompt), /数组/);
 });
-test("headings in fenced evidence never become Markdown sections", () => {
-  const value = sections("## A\n```json\n## not-a-heading\n```\n## B\ntext");
-  assert.ok(value.A.includes("## not-a-heading"));
-  assert.equal(value["not-a-heading"], undefined);
-});
-test("artifact or rubric changes invalidate evidence", () => {
-  assert.throws(() => validateRecord(record({ sha256: "bad" }), protocol, hashes), /指纹/);
-  assert.throws(() => validateRecord(record({ fingerprint: "bad" }), protocol, hashes), /标准/);
-});
-test("source, evidence, reviewer and timestamp are checked", () => {
-  for (const overrides of [{ source: "auto" }, { evidence: "" }, { reviewer: "unknown" }, { at: "invalid" }, { at: 2026 }, { viewport: "wrong" }, { status: "yes" }]) {
+test("sources, artifact hashes, rubric, identities, viewports and evidence are validated", () => {
+  assert.doesNotThrow(() => validateRecord(record(), protocol, hashes));
+  for (const overrides of [{ sha256: "bad" }, { fingerprint: "bad" }, { source: "auto" }, { reviewer: "unknown" },
+    { at: 2026 }, { evidence: "" }, { viewport: "all" }, { refs: [] }, { independentDeclared: false }, { family: "" }]) {
     assert.throws(() => validateRecord(record(overrides), protocol, hashes));
   }
-  assert.doesNotThrow(() => validateRecord(record(), protocol, hashes));
+  assert.throws(() => validateRecord(record({ id: "animation", source: "human" }), protocol, hashes), /来源/);
 });
-test("core acceptance does not average away a failure", () => {
-  const item = (status, tier = "core") => ({ status, tier });
-  assert.equal(acceptanceState([item("pass"), item("fail"), item("pending")]), "fail");
-  assert.equal(acceptanceState([item("partial"), item("pending")]), "pending");
-  assert.equal(acceptanceState([item("partial"), item("pass")]), "partial");
-  assert.equal(acceptanceState([item("pass"), item("fail", "detail")]), "pass");
-  assert.equal(acceptanceState([]), "pending");
+test("two independent families and both viewports are needed for AI visual core pass", () => {
+  const status = (records) => resolveChecks(protocol.criteria, records, record().key).find((item) => item.id === "pelican").status;
+  assert.equal(status([record()]), "pending");
+  const both = ["desktop", "mobile"].flatMap((viewport) => [record({ viewport }), record({ viewport, reviewer: "judge-b", family: "family-b" })]);
+  assert.equal(status(both), "pass");
+  assert.equal(status(both.map((item) => ({ ...item, family: "same-family" }))), "pending");
+  assert.equal(status(both.map((item) => ({ ...item, status: "fail" }))), "pending");
+  both[1].status = "fail"; assert.equal(status(both), "pending");
 });
-test("latest statement replaces only the same reviewer and viewport", () => {
-  const records = [record({ status: "fail", viewport: "desktop" }), record({ status: "pass", viewport: "desktop", at: "2026-10-10T01:00:00Z" })];
-  assert.equal(resolveChecks(protocol.criteria, records, records[0].key).find((item) => item.id === "pelican").status, "pass");
-  records.push(record({ status: "fail", viewport: "mobile" }));
-  const check = resolveChecks(protocol.criteria, records, records[0].key).find((item) => item.id === "pelican");
-  assert.equal(check.status, "pending"); assert.equal(check.disputed, true); assert.equal(check.evidence.length, 2);
+test("human resolution overrides AI only for actually reviewed criterion and viewport", () => {
+  const human = record({ source: "human", reviewer: "person", status: "fail" });
+  const check = resolveChecks(protocol.criteria, [record(), human], human.key).find((item) => item.id === "pelican");
+  assert.equal(check.status, "fail"); assert.equal(check.viewports.desktop.source, "human");
+  assert.equal(check.viewports.mobile.status, "pending");
+  const conflict = resolveChecks(protocol.criteria, [human, { ...human, reviewer: "other", status: "pass" }], human.key).find((item) => item.id === "pelican");
+  assert.equal(conflict.status, "pending"); assert.equal(conflict.disputed, true);
+  const latest = resolveChecks(protocol.criteria, [human, { ...human, at: "2026-10-11T01:00:00Z", status: "pass" }], human.key).find((item) => item.id === "pelican");
+  assert.equal(latest.viewports.desktop.status, "pass");
 });
-test("independent reviewer disagreements stay unresolved", () => {
-  const check = resolveChecks(protocol.criteria, [record(), record({ reviewer: "other", status: "fail" })], version.results[0].key)[4];
-  assert.equal(check.status, "pending"); assert.equal(check.disputed, true);
+test("core failures cannot be compensated with detail or averages", () => {
+  assert.equal(acceptanceState([{ tier: "core", status: "fail" }, { tier: "core", status: "pending" }]), "fail");
+  assert.equal(acceptanceState([{ tier: "core", status: "partial" }, { tier: "core", status: "pending" }]), "pending");
+  assert.equal(acceptanceState([{ tier: "core", status: "pass" }, { tier: "detail", status: "fail" }]), "pass");
 });
-test("shuffle preserves input and all elements", () => {
-  const items = [1, 2, 3, 4];
-  assert.deepEqual(shuffle(items, () => 0), [2, 3, 4, 1]); assert.deepEqual(items, [1, 2, 3, 4]);
-});
-test("session covers all pairs and dimensions and is initially incomplete", () => {
-  const session = createSession(experiment, version, "test", false, "mobile", () => 0);
-  assert.equal(session.tasks.length, 18);
-  assert.equal(new Set(session.tasks.map((task) => `${[task.left, task.right].sort()}|${task.dimension}`)).size, 18);
-  assert.equal(sessionComplete(session, version), false); assert.equal(validDraft(session, version, experiment.id), true);
-});
-test("complete synthetic session validates, without publishing anything", () => {
-  const session = completeSession();
-  assert.equal(sessionComplete(session, version), true);
-  assert.doesNotThrow(() => validateSession(session, protocol, hashes));
+test("normal human queue is small, stratified and never reconfirms auto items", () => {
+  const session = createSession(experiment, version, "test", false, "mobile", () => 0.2);
+  assert.equal(session.queue.length + session.tasks.length, 16);
+  for (const result of version.results) {
+    assert.ok(session.queue.some((task) => task.key === result.key && protocol.criteria.find((item) => item.id === task.id).tier === "core"));
+    assert.ok(session.queue.some((task) => task.key === result.key && protocol.criteria.find((item) => item.id === task.id).tier === "detail"));
+  }
+  assert.ok(session.queue.every((task) => protocol.criteria.find((item) => item.id === task.id).method !== "auto"));
   assert.equal(validDraft(session, version, experiment.id), true);
 });
-test("unsealed or missing-observation sessions cannot be imported", () => {
-  const session = completeSession(); session.sealedAt = null;
-  assert.throws(() => validateSession(session, protocol, hashes), /封存/);
-  session.sealedAt = "2026-10-10T01:00:00Z"; session.assessments[session.order[0]].observed = "yes";
-  assert.throws(() => validateSession(session, protocol, hashes), /完整观看/);
+test("risk tasks are not cut off by the routine budget", () => {
+  const fixture = structuredClone(version);
+  for (const result of fixture.results) for (const check of result.acceptance.checks.filter((item) => item.tier === "core" && item.method === "ai")) check.viewports.desktop.risk = true;
+  const queue = createQueue(fixture, "desktop", () => 0);
+  assert.equal(queue.filter((item) => item.reason === "core-risk").length, 36);
+  assert.ok(queue.length > 16);
 });
-test("partial tasks, repeated pairs, malformed orders and post-seal times are rejected", () => {
+test("audit failure expands the affected artifact but does not manufacture answers", () => {
+  const session = createSession(experiment, version, "test", false, "desktop", () => 0);
+  const task = session.queue.find((task) => protocol.criteria.find((item) => item.id === task.id).tier === "core");
+  expandAudit(session, version, task, { status: "fail" });
+  assert.equal(session.expanded, true);
+  assert.equal(session.queue.filter((item) => item.key === task.key).length, protocol.criteria.filter((item) => item.method !== "auto").length);
+  assert.deepEqual(session.assessments, {});
+});
+test("partial checklist-only and comparison-only sessions can seal and validate", () => {
+  const session = humanSession();
+  assert.equal(Object.values(session.assessments).flatMap((item) => Object.keys(item.checks)).length, 1);
+  assert.equal(session.tasks.length, 0); assert.doesNotThrow(() => validateSession(session, protocol, hashes));
+  const comparison = createSession(experiment, version, "test", false, "desktop");
+  comparison.tasks[0] = { ...comparison.tasks[0], choice: "unknown", note: "Synthetic", at: new Date().toISOString() };
+  assert.doesNotThrow(() => validateSession(sealSession(comparison), protocol, hashes));
+  assert.throws(() => sealSession(createSession(experiment, version, "test", false, "desktop")), /至少/);
+});
+test("incomplete, wrong-source, duplicate and post-seal records are rejected", () => {
   for (const mutate of [
-    (session) => session.tasks.pop(),
-    (session) => { session.tasks[0] = session.tasks[1]; },
-    (session) => session.order.push(session.order[0]),
-    (session) => { session.tasks[0].at = "2026-10-11T00:00:00Z"; },
-    (session) => { session.tasks[0].at = 2026; },
-    (session) => { session.sealedAt = 2026; },
-    (session) => { session.tasks[0].note = ""; },
-    (session) => { session.assessments[session.order[0]].checks.pelican.status = "wrong"; }
-  ]) {
-    const session = completeSession(); mutate(session);
-    assert.throws(() => validateSession(session, protocol, hashes));
-  }
-});
-test("draft restoration rejects different outputs, experiment, version or malformed objects", () => {
-  const session = completeSession();
-  assert.equal(validDraft(session, version, "other"), false);
-  session.version = 1; assert.equal(sessionMatches(session, version), false);
-  session.version = version.version; session.hashes[session.order[0]] = "changed";
-  assert.equal(sessionMatches(session, version), false);
+    (s) => { s.sealedAt = null; }, (s) => { s.source = "ai"; },
+    (s) => { s.assessments[s.queue[0].key].observed = false; },
+    (s) => { s.queue.push(s.queue[0]); },
+    (s) => { s.assessments[s.queue[0].key].checks[s.queue[0].id].at = "2099-01-01T00:00:00Z"; },
+    (s) => { s.assessments[s.queue[0].key].checks[s.queue[0].id].at = "2000-01-01T00:00:00Z"; },
+    (s) => { s.createdAt = "2099-01-01T00:00:00Z"; }
+  ]) { const session = humanSession(); mutate(session); assert.throws(() => validateSession(session, protocol, hashes)); }
+  const session = humanSession(); session.version = 99; assert.equal(sessionMatches(session, version), false);
   assert.equal(validDraft(null, version, experiment.id), false);
 });
-test("only eligible comparisons from the latest complete reviewer session are aggregated", () => {
-  const first = completeSession();
-  first.tasks.forEach((task) => { task.choice = "left"; });
-  const second = structuredClone(first); second.id = "second"; second.sealedAt = "2026-10-10T02:00:00Z";
-  second.tasks.forEach((task) => { task.choice = "tie"; });
-  const fixture = structuredClone(version);
-  fixture.results.forEach((result) => { result.acceptance.status = "pass"; });
-  fixture.evaluation.sessions = [first, second];
-  const summaries = comparisonSummary(fixture);
-  assert.equal(summaries[0].eligible, 6);
-  assert.ok(summaries[0].rows.every((row) => row.wins === 0 && row.ties === 3));
-  fixture.results[0].acceptance.status = "partial";
-  assert.equal(comparisonSummary(fixture)[0].eligible, 3);
-  assert.equal(comparisonSummary(fixture)[0].excluded, 3);
+test("AI references can remove repeated prose only after independent judgment", () => {
+  const session = humanSession(), task = session.queue[0], answer = session.assessments[task.key].checks[task.id];
+  const reference = record({ key: task.key, id: task.id, status: "pass" });
+  const fixture = { ...protocol, records: [reference] };
+  answer.status = "pass"; answer.initialStatus = "pass"; answer.note = "";
+  answer.revealedAt = answer.at; answer.evidenceRef = recordRef(reference);
+  assert.doesNotThrow(() => validateSession(session, fixture, hashes));
+  answer.initialStatus = "fail"; assert.throws(() => validateSession(session, fixture, hashes));
+  answer.note = "Changed after actual re-observation"; assert.doesNotThrow(() => validateSession(session, fixture, hashes));
+  answer.evidenceRef = "wrong"; assert.throws(() => validateSession(session, fixture, hashes), /引用/);
 });
-test("import validates actual disk fingerprints, defaults to dry run and rejects duplicates", () => {
+test("AI import requires full two-viewport coverage and current relevant browser media", () => {
+  const { fixture, batch } = aiFixture();
+  assert.doesNotThrow(() => validateAIReview(batch, fixture, hashes));
+  batch.checks.pop(); assert.throws(() => validateAIReview(batch, fixture, hashes), /完整/);
+  const other = aiFixture(); other.batch.checks[0].refs = ["wrong"];
+  assert.throws(() => validateAIReview(other.batch, other.fixture, hashes), /证据/);
+  const future = aiFixture(); future.fixture.browserEvidence[0].at = "2099-01-01T00:00:00Z";
+  assert.throws(() => validateAIReview(future.batch, future.fixture, hashes), /早于/);
+});
+test("canonical rows cannot invent a different family, date or evidence from the sealed session", () => {
+  const { fixture, batch } = aiFixture();
+  fixture.aiReviews = [batch];
+  const check = batch.checks[0];
+  const ai = { ...check, source: "ai", session: batch.id, reviewer: batch.reviewer, model: batch.model,
+    family: batch.family, independentDeclared: true, at: batch.sealedAt };
+  assert.doesNotThrow(() => validateRecordSession(ai, fixture));
+  for (const overrides of [{ family: "invented-family" }, { model: "invented-model" }, { at: "2000-01-01T00:00:00Z" },
+    { evidence: "different observation" }, { refs: [] }, { reviewer: "different-reviewer" }]) {
+    assert.throws(() => validateRecordSession({ ...ai, ...overrides }, fixture));
+  }
+  const session = humanSession(), task = session.queue[0], answer = session.assessments[task.key].checks[task.id];
+  const human = { key: task.key, id: task.id, source: "human", session: session.id, reviewer: session.reviewer,
+    viewport: session.viewport, status: answer.status, at: answer.at, evidence: answer.note };
+  fixture.sessions = [session];
+  assert.doesNotThrow(() => validateRecordSession(human, fixture));
+  assert.throws(() => validateRecordSession({ ...human, evidence: "different observation" }, fixture));
+});
+test("partial sessions aggregate latest per pair rather than dropping unrelated old votes", () => {
+  const fixture = structuredClone(version); fixture.results.forEach((item) => item.acceptance.status = "pass");
+  const session = createSession(experiment, version, "test", false, "desktop", () => 0);
+  session.tasks.forEach((task) => Object.assign(task, { choice: "left", note: "Synthetic", at: new Date().toISOString() }));
+  const first = sealSession(session), second = structuredClone(first);
+  second.id = "second"; second.tasks = [second.tasks[0]]; second.tasks[0].choice = "tie";
+  second.tasks[0].at = "2099-01-01T00:00:00Z";
+  fixture.evaluation.sessions = [first, second];
+  assert.equal(comparisonSummary(fixture).reduce((sum, item) => sum + item.eligible, 0), 4);
+  fixture.results.forEach((item) => item.acceptance.status = "pending");
+  assert.equal(comparisonSummary(fixture).reduce((sum, item) => sum + item.excluded, 0), 4);
+});
+test("AI position disagreement is unknown and never enters human vote counts", () => {
+  const fixture = structuredClone(version); fixture.results.forEach((item) => item.acceptance.status = "pass");
+  fixture.evaluation.aiReviews = [{ reviewer: "ai", comparisons: [{ left: version.results[0].key, right: version.results[1].key,
+    dimension: protocol.dimensions[0].id, viewport: "desktop", choice: "left", reverseChoice: "right", at: new Date().toISOString() }] }];
+  assert.equal(comparisonSummary(fixture, "ai")[0].rows[0].unknown, 1);
+  assert.equal(comparisonSummary(fixture)[0].eligible, 0);
+});
+test("importers verify real disk bytes, dry-run safely, and do not publish test fixtures", () => {
   const dir = mkdtempSync(join(tmpdir(), "llm-review-test-"));
-  const write = (path, contents) => { const target = join(dir, path); mkdirSync(resolve(target, ".."), { recursive: true }); writeFileSync(target, contents); };
+  const write = (path, value) => { mkdirSync(resolve(dir, path, ".."), { recursive: true }); writeFileSync(join(dir, path), value); };
   try {
-    write("data/lab.json", JSON.stringify(lab));
-    write(version.evaluationPath, text);
+    write("data/lab.json", JSON.stringify(lab)); write(version.evaluationPath, text);
     write(version.promptPath, readFileSync(join(root, version.promptPath)));
-    version.results.forEach((result) => write(result.url, readFileSync(join(root, result.url))));
-    const session = completeSession();
+    version.results.forEach((item) => write(item.url, readFileSync(join(root, item.url))));
+    // No real media is copied into this isolated canonical fixture.
+    const fixtureText = replaceJsonSection(text, "浏览器证据", []);
+    write(version.evaluationPath, fixtureText);
+    const session = humanSession();
     const before = readFileSync(join(dir, version.evaluationPath), "utf8");
-    const imported = importReview(dir, session);
+    assert.equal(parseProtocol(importReview(dir, session).text, version.prompt).records.filter((item) => item.source === "human").length, 1);
     assert.equal(readFileSync(join(dir, version.evaluationPath), "utf8"), before);
-    assert.equal(parseProtocol(imported.text, version.prompt).sessions.length, 1);
-    importReview(dir, session, { write: true });
-    assert.throws(() => importReview(dir, session), /已经导入/);
-    const next = completeSession();
-    write(version.results[0].url, "changed original");
-    assert.throws(() => importReview(dir, next), /原始产物/);
+    importReview(dir, session, { write: true }); assert.throws(() => importReview(dir, session), /已经导入/);
+    const { fixture, batch } = aiFixture();
+    write("assets/evidence/fixture.png", "fixture");
+    write(version.evaluationPath, replaceJsonSection(fixtureText, "浏览器证据", fixture.browserEvidence));
+    assert.equal(importAI(dir, batch).checks, batch.checks.length);
+    importAI(dir, batch, { write: true }); assert.throws(() => importAI(dir, batch), /已导入/);
+    write(version.results[0].url, "changed artifact"); assert.throws(() => importReview(dir, humanSession()), /原始产物/);
   } finally {
     assert.ok(resolve(dir).startsWith(resolve(tmpdir()) + sep + "llm-review-test-"));
     rmSync(dir, { recursive: true, force: true });
   }
 });
-
-const historicalDigests = {
-  "01-rocket-launch": "7b201c507da90e6825e76fc1dafaaa038a4b8aca02ad311054b355718ed4c384",
-  "02-pelican-bicycle": "f39901ef3d97c2360288b4d8ee6c2f8498eb5d78e6d8d8aaca8619fc8d078ea3"
-};
-for (const experiment of lab.experiments) {
-  test(`${experiment.id}: historical rubric, results and commentary stay byte-equivalent`, () => {
-    const value = readFileSync(join(root, `results/${experiment.id}/v2/evaluation.md`), "utf8").replace(/\r\n/g, "\n");
-    const historical = value.slice(value.indexOf("## 历史评分维度")).replace(/^## 历史/gm, "## ").trim();
-    assert.equal(digest(historical), historicalDigests[experiment.id]);
-  });
-  test(`${experiment.id}: no old AI score is treated as a current verdict`, () => {
-    const version = experiment.versions[0];
-    version.results.forEach((result) => {
-      assert.equal(result.score, null); assert.equal(result.acceptance.status, acceptanceState(result.acceptance.checks));
-      assert.ok(result.legacyScore);
-      result.acceptance.checks.filter((item) => item.evidence.length === 0).forEach((check) => assert.equal(check.status, "pending"));
-    });
-  });
-}
-test("generated data passes the real build checker", () => {
+for (const experiment of lab.experiments) test(`${experiment.id}: only new baseline and no historical scores`, () => {
+  assert.equal(experiment.latestVersion, 1); assert.equal(experiment.versions.length, 1);
+  assert.equal(existsSync(join(root, `prompts/${experiment.id}/prompt-v2.md`)), false);
+  const version = experiment.versions[0];
+  assert.ok(!/## 历史|## 评分结果/.test(readFileSync(join(root, version.evaluationPath), "utf8")));
+  for (const item of version.results) {
+    assert.equal(item.legacyScore, undefined); assert.equal(item.score, undefined);
+    assert.equal(item.acceptance.status, acceptanceState(item.acceptance.checks));
+  }
+});
+test("local preview serves correct media types and byte ranges for evidence playback", async () => {
+  const server = await localServer();
+  try {
+    const full = readFileSync(join(root, "lab.js"));
+    const response = await fetch(`${server.url}/lab.js`, { headers: { Range: "bytes=0-9" } });
+    assert.equal(response.status, 206);
+    assert.equal(response.headers.get("content-range"), `bytes 0-9/${full.length}`);
+    assert.deepEqual(Buffer.from(await response.arrayBuffer()), full.subarray(0, 10));
+    const suffix = await fetch(`${server.url}/lab.js`, { headers: { Range: "bytes=-5" } });
+    assert.deepEqual(Buffer.from(await suffix.arrayBuffer()), full.subarray(-5));
+    const head = await fetch(`${server.url}/lab.js`, { method: "HEAD" });
+    assert.equal(Number(head.headers.get("content-length")), full.length);
+    assert.equal(await head.text(), "");
+    for (const range of ["bytes=-", "bytes=999999999999999999999999-", "bytes=10-2", "items=0-5"]) {
+      const invalid = await fetch(`${server.url}/lab.js`, { headers: { Range: range } });
+      assert.equal(invalid.status, 416);
+    }
+    const video = lab.experiments.flatMap((item) => item.versions).flatMap((item) => item.evaluation.browserEvidence)
+      .flatMap((item) => item.files).find((item) => item.kind === "video");
+    if (video) {
+      const response = await fetch(`${server.url}/${video.path}`, { headers: { Range: "bytes=0-3" } });
+      assert.equal(response.headers.get("content-type"), "video/webm");
+      assert.equal(response.status, 206);
+      assert.equal((await response.arrayBuffer()).byteLength, 4);
+    }
+  } finally { await server.close(); }
+});
+test("generated data passes real consistency checker", () => {
   execFileSync(process.execPath, ["scripts/build-data.mjs", "--check"], { cwd: root });
 });

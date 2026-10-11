@@ -5,14 +5,28 @@ import { chromium } from "playwright";
 
 export const root = resolve(import.meta.dirname, "..");
 export async function localServer() {
-  const types = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" };
+  const types = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png", ".webm": "video/webm" };
   const server = createServer((request, response) => {
     try {
       const path = resolve(root, "." + decodeURIComponent(new URL(request.url, "http://local").pathname));
       if (!path.startsWith(root + sep) && path !== root) { response.writeHead(403).end(); return; }
       const target = path === root ? resolve(root, "index.html") : path;
-      response.writeHead(200, { "Content-Type": types[extname(target)] ?? "text/plain", "Cache-Control": "no-store" });
-      response.end(readFileSync(target));
+      const content = readFileSync(target);
+      const headers = { "Content-Type": types[extname(target)] ?? "text/plain", "Cache-Control": "no-store", "Accept-Ranges": "bytes" };
+      const range = request.headers.range;
+      if (range) {
+        const match = range.match(/^bytes=(\d*)-(\d*)$/);
+        const start = match?.[1] ? Number(match[1]) : Math.max(0, content.length - Number(match?.[2]));
+        const end = match?.[1] && match[2] ? Math.min(Number(match[2]), content.length - 1) : content.length - 1;
+        if (!match || (!match[1] && !match[2]) || !Number.isSafeInteger(start) || start < 0 || start > end) {
+          response.writeHead(416, { ...headers, "Content-Range": `bytes */${content.length}` }).end(); return;
+        }
+        response.writeHead(206, { ...headers, "Content-Length": end - start + 1, "Content-Range": `bytes ${start}-${end}/${content.length}` });
+        response.end(request.method === "HEAD" ? undefined : content.subarray(start, end + 1));
+      } else {
+        response.writeHead(200, { ...headers, "Content-Length": content.length });
+        response.end(request.method === "HEAD" ? undefined : content);
+      }
     } catch { response.writeHead(404).end("Not found"); }
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
