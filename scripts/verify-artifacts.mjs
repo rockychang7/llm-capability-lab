@@ -202,7 +202,7 @@ try {
   if (filter && !lab.experiments.some((item) => item.id === filter)) throw new Error("未知实验 ID");
   for (const experiment of lab.experiments.filter((item) => !filter || item.id === filter)) {
     const version = experiment.versions.find((item) => item.version === experiment.latestVersion);
-    if (version.evaluation?.protocol !== 3) continue;
+    if (version.evaluation?.protocol !== 4) continue;
     mediaDir = resolve(root, `assets/evidence/${experiment.id}/v${version.version}/${captureId}`);
     mkdirSync(mediaDir, { recursive: true });
     let text = readFileSync(resolve(root, version.evaluationPath), "utf8");
@@ -224,7 +224,7 @@ try {
           harnessError: observation.harnessError ?? null });
       }
       const files = readdirSync(dirname(resolve(root, result.url))).filter((name) => name !== "run.yaml");
-      for (const criterion of protocol.criteria.filter((item) => item.method === "auto")) {
+      for (const criterion of protocol.criteria.filter((item) => ["runtime", "replay", "console", "viewport", "standalone", "svg-valid", "no-script", "animation"].includes(item.id))) {
         let passed;
         const complete = observations.every((item) => !item.harnessError);
         if (criterion.id === "runtime") passed = observations.every((item) => item.runtime);
@@ -238,14 +238,14 @@ try {
         const status = !complete || passed === undefined ? "pending" : passed ? "pass" : "fail";
         const evidence = JSON.stringify({ ...environment, observations, files });
         records.push({ key: result.key, id: criterion.id, status, source: "auto",
-          reviewer: "artifact-checker-v3", at: new Date().toISOString(), sha256: hash, fingerprint: protocol.fingerprint, evidence });
+          reviewer: "artifact-checker-v4", at: new Date().toISOString(), sha256: hash, fingerprint: protocol.fingerprint, evidence });
         console.log(`      ${criterion.id}: ${status}`);
       }
       items.push({ key: result.key, sha256: hash, observations });
     }
     report.experiments.push({ id: experiment.id, version: version.version, items });
     if (process.argv.includes("--write")) {
-      text = replaceJsonSection(text, "验收记录", [...protocol.records, ...records]);
+      text = replaceJsonSection(text, "功能检查证据", [...protocol.facts, ...records]);
       text = replaceJsonSection(text, "浏览器证据", [...protocol.browserEvidence, ...browserEvidence]);
       writeFileSync(resolve(root, version.evaluationPath), text);
       console.log(`write ${version.evaluationPath}`);

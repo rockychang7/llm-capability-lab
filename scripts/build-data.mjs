@@ -2,8 +2,9 @@
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, posix } from "node:path";
 import { root } from "./browser-tools.mjs";
-import { artifactDigest, parseProtocol, resolveChecks, acceptanceState, validateRecord, validateRecordSession,
+import { artifactDigest, parseProtocol, validateAIRecords,
   validateSession, validateBrowserEvidence, validateAIReview, sections } from "./evaluation.mjs";
+import { summarizeScore } from "../review.js";
 
 const checkOnly = process.argv.includes("--check");
 const errors = [];
@@ -38,7 +39,7 @@ function buildVersion(config, version) {
   let evaluation = null;
   if (evaluationPath) {
     const text = readText(evaluationPath), parts = sections(text);
-    if (Object.keys(parts).some((name) => name.startsWith("历史") || ["评分维度", "评分结果", "模型点评"].includes(name))) throw new Error(`${evaluationPath}: 不允许历史评分章节`);
+    if (Object.keys(parts).some((name) => name.startsWith("历史") || ["评分结果", "模型点评"].includes(name))) throw new Error(`${evaluationPath}: 不允许历史评分章节`);
     const meta = Object.fromEntries(parts._head.flatMap((line) => {
       const match = line.match(/^- \*\*(.+?)\*\*：\s*(.+)$/);
       return match ? [[match[1], match[2]]] : [];
@@ -81,32 +82,25 @@ function buildVersion(config, version) {
       if (!existsSync(join(root, file.path)) || artifactDigest(join(root, file.path)) !== file.sha256) throw new Error(`证据媒体不匹配：${file.path}`);
     });
     const ids = new Set();
-    for (const session of [...evaluation.sessions, ...evaluation.aiReviews]) attempt(() => {
+    for (const session of [...evaluation.humanReviews, ...evaluation.aiReviews]) attempt(() => {
       if (ids.has(session.id)) throw new Error("重复的会话 ID");
       ids.add(session.id);
       if (session.experiment !== id || session.version !== version) throw new Error("会话实验版本无效");
       if (session.source === "ai") validateAIReview(session, evaluation, hashes);
       else validateSession(session, evaluation, hashes);
     });
-    for (const record of evaluation.records) attempt(() => {
-      validateRecord(record, evaluation, hashes);
-      validateRecordSession(record, evaluation);
-    });
-    for (const result of results) {
-      const checks = resolveChecks(evaluation.criteria, evaluation.records, result.key);
-      const visual = checks.filter((check) => check.method !== "auto");
-      result.acceptance = { status: acceptanceState(checks), checks, total: checks.length,
-        checked: checks.filter((check) => check.status !== "pending").length, disputed: checks.filter((check) => check.disputed).length,
-        coverage: Object.fromEntries(["pass", "partial", "fail", "pending"].map((status) => [status, checks.filter((check) => check.status === status).length])),
-        audit: { reviewed: visual.reduce((sum, check) => sum + Object.values(check.viewports).filter((state) => state.audited).length, 0),
-          total: visual.length * 2, aiOnly: visual.filter((check) => check.aiOnly).length } };
+    attempt(() => validateAIRecords(evaluation, hashes));
+    const revisions = new Set();
+    for (const review of evaluation.humanReviews) {
+      const token = JSON.stringify([review.participant, review.key, review.revision]);
+      if (revisions.has(token)) errors.push(`${evaluationPath}: 同一用户评价修订编号重复`);
+      revisions.add(token);
     }
+    for (const result of results) result.score = summarizeScore({ evaluation, results }, result.key);
   }
   results.sort((a, b) => a.label.localeCompare(b.label) || a.key.localeCompare(b.key));
-  const count = (status) => results.filter((item) => item.acceptance?.status === status).length;
   return { version, promptPath, prompt, change, evaluationPath, evaluation,
-    stats: { results: results.length, passed: count("pass"), failed: count("fail"), partial: count("partial"),
-      pending: results.filter((item) => !item.acceptance || item.acceptance.status === "pending").length }, results };
+    stats: { results: results.length, scored: results.filter((item) => item.score?.total != null).length }, results };
 }
 try {
   const experiments = configs.map((config) => {

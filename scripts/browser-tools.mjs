@@ -4,11 +4,18 @@ import { resolve, sep, extname } from "node:path";
 import { chromium } from "playwright";
 
 export const root = resolve(import.meta.dirname, "..");
-export async function localServer() {
+export async function localServer({ reviews = null, port = 0 } = {}) {
   const types = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png", ".webm": "video/webm" };
-  const server = createServer((request, response) => {
+  const server = createServer(async (request, response) => {
     try {
-      const path = resolve(root, "." + decodeURIComponent(new URL(request.url, "http://local").pathname));
+      const pathname = decodeURIComponent(new URL(request.url, "http://local").pathname);
+      if (pathname === "/api/reviews") {
+        if (reviews) return await reviews(request, response);
+        response.writeHead(503, { "Content-Type": "application/json", "Cache-Control": "no-store" }).end(JSON.stringify({ available: false, error: "此静态预览未开启评价服务" }));
+        return;
+      }
+      if (pathname.split("/").some((part) => part.startsWith(".")) || /^\/(server|api)\//.test(pathname)) { response.writeHead(403).end(); return; }
+      const path = resolve(root, "." + pathname);
       if (!path.startsWith(root + sep) && path !== root) { response.writeHead(403).end(); return; }
       const target = path === root ? resolve(root, "index.html") : path;
       const content = readFileSync(target);
@@ -29,7 +36,10 @@ export async function localServer() {
       }
     } catch { response.writeHead(404).end("Not found"); }
   });
-  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(port, "127.0.0.1", resolve);
+  });
   return { url: `http://127.0.0.1:${server.address().port}`, close: () => new Promise((resolve) => server.close(resolve)) };
 }
 

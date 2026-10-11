@@ -4,6 +4,12 @@
   "outputDirectory": "dist",
   "cleanUrls": false,
   "trailingSlash": false,
+  "functions": {
+    "api/reviews.js": {
+      "includeFiles": "data/lab.json",
+      "maxDuration": 30
+    }
+  },
   "headers": [
     {
       "source": "/",

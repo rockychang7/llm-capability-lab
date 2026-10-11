@@ -423,7 +423,7 @@ a.exp-row:hover .exp-arrow { color: var(--accent); transform: translateX(4px); }
   .toolbar-hint { display: none; }
 }
 
-/* ---------- Evidence and local review ---------- */
+/* ---------- Evidence and user ratings ---------- */
 :root { --pass: #18734b; --pass-soft: #edf7f1; }
 .brand-name, .kicker, .readout-label, .exp-row-head, .matrix thead th, .prompt-head h2,
 .card-tag, .prompt-meta dt, .dims-table thead th { letter-spacing: 0; }
@@ -438,8 +438,8 @@ a.exp-row:hover .exp-arrow { color: var(--accent); transform: translateX(4px); }
 .prompt-source { margin: 0; padding: 18px; white-space: pre-wrap; overflow-wrap: anywhere; font: 13px/1.85 var(--mono); }
 .prompt-actions { padding: 0 18px 12px; }
 .prompt-change { padding: 12px 18px; border-top: 1px solid var(--line); font-size: 13px; }
-.model-item { grid-template-columns: 24px minmax(0, 1fr); }
-.model-item > .status { grid-column: 2; justify-self: start; margin-top: 4px; }
+.model-item { grid-template-columns: 24px minmax(0, 1fr) auto; }
+.model-score { font-size: 14px; }
 .model-name b { white-space: normal; overflow-wrap: anywhere; }
 .acceptance-table { width: 100%; min-width: 700px; border-collapse: collapse; font-size: 13px; }
 .acceptance-table th, .acceptance-table td { padding: 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
@@ -454,10 +454,6 @@ a.exp-row:hover .exp-arrow { color: var(--accent); transform: translateX(4px); }
 .evidence summary { cursor: pointer; overflow-wrap: anywhere; color: var(--ink-2); font-size: 12px; }
 .evidence pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 360px; overflow-y: auto; padding: 12px; background: var(--panel-2); font: 11px/1.7 var(--mono); }
 .evidence-video { display: block; width: 100%; max-height: 480px; background: #111418; }
-.reveal-ai { margin-top: 16px; }
-.comparison-dimension { margin-top: 24px; }
-.comparison-dimension > h3 { font-size: 16px; }
-.comparison-dimension > p { font-size: 13px; margin-bottom: 10px; }
 .compare-card header { flex-wrap: wrap; }
 .compare-card header b { overflow-wrap: anywhere; }
 .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 13px; color: var(--ink-2); }
@@ -466,36 +462,33 @@ input, textarea, select { font: inherit; color: var(--ink); }
 .field textarea { resize: vertical; line-height: 1.6; }
 .field select { cursor: pointer; }
 .review-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 20px; }
-.blind-start { max-width: 720px; }
-.blind-start > p { margin-top: 16px; font-size: 14px; }
-.checkbox-line { display: flex; align-items: flex-start; gap: 10px; margin: 18px 0; font-size: 13px; }
-.checkbox-line input, .choice-group input { width: 18px; height: 18px; margin: 2px 0 0; flex: none; accent-color: var(--accent); }
 .review-nav { margin-block: 20px; }
-.blind-acceptance { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(280px, 1fr); gap: 24px; align-items: start; }
-.blind-media { position: sticky; top: 16px; min-width: 0; }
-.blind-checks { display: grid; gap: 16px; min-width: 0; }
-.check-field { min-width: 0; margin: 0; padding: 12px 0 16px; border: 0; border-bottom: 1px solid var(--line-strong); }
-.check-field legend { font-size: 14px; font-weight: 500; }
-.check-field .field { margin-top: 10px; }
-.check-field .chip { font-size: 10px; font-weight: 400; }
 .form-error { color: var(--fail); margin-top: 12px; font-size: 13px; }
-.pair-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.pair-head h2 { font-size: 18px; }
-.pair-head p { font-size: 13px; }
-.blind-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.choice-group { display: flex; flex-wrap: wrap; gap: 14px 24px; padding: 16px 0; border: 0; margin: 20px 0 8px; }
-.choice-group legend { font-size: 14px; font-weight: 500; }
-.choice-group label { display: flex; gap: 8px; font-size: 14px; }
 .runlog summary { flex-wrap: wrap; }
 .runlog summary > .muted { font-size: 12px; }
-@media (max-width: 900px) {
-  .blind-acceptance { grid-template-columns: minmax(0, 1fr); }
-  .blind-media { position: static; }
-}
+.dimension-scores { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 0 24px; margin-top: 16px; }
+.dimension-scores > div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.dimension-scores b { flex: none; font: 16px var(--mono); }
+.dimension-scores small { color: var(--ink-3); font-size: 11px; }
+.rating-field { margin: 22px 0; padding: 0; border: 0; min-width: 0; }
+.rating-field legend { font-size: 16px; font-weight: 500; margin-bottom: 10px; }
+.rating-options { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; max-width: 520px; }
+.rating-options label { position: relative; cursor: pointer; min-width: 0; }
+.rating-options input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.rating-options span { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 64px; padding: 6px; border: 1px solid var(--line-strong); background: var(--panel); font: 20px var(--mono); }
+.rating-options small { font: 12px var(--sans); }
+.rating-options input:checked + span { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.rating-options input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
+.rating-policy, .rating-service { margin-top: 12px; font-size: 12px; color: var(--ink-3); }
+.user-review { padding: 18px 0; border-bottom: 1px solid var(--line); }
+.user-review header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; font-size: 13px; }
+.user-review header span { color: var(--ink-3); font-size: 12px; }
+.user-review p { margin-top: 6px; white-space: pre-wrap; }
+.review > [data-feed] { margin-top: 16px; }
+.score > [data-score] { margin-top: 16px; }
 @media (max-width: 640px) {
   .intro h1, .exp-head h1 { font-size: 26px; }
-  .blind-pair { grid-template-columns: minmax(0, 1fr); }
   .review-fields { grid-template-columns: minmax(0, 1fr); }
   .seg a { padding-inline: 12px; }
-  .blind-pair .image-box { aspect-ratio: 4 / 3; }
+  .rating-options { gap: 5px; }
 }
