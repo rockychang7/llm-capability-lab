@@ -4,16 +4,11 @@ import { resolve, sep, extname } from "node:path";
 import { chromium } from "playwright";
 
 export const root = resolve(import.meta.dirname, "..");
-export async function localServer({ reviews = null, port = 0 } = {}) {
+export async function localServer({ port = 0 } = {}) {
   const types = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png", ".webm": "video/webm" };
   const server = createServer(async (request, response) => {
     try {
       const pathname = decodeURIComponent(new URL(request.url, "http://local").pathname);
-      if (pathname === "/api/reviews") {
-        if (reviews) return await reviews(request, response);
-        response.writeHead(503, { "Content-Type": "application/json", "Cache-Control": "no-store" }).end(JSON.stringify({ available: false, error: "此静态预览未开启评价服务" }));
-        return;
-      }
       if (pathname.split("/").some((part) => part.startsWith(".")) || /^\/(server|api)\//.test(pathname)) { response.writeHead(403).end(); return; }
       const path = resolve(root, "." + pathname);
       if (!path.startsWith(root + sep) && path !== root) { response.writeHead(403).end(); return; }

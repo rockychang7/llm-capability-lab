@@ -1,79 +1,84 @@
-export const STATUS_LABELS = { pass: "做到", partial: "部分做到", fail: "未做到", pending: "未判断" };
-export const POLICY = Object.freeze({ scale: 5, viewports: ["desktop", "mobile"], humanDimensions: 3 });
+export const STATUS_LABELS = { pass: "通过", partial: "部分通过", fail: "未通过", scored: "已评分", pending: "未判断" };
+export const POLICY = Object.freeze({
+  scale: 5, viewports: ["desktop", "mobile"], tasteStep: 0.5,
+  objectiveViewport: "minimum", tasteViewport: "mean", judgeSelection: "latest-complete"
+});
 export const date = (value) => typeof value === "string" && Number.isFinite(Date.parse(value));
-export const name = (value) => typeof value === "string" && Boolean(value.trim()) && value !== "unknown";
-const points = { pass: 1, partial: 0.5, fail: 0 };
+export const name = (value) => typeof value === "string" && Boolean(value.trim()) && value.trim() !== "unknown";
+export const POINTS = Object.freeze({ pass: 5, partial: 2.5, fail: 0, pending: null });
 const round = (value) => Math.round(value * 10) / 10;
+const mean = (items) => items.length ? items.reduce((sum, value) => sum + value, 0) / items.length : null;
+const identity = (item) => JSON.stringify([item.reviewer, item.model]);
 
 export function latestBy(items, key) {
   const latest = new Map();
   for (const item of items) {
     const token = key(item), previous = latest.get(token);
-    const byRevision = Number.isSafeInteger(item.revision) && Number.isSafeInteger(previous?.revision);
-    if (!previous || (byRevision ? item.revision > previous.revision : Date.parse(item.at) > Date.parse(previous.at))) latest.set(token, item);
+    if (!previous || Date.parse(item.at) > Date.parse(previous.at) ||
+        (Date.parse(item.at) === Date.parse(previous.at) && item.id > previous.id)) latest.set(token, item);
   }
   return [...latest.values()];
 }
 
-export function validateHumanReview(review, protocol, hashes) {
-  if (!review || review.protocol !== 4 || review.source !== "human" || review.fingerprint !== protocol.fingerprint ||
-      !hashes[review.key] || review.sha256 !== hashes[review.key]) throw new Error("评价标准或原始产物已变化，请刷新页面");
-  if (!/^[a-f0-9]{64}$/.test(review.participant) || !name(review.id) || !date(review.at) ||
-      !name(review.reviewer) || review.reviewer.length > 40 || !POLICY.viewports.includes(review.viewport) ||
-      !Number.isSafeInteger(review.revision) || review.revision < 1) throw new Error("评价身份或日期无效");
-  const dimensions = protocol.dimensions.filter((item) => item.source === "human");
-  if (!review.scores || Array.isArray(review.scores) ||
-      Object.keys(review.scores).length !== dimensions.length ||
-      dimensions.some((item) => !Number.isInteger(review.scores[item.id]) || review.scores[item.id] < 1 || review.scores[item.id] > 5)) {
-    throw new Error("请为所有人工维度选择 1–5 分");
-  }
-  if (typeof review.comment !== "string" || review.comment.length > 1000) throw new Error("评论最多 1000 字");
-}
-
-export function summarizeScore(version, key, additionalReviews = []) {
-  const evaluation = version.evaluation;
-  if (!evaluation) return { total: null, ai: null, human: null, count: 0, dimensions: [], checks: [] };
-  const checks = evaluation.criteria.map((criterion) => {
-    const records = latestBy(evaluation.records.filter((item) => item.key === key && item.id === criterion.id),
-      (item) => JSON.stringify([item.reviewer, item.model, item.viewport]));
-    const judges = new Map();
-    for (const record of records) {
-      const id = JSON.stringify([record.reviewer, record.model]);
-      const environments = judges.get(id) ?? {};
-      environments[record.viewport] = record;
-      judges.set(id, environments);
-    }
-    const values = [...judges.values()].map((environments) =>
-      POLICY.viewports.every((viewport) => Object.hasOwn(points, environments[viewport]?.status)) ?
-        Math.min(...POLICY.viewports.map((viewport) => points[environments[viewport].status])) : null);
-    const value = values.length && !values.includes(null) ? values.reduce((sum, item) => sum + item, 0) / values.length : null;
-    return { ...criterion, value, records, disputed: new Set(records.map((record) => record.status)).size > 1 };
-  });
-  const result = version.results.find((item) => item.key === key);
-  const reviews = latestBy([...evaluation.humanReviews, ...additionalReviews].filter((item) =>
-    item.key === key && item.fingerprint === evaluation.fingerprint && item.sha256 === result?.sha256),
-  (item) => item.participant);
-  const dimensions = evaluation.dimensions.map((dimension) => {
-    let score = null;
-    if (dimension.source === "human" && reviews.length) {
-      score = reviews.reduce((sum, item) => sum + item.scores[dimension.id], 0) / reviews.length;
-    } else if (dimension.source === "ai") {
-      const selected = checks.filter((check) => check.dimension === dimension.id);
-      if (selected.length && selected.every((check) => check.value !== null)) {
-        score = selected.reduce((sum, check) => sum + check.value, 0) / selected.length * POLICY.scale;
-      }
-    }
-    return { ...dimension, score };
-  });
-  const sourceScore = (source) => {
-    const selected = dimensions.filter((item) => item.source === source);
-    return selected.every((item) => item.score !== null) ?
-      round(selected.reduce((sum, item) => sum + item.score / POLICY.scale * item.weight, 0) /
-        selected.reduce((sum, item) => sum + item.weight, 0) * 100) : null;
+export function summarizeScore(version, key) {
+  const evaluation = version.evaluation, result = version.results.find((item) => item.key === key);
+  const empty = { total: null, objective: null, taste: null, count: 0, aiJudges: 0,
+    dimensions: [], checks: [], judges: [], excluded: [], spread: null };
+  if (!evaluation || !result) return empty;
+  const criteria = evaluation.criteria.map((item) => ({ ...item,
+    kind: evaluation.dimensions.find((dimension) => dimension.id === item.dimension).kind }));
+  const candidates = evaluation.aiReviews.filter((batch) =>
+    batch.fingerprint === evaluation.fingerprint && batch.hashes[key] === result.sha256);
+  const assess = (batch) => {
+    const records = evaluation.records.filter((item) => item.session === batch.id && item.key === key);
+    const checks = criteria.map((criterion) => {
+      const environments = POLICY.viewports.map((viewport) =>
+        records.find((item) => item.id === criterion.id && item.viewport === viewport));
+      const values = environments.map((item) => item?.score);
+      const complete = values.every((value) => typeof value === "number" && Number.isFinite(value));
+      return { ...criterion, score: complete ?
+        criterion.kind === "objective" ? Math.min(...values) : mean(values) : null };
+    });
+    return { batch, checks, complete: checks.every((item) => item.score !== null),
+      pending: checks.filter((item) => item.score === null).map((item) => item.id) };
   };
-  return { total: dimensions.every((item) => item.score !== null) ?
-    round(dimensions.reduce((sum, item) => sum + item.score / POLICY.scale * item.weight, 0)) : null,
-  ai: sourceScore("ai"), human: sourceScore("human"), dimensions, checks, count: reviews.length,
-  reviews: reviews.sort((a, b) => Date.parse(b.at) - Date.parse(a.at)),
-  aiJudges: new Set(evaluation.aiReviews.map((item) => JSON.stringify([item.reviewer, item.model]))).size };
+  const assessed = candidates.map(assess);
+  // Select whole complete sessions, never stitch criteria from unrelated review rounds.
+  const selected = latestBy(assessed.filter((item) => item.complete).map((item) => item.batch), identity);
+  const selectedIds = new Set(selected.map((item) => item.id));
+  const sourceScore = (dimensions, kind) => {
+    const items = dimensions.filter((item) => item.kind === kind);
+    return items.length && items.every((item) => item.score !== null) ?
+      items.reduce((sum, item) => sum + item.score / POLICY.scale * item.weight, 0) /
+        items.reduce((sum, item) => sum + item.weight, 0) * 100 : null;
+  };
+  const judges = selected.map((batch) => {
+    const assessment = assessed.find((item) => item.batch.id === batch.id);
+    const dimensions = evaluation.dimensions.map((dimension) => ({ ...dimension,
+      score: mean(assessment.checks.filter((item) => item.dimension === dimension.id).map((item) => item.score)) }));
+    return { reviewer: batch.reviewer, model: batch.model, session: batch.id, at: batch.at, dimensions,
+      total: dimensions.reduce((sum, item) => sum + item.score / POLICY.scale * item.weight, 0),
+      objective: sourceScore(dimensions, "objective"), taste: sourceScore(dimensions, "taste") };
+  });
+  const dimensions = evaluation.dimensions.map((dimension) => ({ ...dimension,
+    score: mean(judges.map((judge) => judge.dimensions.find((item) => item.id === dimension.id).score)) }));
+  const checks = criteria.map((criterion) => {
+    const score = mean(selected.map((batch) => assessed.find((item) => item.batch.id === batch.id)
+      .checks.find((item) => item.id === criterion.id).score));
+    const records = evaluation.records.filter((item) => item.key === key && item.id === criterion.id &&
+      candidates.some((batch) => batch.id === item.session)).map((item) => ({ ...item, counted: selectedIds.has(item.session) }));
+    return { ...criterion, score, value: score === null ? null : score / POLICY.scale, records,
+      disputed: new Set(records.filter((item) => item.counted).map((item) => item.score)).size > 1 };
+  });
+  const totals = judges.map((item) => item.total), total = mean(totals);
+  const objective = sourceScore(dimensions, "objective"), taste = sourceScore(dimensions, "taste");
+  return { total: total === null ? null : round(total),
+    objective: objective === null ? null : round(objective), taste: taste === null ? null : round(taste),
+    count: judges.length, aiJudges: judges.length, dimensions, checks,
+    judges: judges.map((item) => ({ ...item, total: round(item.total), objective: round(item.objective), taste: round(item.taste) })),
+    excluded: assessed.filter((item) => !item.complete).map(({ batch, pending }) => ({
+      session: batch.id, reviewer: batch.reviewer, model: batch.model, at: batch.at, pending
+    })),
+    spread: totals.length ? { min: round(Math.min(...totals)), max: round(Math.max(...totals)),
+      range: round(Math.max(...totals) - Math.min(...totals)) } : null };
 }

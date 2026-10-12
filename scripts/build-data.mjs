@@ -3,7 +3,7 @@ import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "
 import { join, posix } from "node:path";
 import { root } from "./browser-tools.mjs";
 import { artifactDigest, parseProtocol, validateAIRecords,
-  validateSession, validateBrowserEvidence, validateAIReview, sections } from "./evaluation.mjs";
+  validateBrowserEvidence, validateAIReview, sections } from "./evaluation.mjs";
 import { summarizeScore } from "../review.js";
 
 const checkOnly = process.argv.includes("--check");
@@ -82,20 +82,13 @@ function buildVersion(config, version) {
       if (!existsSync(join(root, file.path)) || artifactDigest(join(root, file.path)) !== file.sha256) throw new Error(`证据媒体不匹配：${file.path}`);
     });
     const ids = new Set();
-    for (const session of [...evaluation.humanReviews, ...evaluation.aiReviews]) attempt(() => {
+    for (const session of evaluation.aiReviews) attempt(() => {
       if (ids.has(session.id)) throw new Error("重复的会话 ID");
       ids.add(session.id);
       if (session.experiment !== id || session.version !== version) throw new Error("会话实验版本无效");
-      if (session.source === "ai") validateAIReview(session, evaluation, hashes);
-      else validateSession(session, evaluation, hashes);
+      validateAIReview(session, evaluation, hashes);
     });
     attempt(() => validateAIRecords(evaluation, hashes));
-    const revisions = new Set();
-    for (const review of evaluation.humanReviews) {
-      const token = JSON.stringify([review.participant, review.key, review.revision]);
-      if (revisions.has(token)) errors.push(`${evaluationPath}: 同一用户评价修订编号重复`);
-      revisions.add(token);
-    }
     for (const result of results) result.score = summarizeScore({ evaluation, results }, result.key);
   }
   results.sort((a, b) => a.label.localeCompare(b.label) || a.key.localeCompare(b.key));

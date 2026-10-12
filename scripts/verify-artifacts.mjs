@@ -202,7 +202,7 @@ try {
   if (filter && !lab.experiments.some((item) => item.id === filter)) throw new Error("未知实验 ID");
   for (const experiment of lab.experiments.filter((item) => !filter || item.id === filter)) {
     const version = experiment.versions.find((item) => item.version === experiment.latestVersion);
-    if (version.evaluation?.protocol !== 4) continue;
+    if (version.evaluation?.protocol !== 5) continue;
     mediaDir = resolve(root, `assets/evidence/${experiment.id}/v${version.version}/${captureId}`);
     mkdirSync(mediaDir, { recursive: true });
     let text = readFileSync(resolve(root, version.evaluationPath), "utf8");
@@ -238,7 +238,7 @@ try {
         const status = !complete || passed === undefined ? "pending" : passed ? "pass" : "fail";
         const evidence = JSON.stringify({ ...environment, observations, files });
         records.push({ key: result.key, id: criterion.id, status, source: "auto",
-          reviewer: "artifact-checker-v4", at: new Date().toISOString(), sha256: hash, fingerprint: protocol.fingerprint, evidence });
+          reviewer: "artifact-checker-v5", at: new Date().toISOString(), sha256: hash, fingerprint: protocol.fingerprint, evidence });
         console.log(`      ${criterion.id}: ${status}`);
       }
       items.push({ key: result.key, sha256: hash, observations });

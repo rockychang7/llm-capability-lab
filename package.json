@@ -4,11 +4,10 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build-site.mjs",
-    "test": "node --test tests/evaluation.test.mjs",
+    "test": "node --test tests/agent-evaluation.test.mjs",
     "check": "node scripts/build-data.mjs --check",
     "verify": "node scripts/verify-artifacts.mjs",
     "test:ui": "node scripts/test-ui.mjs",
-    "import-review": "node scripts/import-review.mjs",
     "prepare-ai": "node scripts/prepare-ai.mjs",
     "import-ai": "node scripts/import-ai.mjs",
     "preview": "node scripts/preview.mjs"

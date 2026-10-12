@@ -1,30 +1,19 @@
-import { STATUS_LABELS, summarizeScore } from "./review.js";
-
 const VIEWPORTS = { desktop: { label: "桌面", width: 1440, height: 900 }, mobile: { label: "手机", width: 390, height: 844 } };
+const KINDS = { objective: "确定性", taste: "品味" };
+const STATUS_LABELS = { pass: "做到", partial: "部分做到", fail: "未做到", scored: "已评分", pending: "待评" };
 const app = document.querySelector("#app"), live = document.querySelector("#live");
 const e = (value) => String(value ?? "").replace(/[&<>"']/g, (char) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[char]);
 const label = (result) => result.label + (result.run ? ` · ${result.run}` : "");
-const number = (value) => value === null || value === undefined ? "待评" : value.toFixed(1);
-const badge = (status) => `<span class="status status-${status}">${STATUS_LABELS[status]}</span>`;
+const number = (value) => Number.isFinite(value) ? value.toFixed(1) : "待评";
+const badge = (status) => `<span class="status status-${e(status)}">${e(STATUS_LABELS[status] ?? status)}</span>`;
 const arrow = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const replay = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4"/></svg>';
 const heading = (title, note = "") => `<div class="section-head"><h2>${e(title)}</h2>${note ? `<p>${e(note)}</p>` : ""}</div>`;
-const readouts = (items) => `<div class="readouts">${items.map(([name, value]) => `<div class="readout"><span class="readout-label">${e(name)}</span><span class="readout-value">${e(value)}</span></div>`).join("")}</div>`;
+const readouts = (items) => `<div class="readouts">${items.map(([name, value, id]) => `<div class="readout"${id ? ` data-metric="${e(id)}"` : ""}><span class="readout-label">${e(name)}</span><span class="readout-value">${e(value)}</span></div>`).join("")}</div>`;
 const latest = (experiment) => experiment.versions.find((version) => version.version === experiment.latestVersion);
-const apiCache = new Map(), memory = new Map();
-let lab, current, generation = 0;
-let storageWarning = false;
-let reviewQueue = Promise.resolve();
-function requestReviews(url, options = {}, timeout = 12000) {
-  // Establish one browser cookie before issuing another experiment's request.
-  const operation = reviewQueue.then(async () => {
-    const response = await fetch(url, { credentials: "same-origin", ...options, signal: AbortSignal.timeout(timeout) });
-    return { response, data: await response.json() };
-  });
-  reviewQueue = operation.catch(() => {});
-  return operation;
-}
+const dimensionsFor = (version) => (version.evaluation?.dimensions ?? []).filter((item) => Object.hasOwn(KINDS, item.kind));
+let lab, current;
 const observer = new ResizeObserver((entries) => entries.forEach(({ target }) => fitFrame(target)));
 function announce(text) { live.textContent = text; }
 function route() {
@@ -35,42 +24,43 @@ function hash(experiment, options = {}) {
   const params = new URLSearchParams(Object.entries(options).filter(([, value]) => value !== undefined && value !== null));
   return `#/${experiment.id}${params.size ? `?${params}` : ""}`;
 }
-const scope = (experiment, version) => `${experiment.id}:v${version.version}:${version.evaluation.fingerprint}`;
-const draftKey = (context, result) => `llm-lab-rating:${scope(context.experiment, context.version)}:${result.key}:${result.sha256}`;
-function stored(key) {
-  try { return JSON.parse(localStorage.getItem(key) ?? "null") ?? memory.get(key); }
-  catch { storageWarning = true; return memory.get(key) ?? null; }
-}
-function store(key, value) {
-  memory.set(key, value);
-  try { value === null ? localStorage.removeItem(key) : localStorage.setItem(key, JSON.stringify(value)); }
-  catch { storageWarning = true; }
-}
-function scoreFor(experiment, version, result) {
-  return apiCache.get(scope(experiment, version))?.data?.scores?.[result.key] ?? result.score ?? summarizeScore(version, result.key);
+function scoreFor(version, result) {
+  // Only generated protocol-5 scores are authoritative; older data stays unscored.
+  if (version.evaluation?.protocol === 5 && result.score) return result.score;
+  const dimensions = dimensionsFor(version);
+  return { total: null, objective: null, taste: null, count: 0, aiJudges: 0,
+    dimensions: dimensions.map((item) => ({ ...item, score: null })),
+    checks: (version.evaluation?.criteria ?? []).flatMap((item) => {
+      const dimension = dimensions.find((dimension) => dimension.id === item.dimension);
+      return dimension ? [{ ...item, kind: dimension.kind, score: null, value: null, records: [], disputed: false }] : [];
+    }), judges: [], excluded: [], spread: null };
 }
 function weightLabel(version) {
-  return ["ai", "human"].map((source) => `${source === "ai" ? "AI" : "人工"} ${version.evaluation.dimensions.filter((item) => item.source === source).reduce((sum, item) => sum + item.weight, 0)}%`).join(" + ");
+  if (!dimensionsFor(version).length) return "评分标准待更新";
+  return Object.entries(KINDS).map(([kind, name]) =>
+    `${name} ${dimensionsFor(version).filter((item) => item.kind === kind).reduce((sum, item) => sum + item.weight, 0)}%`).join(" + ");
 }
 function renderHome(params) {
   const entries = lab.experiments.map((experiment) => ({ experiment, version: latest(experiment) }));
   const results = entries.flatMap(({ version }) => version.results);
   document.title = "LLM Capability Lab · 大模型能力实验台";
-  app.innerHTML = `<div class="page"><section class="intro"><div class="intro-text"><p class="kicker">实验台 / 索引</p><h1>同一份提示词，独立生成。<br>功能交给 AI，体验由用户评价。</h1></div>
+  app.innerHTML = `<div class="page"><section class="intro"><div class="intro-text"><p class="kicker">实验台 / 索引</p><h1>同一份提示词，独立生成。<br>Agent 评分，证据公开。</h1></div>
     ${readouts([["实验", entries.length], ["模型", new Set(results.map((item) => item.model)).size], ["原始产物", results.length]])}</section>
-    <section class="block">${heading("实验")}<div class="box scroll"><div class="exp-table"><div class="exp-row exp-row-head"><span>编号</span><span>实验</span><span>提示词</span><span>产物</span><span>评分权重</span><span>人工维度</span><span></span></div>
+    <section class="block">${heading("实验")}<div class="box scroll"><div class="exp-table"><div class="exp-row exp-row-head"><span>编号</span><span>实验</span><span>提示词</span><span>产物</span><span>评分权重</span><span>评分维度</span><span></span></div>
     ${entries.map(({ experiment, version }) => `<a class="exp-row" href="${hash(experiment)}"><span class="exp-no">${e(experiment.number)}</span><span class="exp-main"><span class="chip">${e(experiment.capability)}</span><span class="exp-title">${e(experiment.title)}</span><span class="exp-question">${e(experiment.question)}</span></span>
       <span class="exp-prompt">v${version.version}<span class="muted">${version.prompt.length.toLocaleString("zh-CN")} 字</span></span>
       <span class="sheet">${version.results.map((result) => `<span class="sheet-item">${result.thumb || experiment.artifactType === "image" ? `<img src="${e(result.thumb ?? result.url)}" alt="" loading="lazy">` : ""}</span>`).join("")}<span class="sheet-count">${version.results.length} 份</span></span>
-      <span class="progress-text">${weightLabel(version)}</span><span class="mono">${version.evaluation.dimensions.filter((item) => item.source === "human").length} 项</span><span class="exp-arrow">${arrow}</span></a>`).join("")}
+      <span class="progress-text">${weightLabel(version)}</span><span class="mono">${dimensionsFor(version).length} 项</span><span class="exp-arrow">${arrow}</span></a>`).join("")}
     </div></div></section>
     <section class="block" id="matrix">${heading("模型 × 实验")}<div class="box scroll"><table class="matrix"><thead><tr><th>模型</th>${entries.map(({ experiment }) => `<th>${e(experiment.title)}</th>`).join("")}</tr></thead><tbody>
     ${[...new Set(results.map((item) => item.model))].sort().map((model) => `<tr><th>${e(results.find((item) => item.model === model).label)}</th>${entries.map(({ experiment, version }) => `<td>${version.results.filter((item) => item.model === model).map((result) => {
-      const score = scoreFor(experiment, version, result);
-      return `<a class="cell" href="${hash(experiment, { model: result.key })}"><span data-home-score="${e(experiment.id)}:${e(result.key)}">${number(score.total)}</span><span class="cell-note" data-home-count="${e(experiment.id)}:${e(result.key)}">${score.count} 份评价</span></a>`;
+      const score = scoreFor(version, result);
+      return `<a class="cell" href="${hash(experiment, { model: result.key })}"><span data-home-score="${e(experiment.id)}:${e(result.key)}">${number(score.total)}</span><span class="cell-note" data-home-count="${e(experiment.id)}:${e(result.key)}">${score.count} 位 Agent</span></a>`;
     }).join("") || "—"}</td>`).join("")}</tr>`).join("")}</tbody></table></div></section>
-    <section class="block" id="method">${heading("评分规则")}<dl class="cells"><div><dt>AI 功能分</dt><dd>逐项判断实现情况，以实际运行和画面为证据。</dd></div><div><dt>用户体验分</dt><dd>只评价少量整体维度，各 1–5 分。</dd></div><div><dt>总分</dt><dd>按实验冻结的权重合成；缺少评分则待评，不补分。</dd></div></dl></section></div>`;
-  for (const { experiment, version } of entries) loadReviews(experiment, version);
+    <section class="block" id="method">${heading("评分规则")}<dl class="cells"><div><dt>确定性分</dt><dd>Agent 逐项判断实现情况。做到 / 部分做到 / 未做到为 5 / 2.5 / 0 分，每项取桌面与手机较低分。</dd></div>
+      <div><dt>品味分</dt><dd>Agent 按冻结标准给出 0–5 分，步进 0.5，每项取两个视口均值。品味是 AI 判断，不是人类共识。</dd></div>
+      <div><dt>综合分</dt><dd>每位完整评审按本实验冻结权重合成，再等权平均各 Agent 总分。缺项批次不计入，不补分；无完整评审时待评。</dd></div>
+      <div><dt>比较范围</dt><dd>只比较同一实验、同一 Prompt 版本。保留评审模型、批次、分差与真实浏览器证据，不合并跨实验总榜。</dd></div></dl></section></div>`;
   if (params.get("section")) requestAnimationFrame(() => document.getElementById(params.get("section"))?.scrollIntoView());
 }
 function preview(experiment, result, viewport) {
@@ -93,59 +83,94 @@ function observeFrames() {
   });
 }
 function scoreMarkup(score) {
-  return `${readouts([["综合 / 100", number(score.total)], ["AI / 100", number(score.ai)], ["人工 / 100", number(score.human)], ["有效用户评价", score.count]])}
-    <div class="dimension-scores">${score.dimensions.map((item) => `<div><span>${item.source === "ai" ? "AI" : "人工"} · ${e(item.name)} <small>${item.weight}%</small></span><b>${number(item.score)}${item.score !== null ? '<small> / 5</small>' : ""}</b></div>`).join("")}</div>`;
+  return `${readouts([["综合 / 100", number(score.total), "total"], ["确定性 / 100", number(score.objective), "objective"],
+    ["品味 / 100", number(score.taste), "taste"], ["完整 Agent 数", score.count, "count"], ["Agent 分差", number(score.spread?.range), "spread"]])}
+    <div class="dimension-scores">${score.dimensions.map((item) => `<div data-dimension="${e(item.id)}"><span>${e(KINDS[item.kind])} · ${e(item.name)} <small>${item.weight}%</small></span><b>${number(item.score)}${Number.isFinite(item.score) ? '<small> / 5</small>' : ""}</b></div>`).join("")}</div>
+    ${score.spread ? `<p class="legend">完整 Agent 综合分范围：${number(score.spread.min)} 至 ${number(score.spread.max)} / 100。</p>` : ""}`;
 }
-function feedMarkup(reviews) {
-  if (!reviews?.length) return '<p class="muted">还没有用户评价。</p>';
-  return reviews.map((review) => `<article class="user-review"><header><b>${e(review.reviewer)}</b><span>${e(VIEWPORTS[review.viewport]?.label)} · ${e(review.at.slice(0, 10))}</span></header>
-    <p class="small">${Object.entries(review.scores).map(([id, value]) => `${e(current.version.evaluation.dimensions.find((item) => item.id === id)?.name)} ${value}/5`).join(" · ")}</p>
-    ${review.comment ? `<p>${e(review.comment)}</p>` : ""}</article>`).join("");
+function judgesMarkup(score) {
+  if (!score.judges.length) return '<p class="muted agent-empty">尚无完整 Agent 评审，综合分待评。</p>';
+  return `<div class="box scroll"><table class="judge-table"><thead><tr><th>Agent / 批次</th><th>综合 / 100</th><th>确定性 / 100</th><th>品味 / 100</th>${score.dimensions.map((item) => `<th>${e(item.name)} / 5</th>`).join("")}</tr></thead><tbody>
+    ${score.judges.map((judge) => `<tr data-judge="${e(judge.session)}"><th><b>${e(judge.reviewer)}</b><span>${e(judge.model)}</span><span>${e(judge.at)}</span><span class="mono small">${e(judge.session)}</span></th>
+      <td data-judge-total>${number(judge.total)}</td><td>${number(judge.objective)}</td><td>${number(judge.taste)}</td>
+      ${score.dimensions.map((item) => `<td>${number(judge.dimensions.find((dimension) => dimension.id === item.id)?.score)}</td>`).join("")}</tr>`).join("")}
+    </tbody></table></div>`;
 }
-function humanForm(context, result) {
-  const dimensions = context.version.evaluation.dimensions.filter((item) => item.source === "human");
-  return `<section class="review" id="user-rating">${heading("你的评价")}<form id="rating-form" data-key="${e(result.key)}">
-    <div class="review-fields"><label class="field">公开昵称<input name="reviewer" maxlength="40" required autocomplete="nickname"></label><label class="field">观看视口<select name="viewport">${Object.entries(VIEWPORTS).map(([id, value]) => `<option value="${id}" ${context.options.viewport === id ? "selected" : ""}>${value.label}</option>`).join("")}</select></label></div>
-    ${dimensions.map((item) => `<fieldset class="rating-field"><legend>${e(item.name)} <span class="muted small">${item.weight}%</span></legend><div class="rating-options">${[1, 2, 3, 4, 5].map((value) =>
-      `<label><input type="radio" name="score:${e(item.id)}" value="${value}" required><span>${value}<small>${["很差", "较差", "一般", "好", "很好"][value - 1]}</small></span></label>`).join("")}</div></fieldset>`).join("")}
-    <label class="field">评论（选填）<textarea name="comment" maxlength="1000" rows="2"></textarea></label>
-    <p class="rating-policy">昵称、评分及评论会公开。同一浏览器再次提交更新原评价；参与标识不认证真实身份，清除 Cookie 或换设备可能重复计入。</p>
-    <div class="actions review-nav"><button class="btn btn-primary" type="submit" disabled>提交评价 ${arrow}</button><button class="btn" type="button" data-action="retry-reviews">刷新评价</button></div>
-    <p class="rating-service" role="status">正在连接评价服务…</p><p id="review-error" class="form-error" role="alert"></p>
-    </form>${storageWarning ? '<p class="form-error">浏览器草稿保存不可用，请保持页面打开直到提交成功。</p>' : ""}</section>`;
+function pendingLabel(pending) {
+  if (Number.isInteger(pending)) return `${pending} 项待评`;
+  if (!Array.isArray(pending)) return typeof pending === "string" ? pending : "含待评项";
+  return pending.map((item) => typeof item === "string" ? item :
+    `${item.id ?? item.dimension ?? "待评项"}${item.viewport ? ` · ${VIEWPORTS[item.viewport]?.label ?? item.viewport}` : ""}`).join("；");
 }
-function checkTable(checks) {
-  return `<div class="box scroll"><table class="acceptance-table"><thead><tr><th>功能要求</th><th>判断依据</th><th>AI 完成度</th><th>评审证据</th></tr></thead><tbody>
-    ${checks.map((item) => `<tr><th>${e(item.text)}</th><td>${e(item.how)}</td><td>${item.value === null ? "待评" : `${(item.value * 100).toFixed(0)}%`}${item.disputed ? '<p class="muted small">含不同 AI 判断</p>' : ""}</td><td>
-      ${item.records.length ? item.records.map((record) => `<details class="evidence"><summary>${e(record.model)} · ${e(record.viewport)} · ${badge(record.status)}</summary><p>${e(record.evidence)}</p></details>`).join("") : '<span class="muted">尚无 AI 评分</span>'}</td></tr>`).join("")}</tbody></table></div>`;
+function excludedMarkup(score) {
+  if (!score.excluded.length) return "";
+  return `<details class="runlog excluded-reviews"><summary><h2>未完整评审 · ${score.excluded.length} 批</h2><span class="muted">不计入汇总</span></summary><ul class="excluded-list">
+    ${score.excluded.map((item) => `<li data-excluded="${e(item.session)}"><b>${e(item.reviewer)} · ${e(item.model)}</b><p class="muted small">${e(item.at)} · ${e(item.session)}</p><p>${e(pendingLabel(item.pending))}</p></li>`).join("")}</ul></details>`;
+}
+function mediaMarkup(capture) {
+  return `<div class="evidence-media">${(capture.files ?? []).map((file) =>
+    /^assets\/evidence\/[a-zA-Z0-9/_-]+\.(png|webm)$/.test(file.path) ?
+      `<a href="${e(file.path)}" target="_blank" rel="noopener" data-media-ref="${e(capture.id)}">${file.kind === "video" ? "录像" : "截图"} · ${e(file.path.split("/").at(-1))}</a><span class="mono small muted">媒体 SHA-256：${e(file.sha256)}</span>` : "").join("")}</div>`;
+}
+function captureMarkup(capture) {
+  return `<div class="capture"><p class="small">${e(capture.id)} · ${e(VIEWPORTS[capture.viewport]?.label ?? capture.viewport)} · 采集 ${e(capture.at)}</p>${mediaMarkup(capture)}
+    <p class="mono small muted">采集标准指纹：${e(capture.fingerprint)}</p><p class="mono small muted">产物 SHA-256：${e(capture.sha256)}</p>
+    ${capture.harnessError ? `<p class="is-fail small">采集错误：${e(capture.harnessError)}</p>` : ""}</div>`;
+}
+function recordScore(record, kind) {
+  if (kind === "objective") return ({ pass: 5, partial: 2.5, fail: 0 })[record.status] ?? null;
+  return record.status === "scored" ? record.score : null;
+}
+function checkTable(version, result, score) {
+  if (!score.checks.length) return '<p class="muted agent-empty">尚无 protocol 5 逐项标准。</p>';
+  const captures = version.evaluation?.browserEvidence ?? [];
+  return `<div class="box scroll"><table class="acceptance-table"><thead><tr><th>评分规则</th><th>判断依据</th><th>Agent 分 / 5</th><th>评审记录与证据</th></tr></thead><tbody>
+    ${score.checks.map((item) => `<tr data-check="${e(item.id)}"><th>${e(item.text)}<span class="muted small">${e(KINDS[item.kind])} · ${e(score.dimensions.find((dimension) => dimension.id === item.dimension)?.name)}</span><span class="mono small muted">${e(item.id)}</span></th>
+      <td>${e(item.how)}</td><td data-check-score>${number(item.score)}${item.disputed ? '<p class="muted small">存在不同判断</p>' : ""}</td><td>
+      ${item.records.length ? item.records.map((record) => `<details class="evidence" data-counted="${record.counted === true}"><summary>${e(record.reviewer)} · ${e(record.model)} · ${e(VIEWPORTS[record.viewport]?.label ?? record.viewport)} · ${badge(record.status)} · ${number(recordScore(record, item.kind))} / 5<span class="record-counted">${record.counted ? "计入汇总" : "未计入汇总"}</span></summary>
+        <p class="small muted">${e(record.at)} · 批次 ${e(record.session)}</p><p class="evidence-text">${e(record.evidence)}</p>
+        ${(record.refs ?? []).map((ref) => {
+          const capture = captures.find((capture) => capture.id === ref && capture.key === result.key &&
+            (capture.viewport === record.viewport || ["dpr2", "reduced"].includes(capture.viewport)) &&
+            capture.sha256 === result.sha256);
+          return capture ? captureMarkup(capture) : `<p class="muted small">证据引用：${e(ref)}（媒体未发布）</p>`;
+        }).join("")}</details>`).join("") : '<span class="muted">尚无 Agent 判断；浏览器媒体本身不是评分。</span>'}</td></tr>`).join("")}</tbody></table></div>`;
+}
+function browserEvidenceMarkup(version, result) {
+  const captures = (version.evaluation?.browserEvidence ?? []).filter((item) => item.key === result.key && item.sha256 === result.sha256);
+  return `<details class="runlog browser-evidence"><summary><h2>浏览器采集证据 · ${captures.length} 组</h2></summary>
+    <p class="muted small">媒体保留原采集时间及指纹；采集证据不等同于 Agent 判断。</p>${captures.length ? captures.map(captureMarkup).join("") : '<p class="muted small">尚无已发布浏览器媒体。</p>'}</details>`;
 }
 function renderFocus(experiment, version, options) {
   const result = version.results.find((item) => item.key === options.model) ?? version.results[0];
   if (!result) return '<div class="empty"><strong>暂无产物</strong></div>';
-  const score = scoreFor(experiment, version, result);
+  const score = scoreFor(version, result);
   return `<section class="bench bench-row"><aside class="bench-list"><div class="list-head"><h2>原始产物 <span class="count">${version.results.length}</span></h2><span>按名称排序</span></div><ul class="model-list">
-    ${version.results.map((item, index) => `<li><a class="model-item" href="${hash(experiment, { ...options, model: item.key })}" aria-current="${item.key === result.key}"><span class="model-rank">${String(index + 1).padStart(2, "0")}</span><span class="model-name"><b>${e(label(item))}</b><span>${e(lab.vendors[item.vendor]?.label ?? item.vendor)}</span></span><span class="model-score" data-small-score="${e(item.key)}">${number(scoreFor(experiment, version, item).total)}</span></a></li>`).join("")}
+    ${version.results.map((item, index) => `<li><a class="model-item" href="${hash(experiment, { ...options, model: item.key })}" aria-current="${item.key === result.key}"><span class="model-rank">${String(index + 1).padStart(2, "0")}</span><span class="model-name"><b>${e(label(item))}</b><span>${e(lab.vendors[item.vendor]?.label ?? item.vendor)}</span></span><span class="model-score" data-small-score="${e(item.key)}">${number(scoreFor(version, item).total)}</span></a></li>`).join("")}
     </ul></aside><div class="bench-main"><div class="stage"><div class="stage-bar"><b>${e(label(result))}</b><a href="${e(result.url)}" target="_blank" rel="noopener">打开原始文件</a></div>${preview(experiment, result, options.viewport)}</div>
-    ${humanForm(current, result)}
-    <section class="score">${heading("评分", weightLabel(version))}<div data-score="${e(result.key)}">${scoreMarkup(score)}</div>
-      <p class="legend">总分只在 AI 各项已评分且有人评价时显示；不把待评视为零分。用户分为最新有效评价的均值。</p></section>
-    <section class="review">${heading("用户评价", "最近 20 份；同一参与标识只计最新评价")}<div data-feed="${e(result.key)}">${feedMarkup(score.reviews)}</div></section>
-    <details class="runlog"><summary><h2>AI 功能标准与证据</h2></summary>${checkTable(summarizeScore(version, result.key).checks)}</details>
+    <section class="score">${heading("Agent 评分", weightLabel(version))}<div data-score="${e(result.key)}">${scoreMarkup(score)}</div>
+      <p class="legend">品味是 AI 判断，不是人类共识。仅最新完整评审计入汇总，每位 Agent 等权；未完整评审不补分，无完整评审时待评。</p></section>
+    <section class="agent-scores">${heading("各 Agent 得分", "每位 Agent 按冻结维度权重计算")}<div data-judges="${e(result.key)}">${judgesMarkup(score)}</div>${excludedMarkup(score)}</section>
+    <section class="rules">${heading("逐项规则与证据", "确定性项取两个视口较低分；品味项取均值")}${checkTable(version, result, score)}</section>
+    ${browserEvidenceMarkup(version, result)}
     <details class="runlog"><summary><h2>原始运行记录</h2></summary><dl class="cells">${Object.entries(result.record).map(([name, value]) => `<div><dt class="mono">${e(name)}</dt><dd>${e(value)}</dd></div>`).join("")}<div><dt>SHA-256</dt><dd class="mono small">${e(result.sha256)}</dd></div></dl></details></div></section>`;
 }
 function renderComparison(experiment, version, options) {
   return `<section class="bench"><div class="compare-grid ${experiment.artifactType === "image" ? "is-image" : ""} is-${options.viewport}">
-    ${version.results.map((result) => `<article class="compare-card"><header><b>${e(label(result))}</b><span class="compare-score" data-small-score="${e(result.key)}">${number(scoreFor(experiment, version, result).total)}</span></header>${preview(experiment, result, options.viewport)}
-      <p class="compare-meta">${e(result.record.harness)} · 联网 ${e(result.record.web_access)} · ${e(result.record.turns)} 轮</p><footer><a href="${hash(experiment, { ...options, view: "rate", model: result.key })}">评价这份产物</a><a href="${e(result.url)}" target="_blank" rel="noopener">原始文件</a></footer></article>`).join("")}
-    </div></section><section class="block">${heading("评分对照", weightLabel(version))}<div class="box scroll"><table class="matrix"><thead><tr><th>产物</th><th>AI / 100</th><th>人工 / 100</th><th>综合 / 100</th><th>用户评价数</th></tr></thead><tbody>
     ${version.results.map((result) => {
-      const score = scoreFor(experiment, version, result);
-      return `<tr data-score-row="${e(result.key)}"><th>${e(label(result))}</th><td>${number(score.ai)}</td><td>${number(score.human)}</td><td>${number(score.total)}</td><td>${score.count}</td></tr>`;
-    }).join("")}</tbody></table></div></section>`;
+      const score = scoreFor(version, result);
+      return `<article class="compare-card"><header><b>${e(label(result))}</b><span class="compare-score" data-small-score="${e(result.key)}">${number(score.total)}</span></header>${preview(experiment, result, options.viewport)}
+      <p class="compare-meta">${score.count} 位 Agent · ${e(result.record.harness)} · 联网 ${e(result.record.web_access)} · ${e(result.record.turns)} 轮</p><footer><a href="${hash(experiment, { ...options, view: "focus", model: result.key })}">评分与证据</a><a href="${e(result.url)}" target="_blank" rel="noopener">原始文件</a></footer></article>`;
+    }).join("")}
+    </div></section><section class="block">${heading("Agent 评分对照", weightLabel(version))}<div class="box scroll"><table class="matrix comparison-table"><thead><tr><th>产物</th><th>综合 / 100</th><th>确定性 / 100</th><th>品味 / 100</th><th>完整 Agent 数</th><th>Agent 分差</th></tr></thead><tbody>
+    ${version.results.map((result) => {
+      const score = scoreFor(version, result);
+      return `<tr data-score-row="${e(result.key)}"><th><a href="${hash(experiment, { ...options, view: "focus", model: result.key })}">${e(label(result))}</a></th><td>${number(score.total)}</td><td>${number(score.objective)}</td><td>${number(score.taste)}</td><td>${score.count}</td><td>${number(score.spread?.range)}</td></tr>`;
+    }).join("")}</tbody></table></div><p class="legend">品味是 AI 判断，不是人类共识。分差为本产物完整 Agent 综合分的最高值减最低值。</p></section>`;
 }
 function renderExperiment(experiment, params) {
   const version = experiment.versions.find((item) => item.version === Number(params.get("v"))) ?? latest(experiment);
-  const options = { v: version.version, view: ["compare", "rate"].includes(params.get("view")) ? params.get("view") : "focus",
+  const options = { v: version.version, view: params.get("view") === "compare" ? "compare" : "focus",
     viewport: params.get("viewport") === "mobile" ? "mobile" : "desktop", model: params.get("model") ?? undefined };
   current = { experiment, version, options };
   document.title = `${experiment.title} · LLM Capability Lab`;
@@ -153,134 +178,16 @@ function renderExperiment(experiment, params) {
     <header class="exp-head"><div class="exp-head-text"><p class="kicker">${e(experiment.capability)} / PROMPT v${version.version}</p><h1>${e(experiment.title)}</h1><p class="exp-head-question">${e(experiment.question)}</p></div>
     <label class="readout-select field">提示词版本<select id="version-select">${experiment.versions.map((item) => `<option value="${item.version}" ${item === version ? "selected" : ""}>v${item.version}${item.version === experiment.latestVersion ? " · 当前" : ""}</option>`).join("")}</select></label></header>
     <details class="prompt"><summary class="prompt-head"><h2>完整 Prompt · ${version.prompt.length.toLocaleString("zh-CN")} 字</h2></summary><pre class="prompt-source">${e(version.prompt)}</pre><div class="actions prompt-actions"><button class="btn" type="button" data-action="copy-prompt">复制原文</button><a class="btn" href="${e(version.promptPath)}" target="_blank" rel="noopener">版本文件</a></div></details>
-    <section class="bench"><div class="toolbar"><nav class="seg" aria-label="产物视图">${[["focus", "单个查看"], ["compare", "并排对照"], ["rate", "提交评价"]].map(([view, text]) => `<a href="${hash(experiment, { ...options, view })}" aria-current="${options.view === view}">${text}</a>`).join("")}</nav>
+    <section class="bench"><div class="toolbar"><nav class="seg" aria-label="产物视图">${[["focus", "单个查看"], ["compare", "并排对照"]].map(([view, text]) => `<a href="${hash(experiment, { ...options, view })}" aria-current="${options.view === view}">${text}</a>`).join("")}</nav>
     <div class="toolbar-group"><div class="seg" aria-label="预览视口">${Object.entries(VIEWPORTS).map(([viewport, size]) => `<a href="${hash(experiment, { ...options, viewport })}" aria-current="${viewport === options.viewport}">${size.label}</a>`).join("")}</div><button class="btn" type="button" data-action="reload">${replay}重新加载</button></div></div></section>
     ${options.view === "compare" ? renderComparison(experiment, version, options) : renderFocus(experiment, version, options)}
-    <details class="runlog"><summary><h2>本实验评分标准</h2></summary><dl class="cells">${version.evaluation.dimensions.map((item) => `<div><dt>${item.source === "ai" ? "AI" : "人工"} · ${e(item.name)} · ${item.weight}%</dt><dd>${e(item.rubric)}</dd></div>`).join("")}</dl>
-      <p class="muted small">冻结日期：${e(version.evaluation.freezeDate)}。生成条件见原始运行记录；只比较本版本，不合并跨实验总榜。</p>
-      <a class="text-link" href="${e(version.evaluationPath)}" target="_blank" rel="noopener">完整评测原文</a></details></div>`;
+    <details class="runlog standards"><summary><h2>本实验评分标准</h2></summary><dl class="cells">${dimensionsFor(version).map((item) => `<div><dt>${e(KINDS[item.kind])} · ${e(item.name)} · ${item.weight}%</dt><dd>${e(item.rubric)}</dd></div>`).join("")}</dl>
+      <p class="muted small">协议：${e(version.evaluation?.protocol ?? "待定")}。冻结日期：${e(version.evaluation?.freezeDate ?? "未冻结")}。生成条件见原始运行记录；只比较本版本，不合并跨实验总榜。</p>
+      ${version.evaluationPath ? `<a class="text-link" href="${e(version.evaluationPath)}" target="_blank" rel="noopener">完整评测原文</a>` : ""}</details></div>`;
   observeFrames();
-  restoreForm();
-  refreshScores();
-  loadReviews(experiment, version);
-  if (options.view === "rate") requestAnimationFrame(() => document.getElementById("user-rating")?.scrollIntoView());
 }
-function restoreForm() {
-  const form = document.getElementById("rating-form");
-  if (!form) return;
-  const result = current.version.results.find((item) => item.key === form.dataset.key);
-  const value = stored(draftKey(current, result)) ?? apiCache.get(scope(current.experiment, current.version))?.data?.own?.[result.key];
-  form.elements.reviewer.value = value?.reviewer ?? stored("llm-lab-nickname") ?? "";
-  if (!value) return;
-  form.elements.viewport.value = value.viewport ?? current.options.viewport;
-  form.elements.comment.value = value.comment ?? "";
-  for (const dimension of current.version.evaluation.dimensions.filter((item) => item.source === "human")) {
-    const score = value.scores?.[dimension.id];
-    const input = form.querySelector(`input[name="score:${dimension.id}"][value="${score}"]`);
-    if (input) input.checked = true;
-  }
-}
-function refreshScores() {
-  if (!current) return;
-  const { experiment, version } = current, state = apiCache.get(scope(experiment, version));
-  for (const result of version.results) {
-    const score = scoreFor(experiment, version, result);
-    app.querySelector(`[data-score="${CSS.escape(result.key)}"]`)?.replaceChildren();
-    const scoreElement = app.querySelector(`[data-score="${CSS.escape(result.key)}"]`);
-    if (scoreElement) scoreElement.innerHTML = scoreMarkup(score);
-    const feed = app.querySelector(`[data-feed="${CSS.escape(result.key)}"]`);
-    if (feed) feed.innerHTML = feedMarkup(score.reviews);
-    for (const node of app.querySelectorAll(`[data-small-score="${CSS.escape(result.key)}"]`)) node.textContent = number(score.total);
-    const row = app.querySelector(`[data-score-row="${CSS.escape(result.key)}"]`);
-    if (row) [...row.querySelectorAll("td")].forEach((node, index) => { node.textContent = [number(score.ai), number(score.human), number(score.total), score.count][index]; });
-  }
-  const service = app.querySelector(".rating-service"), form = app.querySelector("#rating-form");
-  if (service) service.textContent = state?.error ? `${state.error}；尚未提交。` : state?.data ? "评价服务已连接。" : "正在连接评价服务…";
-  if (form) form.querySelector('button[type="submit"]').disabled = !state?.data?.token || Boolean(state?.submitting);
-}
-async function loadReviews(experiment, version, force = false) {
-  const key = scope(experiment, version), previous = apiCache.get(key);
-  if (previous?.loading || previous?.submitting) return;
-  if (!force && previous?.data && Date.now() - previous.at < 15000) return;
-  const state = previous ?? {};
-  state.loading = true;
-  apiCache.set(key, state);
-  try {
-    const { response, data } = await requestReviews(`/api/reviews?${new URLSearchParams({ experiment: experiment.id, version: version.version })}`, {
-      cache: "no-store"
-    });
-    if (!response.ok || !data.available) throw new Error(data.error ?? "评价服务暂不可用");
-    state.data = data; state.at = Date.now(); state.error = null;
-  } catch (error) {
-    state.error = error.name === "TimeoutError" ? "评价服务响应超时，请重试" : error.message;
-    state.data = null;
-  } finally { state.loading = false; }
-  if (current && scope(current.experiment, current.version) === key) {
-    if (!document.getElementById("rating-form")?.dataset.dirty) restoreForm();
-    refreshScores();
-  } else if (!current) {
-    for (const result of version.results) {
-      const score = scoreFor(experiment, version, result);
-      const token = `${experiment.id}:${result.key}`;
-      app.querySelector(`[data-home-score="${CSS.escape(token)}"]`)?.replaceChildren(document.createTextNode(number(score.total)));
-      app.querySelector(`[data-home-count="${CSS.escape(token)}"]`)?.replaceChildren(document.createTextNode(`${score.count} 份评价`));
-    }
-  }
-}
-function formDraft(form, context) {
-  const result = context.version.results.find((item) => item.key === form.dataset.key);
-  const key = draftKey(context, result), previous = stored(key), values = new FormData(form);
-  const value = { reviewer: String(values.get("reviewer")).trim(),
-    viewport: values.get("viewport"), comment: String(values.get("comment") ?? ""),
-    scores: Object.fromEntries(context.version.evaluation.dimensions.filter((item) => item.source === "human")
-      .flatMap((item) => values.has(`score:${item.id}`) ? [[item.id, Number(values.get(`score:${item.id}`))]] : [])) };
-  const previousValues = previous ? Object.fromEntries(Object.entries(previous).filter(([name]) => name !== "id")) : null;
-  value.id = JSON.stringify(previousValues) === JSON.stringify(value) ? previous.id : crypto.randomUUID();
-  store(key, value); store("llm-lab-nickname", value.reviewer);
-  return { key, value, result };
-}
-app.addEventListener("input", (event) => {
-  const form = event.target.closest("#rating-form");
-  if (form && current) { form.dataset.dirty = "true"; formDraft(form, current); }
-});
-app.addEventListener("submit", async (event) => {
-  if (event.target.id !== "rating-form" || !current) return;
-  event.preventDefault();
-  const form = event.target, context = current, pageGeneration = generation;
-  if (form.dataset.submitting === "true") return;
-  const state = apiCache.get(scope(context.experiment, context.version)), { key, value, result } = formDraft(form, context);
-  if (state?.submitting) return;
-  const errorElement = document.getElementById("review-error");
-  if (!state?.data?.token) { errorElement.textContent = "评价服务尚未连接，请刷新评价后重试。"; return; }
-  state.submitting = true; form.dataset.submitting = "true"; errorElement.textContent = ""; refreshScores();
-  try {
-    const { response, data } = await requestReviews("/api/reviews", { method: "POST",
-      headers: { "Content-Type": "application/json", "X-Review-Token": state.data.token },
-      body: JSON.stringify({ ...value, experiment: context.experiment.id, version: context.version.version, key: result.key,
-        sha256: result.sha256, fingerprint: context.version.evaluation.fingerprint })
-    }, 15000);
-    if (!response.ok || !data.submitted) throw new Error(data.error ?? "提交失败");
-    state.data = data; state.at = Date.now(); state.error = null;
-    const unchanged = stored(key)?.id === value.id;
-    if (unchanged) store(key, null);
-    if (generation === pageGeneration) {
-      if (unchanged) delete form.dataset.dirty;
-      refreshScores(); errorElement.textContent = "";
-      form.querySelector(".rating-service").textContent = unchanged ? "评价已提交并保存，已更新汇总。" : "评价已提交；新修改的草稿仍待提交。";
-    }
-    announce("评价已提交并保存。");
-  } catch (error) {
-    if (generation === pageGeneration) errorElement.textContent = `${error.name === "TimeoutError" ? "请求超时，请重试" : error.message}。草稿已保留。`;
-  } finally {
-    state.submitting = false; form.dataset.submitting = "false";
-    if (current && scope(current.experiment, current.version) === scope(context.experiment, context.version)) {
-      const activeForm = document.getElementById("rating-form");
-      if (activeForm) activeForm.querySelector('button[type="submit"]').disabled = !state?.data?.token;
-    }
-  }
-});
 app.addEventListener("change", (event) => {
-  if (event.target.id === "version-select") location.hash = hash(current.experiment, { v: event.target.value, view: current.options.view });
+  if (event.target.id === "version-select") location.hash = hash(current.experiment, { ...current.options, v: event.target.value });
 });
 app.addEventListener("click", async (event) => {
   const action = event.target.closest("[data-action]")?.dataset.action;
@@ -288,14 +195,13 @@ app.addEventListener("click", async (event) => {
     app.querySelectorAll(".frame-box iframe,.image-box img").forEach((element) => { element.src = element.getAttribute("src"); });
     announce("产物已重新加载。");
   }
-  if (action === "retry-reviews" && current) await loadReviews(current.experiment, current.version, true);
   if (action === "copy-prompt" && current) {
     try { await navigator.clipboard.writeText(current.version.prompt); announce("已复制 Prompt 原文。"); }
     catch { announce("剪贴板不可用，请从完整 Prompt 中选择原文。"); }
   }
 });
 function render() {
-  generation++; observer.disconnect();
+  observer.disconnect();
   const { path, params } = route();
   current = null;
   const experiment = lab.experiments.find((item) => item.id === path);
