@@ -12793,6 +12793,2633 @@
     "at": "2026-10-12T04:52:39.825Z",
     "sha256": "3998adef2a8c45e1668dd3cf0c7a7cecb29e57c79cc58ebe2d624b717db61cf5",
     "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "svg-valid",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Earlier independent XML inspection found the proper SVG root/namespace and no parser error; the original desktop img actually decoded into the complete coastal illustration.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "viewbox",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The fully read source uses viewBox 0 0 800 600 with finite positive extents. Original desktop screenshots contain the whole bill, tail and two wheels.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "no-script",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The earlier complete-source reading and independent XML DOM inspection found no script, on-event attribute or javascript URL. Visible img motion is declarative.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "standalone",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Earlier source/CSS reference inspection found only internal SVG resources, no external files or imports; independent network observation contained only the local harness and original SVG.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "animation",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The previously viewed decoded original desktop img timeline extends beyond 12 seconds. Spokes, crank, alternating legs and road visibly move, independently of checker status.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "declarative",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Original embedded animate/animateTransform SMIL elements were read and corroborate the motion actually observed in desktop img mode.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "pelican",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The viewed long bill, large hanging red sac, chestnut curved neck and gray-brown folded feathers identify a brown pelican with breeding colors, without relying on its title.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "pouch",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "A broad hanging sac below the bill is large relative to the head, with curved internal fold lines visible in the original desktop picture.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "crown",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Both the yellow crown strip and adjacent white head cap/face are visible above the chestnut neck.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "nape",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Chestnut brown is located on the outside/rear of the S-shaped neck, separate from the pale front throat and gray wing.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "red-pouch",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Red fills the large throat pouch, with darker red curved fold lines.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "frame",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Original desktop view shows a red main triangle connecting steering head, seat junction and bottom bracket, a rear triangle to the rear axle and a connected front fork.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "spokes",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Both complete wheels contain radial spoke sets extending from their hubs to their rims in the original desktop view.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "front-spin",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Earlier viewed archived wheel sequences followed three front-wheel revolutions: spoke/marker directions turn about the fixed front hub rather than merely translating.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "rear-spin",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Earlier archived wheel sequences show three rear-wheel revolutions with changing spoke/marker direction about the stationary rear hub.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "crank-spin",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Three earlier observed 1.6-second crank/leg cycles show opposed crank arms and pedals revolving around the visible frame bottom bracket.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "left-contact",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The nearer foot was independently followed through upper, forward, lower and return phases in three complete archived cycles and their boundaries. Its long sole stays with its corresponding pedal.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "right-contact",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The farther foot was followed independently in its exposed phases on both sides of foreground overlap over three archived cycles; no visible separation from its opposite pedal occurred.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "pedal-phase",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The previously inspected sequence maintains approximately 180-degree opposition of the pedal endpoints while the two legs alternate extension.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "crank-sync",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Across three earlier observed cycles, both feet preserve their own crank-endpoint phase and the knees articulate with pedal travel without visible drift.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "seamless",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The earlier viewed archived short-cycle boundaries show no obvious wheel/leg/road jump. Published desktop cloud samples straddle the three 64-second boundaries: actual request-elapsed ranges 63.923-64.440, 127.941-129.025 and 191.986-193.118 seconds. No obvious sampled reset was seen. These are Chromium 153.0.8010.12 requests from 2026-10-12T01:28:14.520Z to 01:30:23.715Z, not the old archive capture. Gaps up to about 0.52 seconds limit this to visible sampled continuity, not subframe proof.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop",
+      "20261012-pauli-long-cycle-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "feathers",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Earlier normal and enlarged desktop views show overlapping pale feather outlines across the folded back/wing, darker layered flight feathers and a separate tapered tail.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "handlebar",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "A connected stem/bar lies above the front fork. A dark wing tip covers much of the grip, but the visible steering assembly and earlier source reading establish the connection.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "saddle",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The silver seatpost rises from the frame seat junction to the belly underside. The mostly covered saddle is at that support region; earlier source geometry corroborates plausible body occlusion.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "crank",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The silver chainring, central hub and visible revolving crank arms are located at the main-frame bottom bracket.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "pedals",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Previously inspected time sequences separately expose the two black pedal blocks at opposing crank ends.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "composition",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "During the previously observed desktop motion the bill tip, tail feathers and both whole wheel rims remain inside the original rendering.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "silhouette-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 4,
+    "evidence": "Beyond the recognizable 3 anchor, the curved chestnut neck and broad folded red pouch give a specific expressive profile. The tiny head against the pouch and compressed wing-to-grip contour prevent fully unified 5-anchor shaping.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "proportion-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "Seat support and leg reach make the rider/bike relation work beyond the ordinary 3 anchor. Oversized pouch, tiny head and long sharply hinged limbs are not fully convincing controlled exaggeration at the 5 anchor.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "palette-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 4,
+    "evidence": "Chestnut/gray plumage, red bicycle/pouch and pale coastal blues/greens are clearly separated and more developed than the ordinary coordinated anchor. Generic sun glow and competing red accents stop short of refined 5-anchor material hierarchy.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "line-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "Bill/neck curves and bicycle spokes are clean. Repetitive outlined feather ovals are decorative rather than individually directed, and hard leg hinges differ from the smooth upper contour; feather restraint remains below the 5 anchor.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "layout-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 4,
+    "evidence": "The whole rider/bike has forward space and clear road placement; coast/ground bands support horizontal direction beyond the ordinary readable anchor. Sun proximity to the bill weakens the strongest focal hierarchy.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "finish-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "Coastal setting, breeding colors, feather pattern and bicycle details form a finished coherent scene. Ornamental feather repetition, simple grip and angular legs are unevenly resolved compared with the clean head/neck, below consistent 5-anchor refinement.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "gait-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 3,
+    "evidence": "Three earlier observed cycles show clear alternating pedal action with both feet attached. Sharp knees, rigid flat feet and near-constant progression convey little load/force modulation: the readable 3 anchor rather than natural 5-anchor effort.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "posture-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "Low torso, curved neck and steering-wing contact establish seated riding; slight head movement adds coordination. Nearly steady torso and staged wing/flat-foot pose provide too little weight transfer for the natural top anchor.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "rhythm-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "Earlier viewed short wheel/leg/road cycles have a steady beat, and the three published slow-cloud boundary groups have no obvious sampled interruption. Minimal body response and constant mechanical pacing prevent expressive top-anchor unity; desktop long-seam evidence remains coarse, not a subframe test.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-desktop",
+      "20261012-pauli-long-cycle-claude-opus-5-5-high-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "svg-valid",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Earlier independent XML inspection and the viewed original mobile img establish successful SVG decoding; the new long video also displays the original scene, not an error screen.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "viewbox",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The same valid viewBox scales with the whole bill, tail and wheels retained in the original mobile screenshot. White surrounding bands are harness letterboxing.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "no-script",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The same fully inspected source contains no script/event/javascript URL. The viewed mobile img animates without executing an artifact script.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "standalone",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The earlier mobile network observation and full source inspection found no external resource/import. The viewed scene, feathers and bicycle are drawn within the original SVG.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "animation",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The previously viewed original mobile timeline exceeds 12 seconds and visibly shows rotating wheels, crank, alternating legs and road; the new long video corroborates continued motion.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "declarative",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Original embedded SMIL visibly drives the wheel/crank/leg movement in the mobile img; the mechanism is not JavaScript.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "pelican",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "At normal mobile size the long bill, red hanging sac, S-shaped chestnut neck and pale/yellow head remain specifically recognizable as a brown pelican.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "pouch",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The large hanging volume underneath the lower bill is plainly visible at normal mobile scale; it is not merely a line or title claim.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "crown",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The small mobile head still shows both yellow and white head-top regions, not only one required color.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "nape",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The brown rear-neck curve visibly joins the pale/yellow head to the body; it is not a same-colored bicycle component.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "red-pouch",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The hanging throat sac is visibly red in the original normal-size mobile picture and new long-video scene.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "frame",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The red diamond, rear triangle and front fork remain connected and separately locatable at mobile scale.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "spokes",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Thin radial spokes are visible within both whole wheel circles at normal mobile scale.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "front-spin",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Earlier viewed archived mobile wheel sequences followed three revolutions of the front spoke/marker pattern about its fixed axle.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "rear-spin",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The separately followed rear spoke/marker pattern revolves about the rear hub in three previously viewed archived mobile cycles.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "crank-spin",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Across three previously inspected mobile crank/leg cycles, the endpoints trace a circle centered at the frame bottom bracket.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "left-contact",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Three earlier mobile leg cycles and boundary frames were inspected for the nearer foot separately; its visible sole remains on its paired pedal throughout the observed arcs.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "right-contact",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The farther foot was separately checked at exposed opposed phases in all three earlier mobile cycles and stays with its own pedal; this is not inferred from the nearer leg.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "pedal-phase",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Viewed mobile time sequences show opposite crank endpoints and alternating flexion/extension, not two feet traveling together.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "crank-sync",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Each foot travels with its corresponding crank endpoint through three previously inspected complete mobile cycles; phase does not independently wander.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "seamless",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "New public mobile WebM was actually decoded and visually inspected: three 64-second cycle overviews (video positions 0.040-192 seconds, 4-second spacing) and continuous row-major 25fps neighborhoods 62-66, 126-130 and 190-194 seconds. Cloud travel, landscape/road and alternating crank/legs continue through all three neighborhoods without an obvious reset jump. This closes the former missing second mobile boundary. Capture is Chromium 154.0.8037.98, 390x844 DPR1, 2026-10-12T04:55:59.439Z to 04:59:17.456Z. Video positions and the decode-elapsed timer are not an exact SMIL epoch; no subframe claim.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-high"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "feathers",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The earlier normal mobile view retains feather rows distinct from lower dark wing layers and tail; enlargement shows overlapping individual shapes rather than a flat fill.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "handlebar",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The small bar at the wing tip is connected by the visible stem to the red steering tube/front fork, despite overlap.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "saddle",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The visible post terminates at the belly support region rather than open air or high inside the torso. Earlier source reading confirms the saddle in that occluded region.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "crank",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The silver chainring/hub and crank arm are separately locatable at the base of the main frame, not at a wheel hub.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "pedals",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Both black pedals can be individually located as the feet alternate through the earlier observed mobile sequence.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "composition",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Original mobile screenshots and the new long-video scene retain the entire bill, tail and both wheels with no subject clipping by the viewBox.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "silhouette-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 4,
+    "evidence": "The neck curve and broad sac keep an expressive, specific profile on mobile. Tiny head and compressed steering-wing detail weaken local contour clarity, keeping it below the completely integrated top anchor.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "proportion-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "The seated rider and leg reach remain readable. The large sac/tiny head and thin angular knees feel diagrammatic, limiting the credibility of the otherwise workable proportions.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "palette-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 4,
+    "evidence": "Breeding colors, gray bird, red bicycle and blue/green setting remain distinct at small size. The quiet background supports reading, but the bright sun and equally strong red accents share emphasis.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "line-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 3,
+    "evidence": "Clean bill/neck/frame edges survive reduction, but feather ovals compress into a patterned mesh and tiny hinges/flat feet look mechanical. This meets the tidy ordinary 3 anchor, not refined density control.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "layout-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 4,
+    "evidence": "The whole rider/bike is balanced within the landscape image with useful surrounding space and no edge crowding. The sun competes near the bill, so the focal hierarchy is not completely resolved.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "finish-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "A complete illustration with a consistent style survives at mobile scale. Dense wing ornament and simplified steering/leg treatment hold it only modestly above the uniform-but-ordinary 3 anchor.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "gait-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 3,
+    "evidence": "Previously observed three-cycle mobile motion clearly reads as cycling and feet remain attached. Thin mechanical pivots and limited ankle/load response keep the gait at the ordinary continuous 3 anchor.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "posture-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "The seated relation and small head movement coordinate with the visible legs. A near-fixed body and compressed grip contact still show little responsive weight transfer, modestly beyond the ordinary posture anchor.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-high",
+    "id": "rhythm-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "Actually viewed new mobile video cycle overviews span three slow-cloud periods; dense 25fps neighborhoods 62-66, 126-130 and 190-194 seconds keep cloud/road movement and alternating pedal action visually continuous. Fast wheel/leg beat against slower scenery is readable and restrained, above merely ordinary 3-anchor flow. Constant pacing and little body load response remain mechanical, below the 5 anchor. This is new 2026-10-12T04:55:59.439Z capture evidence, not an old-capture time or a precision frame-rate/SMIL-origin measurement.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-high-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-high"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "at": "2026-10-12T14:17:52.764Z",
+    "sha256": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "svg-valid",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Retained from my earlier independent observation under this frozen standard: the original desktop img decoded into the complete coastal bird/bicycle illustration without an XML error screen. My full-source and XML inspection found the SVG root and correct namespace.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "viewbox",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier full-source inspection confirmed viewBox 0 0 800 600, four finite values with positive extents. The viewed desktop image contains the whole bill, tail and both wheel rims, rather than merely declaring a viewBox.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "no-script",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier complete-source reading and independent XML DOM inspection found no script element, on-event attribute or javascript URL. The original img visibly animated without artifact JavaScript.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "standalone",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier complete source/CSS-reference inspection found internal SVG resources and fragment references, not external files or imports. Independent img-mode network observation contained only the local harness and original SVG; the viewed coast and bicycle rendered within that file.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "animation",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "I previously decoded and viewed the archived desktop img timeline over more than 12 seconds. Spoke directions, crank angle, alternating legs and roadway visibly move; this observation establishes running animation, not foot contact or seamlessness by itself.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "declarative",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The embedded animate/animateTransform SMIL elements were read in my earlier complete source inspection. Actual desktop img-mode wheel, crank and leg movement corroborates this declarative mechanism rather than a script-based playback claim.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "pelican",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier normal-size desktop view shows a long hooked bill, large hanging pouch, elongated chestnut neck, dark belly and layered gray wing. The head, neck and pouch breeding colors make a recognizable brown pelican independently of the title.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "pouch",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The previously viewed desktop picture has a broad red sac hanging underneath most of the long bill, visibly separated from the thin upper mandible and neck; this is a volume, not only a bill outline.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "crown",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Both the yellow crown and adjacent white head-top/face region are visible above the chestnut neck in my earlier normal desktop observation. Neither required color is inferred from a label.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "nape",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Chestnut brown occupies the rear of the neck below the white head, with lighter streaks. In my earlier desktop view this area is anatomically distinct from the wing and teal bicycle frame.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "red-pouch",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The large hanging throat sac in my earlier desktop observation is filled with saturated red and darker curved internal folds; the required red is on the pouch itself.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "frame",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier desktop view resolves connected teal top/down/seat tubes, a rear triangle reaching the rear axle and a steering tube/front fork reaching the front axle. The main diamond and load-bearing connections are coherent, not merely a collection of tubes.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "spokes",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier normal desktop image shows thin radial silver spokes extending from each of the two wheel hubs to its rim. Both wheels were independently located.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "front-spin",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "In my earlier three complete wheel-cycle sequences, front-wheel spoke and colored-marker directions repeatedly swept around the stationary front hub. This is observed rotation, not bicycle translation or a frame-difference test.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "rear-spin",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "I separately followed the rear spoke pattern and marker through three complete earlier desktop rotations. Their directions revolve around the fixed rear axle rather than moving the entire wheel across the image.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "crank-spin",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Three earlier viewed 1.6-second crank/leg cycles show opposed arms and pedal endpoints revolving around the frame bottom bracket. The center is not a knee or wheel hub.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "left-contact",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "I assigned this item to the nearer leg and previously followed its foot separately through upper, forward, lower and return phases in three complete cycles and boundary frames. Its sole stays on its corresponding pedal throughout the observed phases.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "right-contact",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The farther foot was independently followed through its exposed phases before and after foreground overlap over three earlier complete cycles. It follows the opposite pedal without visible separation. Brief overlap was not treated as proof from the nearer foot or as a wholly hidden leg.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "pedal-phase",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Across my earlier three viewed cycles, the pedal endpoints remain approximately 180 degrees opposed across the crank center while the two legs alternate extension and flexion, not advancing together in phase.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "crank-sync",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Both feet preserve their pairing and phase with the corresponding crank endpoints over three earlier inspected complete desktop cycles; knee bending changes with pedal travel, with no visible accumulated drift or independent leg swing.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "seamless",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier archived short-cycle boundary sequences showed no obvious subject/wheel/road restart. I also actually viewed the published slow-cloud samples straddling 90/180/270 seconds: request-elapsed ranges 89.924-91.290, 179.932-181.396 and 269.947-271.255 seconds showed no obvious sampled cloud reset. Those Chromium 153.0.8010.12 requests were made from 2026-10-12T01:28:40.160Z through 01:31:41.491Z, not during the old archive capture. Sampling gaps up to about 0.60 seconds limit this to visible sampled continuity, not subframe continuity or every combined-period alignment.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop",
+      "20261012-pauli-long-cycle-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "feathers",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier normal and enlarged desktop views show overlapping silver outlined feather rows, dark flight-feather ends and a separate tapered tail fan. The wing/back are layered rather than flat undifferentiated fills.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "handlebar",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The previously viewed curved black drop bar connects to the steering stem above the front fork. The wing overlaps its upper part, but the visible lower bar and stem-to-fork connection remain identifiable.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "saddle",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "In my earlier desktop view the seatpost rises from the frame seat junction to the belly underside. The mostly covered saddle occupies that support region. Original source geometry corroborated plausible body occlusion, rather than a floating seat or an inference from a saddle label alone.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "crank",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "A toothed silver chainring, central hub and opposed crank arms are visible at the main-frame bottom bracket in my earlier desktop observation. This is not merely an unconnected spinning circle.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "pedals",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "I previously located two distinct black pedal blocks separately on opposite crank ends through successive desktop phases, including the farther pedal when it clears the foreground leg. The second pedal is not inferred from the first.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "composition",
+    "viewport": "desktop",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Throughout my earlier observed desktop phases the bill tip, tail fan and full circumference of both wheel rims stay inside the original image; no viewBox clipping of these extremities was visible.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "silhouette-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 4,
+    "evidence": "My earlier desktop image judgment is above the recognizable 3 anchor: hooked bill, folded pouch, chestnut nape and broad wing form a distinctive expressive pelican profile. The long finger-like black steering-wing extension is awkward and prevents the fully unified 5-anchor silhouette.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "proportion-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "The earlier viewed low horizontal body balances the wheels and has plausible underbelly seat support, modestly beyond the overall-established 3 anchor. The elongated steering reach and angular knees make rider/bicycle proportions less convincingly controlled than the 5 anchor.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "palette-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 4,
+    "evidence": "In my earlier desktop image, silver/brown breeding plumage, red pouch and teal metal separate clearly against the blue coast; warm sun and sand add balance beyond ordinary coordinated color. The intense sky and sunlight compete with small pale head details, below the refined 5-anchor material/background hierarchy.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "line-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "The earlier viewed frame lines and spokes are clean, with controlled flight-feather edges, modestly beyond the tidy 3 anchor. Pale scale-like feather outlines are densely repeated, and the wing-to-bar fingers depart from the orderly curve language; restraint and line consistency fall short of the 5 anchor.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "layout-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 4,
+    "evidence": "My earlier desktop view has a balanced horizontal bird/bicycle group, clear rightward direction, bill clearance and intact wheels, beyond the merely clear 3 anchor. Palm, sun, rail and dense spokes add competing vertical/radial accents, keeping negative-space hierarchy below the exceptionally resolved 5 anchor.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "finish-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "Coastal setting, metal highlights and layered feathers made the earlier viewed scene completed and stylistically identifiable, slightly beyond uniform-but-ordinary 3. Ornamental feather repetition and finger-like steering-wing treatment are unevenly resolved, below the 5 anchor's consistent refinement of every detail.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "gait-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 3,
+    "evidence": "My earlier three-cycle desktop observation showed coherent opposite pedaling and sustained foot contact: the continuous, readable 3 anchor. Sharply hinged knees, almost rigid feet and uniform angular progression convey little pressure or weight transfer, short of the 5 anchor's credible joint articulation and effort.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "posture-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 3,
+    "evidence": "The low seated body and steering reach in my earlier desktop motion make riding viable, matching the established-riding-pose 3 anchor. Torso and neck remain very steady and the finger-like grip looks posed, with little coordinated weight response to the active legs, below the natural 5 anchor.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "rhythm-taste",
+    "viewport": "desktop",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "My earlier wheel/leg/road sequences have a readable steady beat, and the three actually viewed published 90/180/270-second cloud boundary groups have no obvious sampled interruption, modestly beyond ordinary 3-anchor flow. Constant speed and minimal body weighting limit top-anchor expressiveness and unified effort. Desktop long-period gaps up to about 0.60 seconds do not establish subframe smoothness; supplemental requests retain their actual 2026-10-12 capture time.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-desktop",
+      "20261012-pauli-long-cycle-claude-opus-5-5-xhigh-desktop"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "svg-valid",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier independent XML inspection and actual original mobile img decoding established the correct SVG root/namespace and a complete illustration without a parser error. The newly viewed public long-video frames corroborate that the original mobile scene renders.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "viewbox",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The previously inspected valid viewBox 0 0 800 600 scales to the original narrow mobile img with the whole bill, tail and wheels retained. Newly viewed long-video scene frames corroborate no subject clipping; outer white bands are harness letterboxing, not missing SVG content.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "no-script",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Retained from my earlier complete-source and independent XML DOM inspection: the same mobile artifact has no script element, on-event attribute or javascript URL. Its observed img animation does not require artifact JavaScript.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "standalone",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier full source/CSS-reference inspection found no external file or import, and independent mobile img-mode network observation showed only the harness and artifact requests. The original coastal scene and bicycle are internally drawn, not supplied by external media.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "animation",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier viewed mobile img timeline exceeds 12 seconds and visibly contains rotating wheels/crank, alternating legs and moving roadway. The new long-video continuous neighborhoods also show those motions; this is not a deduction from changed frame hashes or a success label.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "declarative",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier complete-source reading found embedded animate/animateTransform SMIL. Actual mobile img wheel, crank and leg movement corroborates execution of that declarative mechanism, with no artifact script needed.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "pelican",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier normal-size mobile picture shows a long bill, red hanging pouch, chestnut neck and gray/dark wing-body separation recognizable as a brown pelican. The new long-video scene retains those features independently of the SVG title.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "pouch",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The large lower-bill sac was plainly visible in my earlier normal mobile image and remains clear in the new video. Its broad hanging contour distinguishes a pouch from a red line outlining the bill.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "crown",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Both the yellow crown and adjoining white head-top region were discernible in my earlier normal-size mobile view. The same two regions remain visible in the newly decoded scene frames; neither color is replaced by a title-based inference.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "nape",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier mobile image locates a clear chestnut rear-neck strip between the pale head and dark body. The newly viewed video confirms its anatomical position, not merely a brown object elsewhere in the scene.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "red-pouch",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "The hanging throat sac itself is visibly red in my earlier normal-size mobile picture and the newly viewed long video, with darker curved folds rather than a red accent elsewhere.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "frame",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier mobile view separately resolves a connected teal main diamond, rear triangle and front fork, ending at the seat, crank and axle regions. New scene frames retain the same connected geometry rather than disconnected decorative tubes.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "spokes",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Both complete wheels contain radial spokes in my earlier normal-size mobile image. Newly viewed video frames again resolve spoke sets in both wheels; neither is a solid disk or an inferred hidden wheel.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "front-spin",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "I previously followed three complete mobile front-wheel cycles, with spokes and the colored marker rotating about the fixed front axle. The newly viewed dense video neighborhoods corroborate rotation while the hub remains stationary in the image.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "rear-spin",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "In my earlier separately inspected three mobile rear-wheel cycles, spoke/marker directions revolved around the stationary rear hub. Newly viewed video boundary sequences also show this rear pattern turning, not translation of the bicycle.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "crank-spin",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Across three earlier inspected complete mobile crank/leg cycles, the opposed arm endpoints circle the main-frame bottom bracket. Newly viewed dense long-video boundary neighborhoods retain that rotation center, not a knee or wheel axle.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "left-contact",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Retained from my earlier phase-by-phase observation: I followed the nearer foot independently through upper, forward, lower and return arcs in three complete mobile leg-cycle sequences and boundary frames. Its sole stayed with its own pedal throughout those observed phases, not merely at one static pose.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "right-contact",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "I separately checked the farther foot on the opposite pedal in three earlier complete mobile cycles, including exposed phases before and after foreground overlap. No visible detachment occurred; its contact is not inferred from the nearer foot, and overlap is brief rather than complete unobserved concealment.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "pedal-phase",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier three-cycle mobile sequence resolves opposite crank endpoints and alternating leg extension/flexion. Newly viewed dense video neighborhoods corroborate this alternation; the two pedals do not advance together in phase.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "crank-sync",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier three complete mobile leg/crank cycles show both feet rising and falling with their own crank endpoints, preserving the pairing without phase drift. Newly viewed video neighborhoods remain consistent with that coupled motion, not an independent leg swing.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "seamless",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "New public WebM was actually decoded and viewed as three nominal 90-second cycle overview grids (5.625-second spacing) plus row-major continuous neighborhoods 88-92, 178-182 and 268-272 seconds at 0.04-second steps. Clouds continue across all three long-period seams without an obvious reset; palms, road markings and alternating crank/legs also continue rather than snapping back. This supplies the previously missing first and third mobile long-boundary sides. The 0.040-second overview entry is an initial blank frame and is excluded from motion judgment; later overview entries and all three seam neighborhoods visibly contain the SVG. Earlier short-cycle observations are retained. The referenced capture is Chromium 154.0.8037.98, 390x844 DPR1, 2026-10-12T04:59:17.734Z to 05:03:53.739Z. Video positions and the decode-elapsed timer are not an exact SMIL epoch; no subframe or every combined-period alignment claim is made.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "feathers",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier normal mobile view resolves silver layered back feathers, distinct dark flight feathers and a separate tail fan; earlier enlargement confirms overlapping individual shapes. Newly viewed scene frames retain this visible layering despite reduced detail density.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "handlebar",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier mobile view follows the connected stem and curved drop bar above the front fork. Wing overlap does not erase the lower bar or its steering connection; the newly viewed scene keeps that assembly visible.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "saddle",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "In my earlier mobile observation the visible seatpost meets the belly/seat region above the rear frame. The low belly plausibly covers most of the saddle; my original source inspection corroborated the saddle at that contact region, rather than assuming support from its label.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "crank",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "My earlier mobile view separately locates the silver chainring/hub and crank arm at the main-frame bottom bracket. The new video continues to show that assembly in the same frame location, not a wheel-centered spinning circle.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "pedals",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "I individually located both black pedals at opposing crank ends through earlier mobile time sequences, including phases exposing the farther block. The second pedal was not inferred from the foreground foot or from a source element name.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "composition",
+    "viewport": "mobile",
+    "status": "pass",
+    "score": 5,
+    "evidence": "Earlier original mobile screenshots and newly viewed long-video scene frames retain the entire bill, tail and both wheel rims within the landscape img. No subject edge is cut by the viewBox; surrounding harness white space is not scored as SVG clipping.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "silhouette-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 4,
+    "evidence": "My earlier mobile image and new scene frames keep an immediately recognizable, expressive hooked-bill/red-pouch/chestnut-neck profile, beyond the recognizable 3 anchor. The claw-like wing extension and dense back outline are less anatomically integrated than the head and neck, below the fully unified 5 anchor.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "proportion-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "The previously viewed rider sits coherently over the rear half of the bicycle and the bill clears the bars, modestly beyond the overall-established 3 anchor; new scene frames preserve that relation. Narrow scale emphasizes the long wing reach and thin hinged legs, so support is credible but exaggeration is not finely controlled at the 5 anchor.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "palette-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 4,
+    "evidence": "Earlier normal-size mobile viewing and the new video show red pouch and teal bicycle separating cleanly from gray plumage and blue sea. Warm sand and sun add balanced color beyond the coordinated 3 anchor. Bright sky/sun still rival the small pale head, below a fully refined 5-anchor focal and material hierarchy.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "line-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 3,
+    "evidence": "My earlier normal mobile view has clean frame and bill edges, but silver feather outlines compress into a busy mesh; newly viewed reduced scene frames corroborate that density. The layered feathers remain readable, matching the tidy middle anchor, without the 5 anchor's restrained density and unified curve treatment.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "layout-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "The whole rider/bicycle grouping stays balanced in my earlier mobile landscape image, with forward space beyond the merely clear 3 anchor; new scene frames retain that balance. Palm foliage and dense wing/wheel textures crowd the smaller field, below the 5 anchor's finely resolved negative space. Harness letterboxing is excluded from the SVG layout judgment.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "finish-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "My earlier mobile observation and new video show a completed coast/bicycle/breeding-plumage scene with a consistent style, modestly beyond uniform-but-ordinary 3. Dense silver ornament and the awkward steering extension remain conspicuous when finer metallic details shrink, below the 5 anchor's consistent refinement.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "gait-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 3,
+    "evidence": "My earlier three complete mobile leg cycles clearly read as alternating cycling with both feet attached; newly viewed dense boundary sequences remain coherent. The narrow limbs pivot like hinged links with little ankle articulation or force variation: continuous/readable 3-anchor action, not the 5 anchor's credible joint mechanics and effort.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "posture-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 3,
+    "evidence": "The seat relation and forward wing reach in my earlier mobile motion make riding recognizable, matching the established-pose 3 anchor. The new dense sequences likewise show an almost fixed upper body against the active legs; claw-like bar contact and limited responsive weight transfer prevent natural 5-anchor coordination.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
+  },
+  {
+    "key": "claude-opus-5-5-xhigh",
+    "id": "rhythm-taste",
+    "viewport": "mobile",
+    "status": "scored",
+    "score": 3.5,
+    "evidence": "Actually viewed new mobile WebM overview grids cover three nominal slow-cloud periods, and dense 0.04-second neighborhoods 88-92, 178-182 and 268-272 seconds show no obvious cloud/road restart interrupting the alternating wheel/leg beat. Slow cloud travel and faster palms/road/pedaling remain legible and restrained, modestly beyond ordinary 3-anchor flow. Constant mechanical pacing, rigid feet and little body weighting prevent the 5 anchor's naturally unified, expressive rhythm. The initial 0.040-second blank overview frame is excluded; this is sampled visual judgment, not uninterrupted full-clip playback or a precision frame-rate/subframe test. The new capture is 2026-10-12T04:59:17.734Z to 05:03:53.739Z in Chromium 154.0.8037.98 at 390x844 DPR1, and video/decode elapsed positions are not exact SMIL start times.",
+    "refs": [
+      "20261011071227453-claude-opus-5-5-xhigh-mobile",
+      "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+    ],
+    "source": "ai",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "session": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "at": "2026-10-12T14:34:55.010Z",
+    "sha256": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577"
   }
 ]
 ```
@@ -19186,12 +21813,1663 @@
         ]
       }
     ]
+  },
+  {
+    "protocol": 5,
+    "source": "ai",
+    "id": "cd5702fc-1995-4240-9610-d1d5b2b665f6",
+    "experiment": "02-pelican-bicycle",
+    "version": 1,
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "hashes": {
+      "claude-opus-5-5-high": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef"
+    },
+    "at": "2026-10-12T14:17:52.764Z",
+    "checks": [
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "svg-valid",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Earlier independent XML inspection found the proper SVG root/namespace and no parser error; the original desktop img actually decoded into the complete coastal illustration.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "viewbox",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The fully read source uses viewBox 0 0 800 600 with finite positive extents. Original desktop screenshots contain the whole bill, tail and two wheels.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "no-script",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The earlier complete-source reading and independent XML DOM inspection found no script, on-event attribute or javascript URL. Visible img motion is declarative.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "standalone",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Earlier source/CSS reference inspection found only internal SVG resources, no external files or imports; independent network observation contained only the local harness and original SVG.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "animation",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The previously viewed decoded original desktop img timeline extends beyond 12 seconds. Spokes, crank, alternating legs and road visibly move, independently of checker status.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "declarative",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Original embedded animate/animateTransform SMIL elements were read and corroborate the motion actually observed in desktop img mode.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "pelican",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The viewed long bill, large hanging red sac, chestnut curved neck and gray-brown folded feathers identify a brown pelican with breeding colors, without relying on its title.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "pouch",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "A broad hanging sac below the bill is large relative to the head, with curved internal fold lines visible in the original desktop picture.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "crown",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Both the yellow crown strip and adjacent white head cap/face are visible above the chestnut neck.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "nape",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Chestnut brown is located on the outside/rear of the S-shaped neck, separate from the pale front throat and gray wing.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "red-pouch",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Red fills the large throat pouch, with darker red curved fold lines.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "frame",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Original desktop view shows a red main triangle connecting steering head, seat junction and bottom bracket, a rear triangle to the rear axle and a connected front fork.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "spokes",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Both complete wheels contain radial spoke sets extending from their hubs to their rims in the original desktop view.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "front-spin",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Earlier viewed archived wheel sequences followed three front-wheel revolutions: spoke/marker directions turn about the fixed front hub rather than merely translating.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "rear-spin",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Earlier archived wheel sequences show three rear-wheel revolutions with changing spoke/marker direction about the stationary rear hub.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "crank-spin",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Three earlier observed 1.6-second crank/leg cycles show opposed crank arms and pedals revolving around the visible frame bottom bracket.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "left-contact",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The nearer foot was independently followed through upper, forward, lower and return phases in three complete archived cycles and their boundaries. Its long sole stays with its corresponding pedal.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "right-contact",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The farther foot was followed independently in its exposed phases on both sides of foreground overlap over three archived cycles; no visible separation from its opposite pedal occurred.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "pedal-phase",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The previously inspected sequence maintains approximately 180-degree opposition of the pedal endpoints while the two legs alternate extension.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "crank-sync",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Across three earlier observed cycles, both feet preserve their own crank-endpoint phase and the knees articulate with pedal travel without visible drift.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "seamless",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The earlier viewed archived short-cycle boundaries show no obvious wheel/leg/road jump. Published desktop cloud samples straddle the three 64-second boundaries: actual request-elapsed ranges 63.923-64.440, 127.941-129.025 and 191.986-193.118 seconds. No obvious sampled reset was seen. These are Chromium 153.0.8010.12 requests from 2026-10-12T01:28:14.520Z to 01:30:23.715Z, not the old archive capture. Gaps up to about 0.52 seconds limit this to visible sampled continuity, not subframe proof.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop",
+          "20261012-pauli-long-cycle-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "feathers",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Earlier normal and enlarged desktop views show overlapping pale feather outlines across the folded back/wing, darker layered flight feathers and a separate tapered tail.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "handlebar",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "A connected stem/bar lies above the front fork. A dark wing tip covers much of the grip, but the visible steering assembly and earlier source reading establish the connection.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "saddle",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The silver seatpost rises from the frame seat junction to the belly underside. The mostly covered saddle is at that support region; earlier source geometry corroborates plausible body occlusion.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "crank",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The silver chainring, central hub and visible revolving crank arms are located at the main-frame bottom bracket.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "pedals",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Previously inspected time sequences separately expose the two black pedal blocks at opposing crank ends.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "composition",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "During the previously observed desktop motion the bill tip, tail feathers and both whole wheel rims remain inside the original rendering.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "silhouette-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 4,
+        "evidence": "Beyond the recognizable 3 anchor, the curved chestnut neck and broad folded red pouch give a specific expressive profile. The tiny head against the pouch and compressed wing-to-grip contour prevent fully unified 5-anchor shaping.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "proportion-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "Seat support and leg reach make the rider/bike relation work beyond the ordinary 3 anchor. Oversized pouch, tiny head and long sharply hinged limbs are not fully convincing controlled exaggeration at the 5 anchor.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "palette-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 4,
+        "evidence": "Chestnut/gray plumage, red bicycle/pouch and pale coastal blues/greens are clearly separated and more developed than the ordinary coordinated anchor. Generic sun glow and competing red accents stop short of refined 5-anchor material hierarchy.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "line-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "Bill/neck curves and bicycle spokes are clean. Repetitive outlined feather ovals are decorative rather than individually directed, and hard leg hinges differ from the smooth upper contour; feather restraint remains below the 5 anchor.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "layout-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 4,
+        "evidence": "The whole rider/bike has forward space and clear road placement; coast/ground bands support horizontal direction beyond the ordinary readable anchor. Sun proximity to the bill weakens the strongest focal hierarchy.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "finish-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "Coastal setting, breeding colors, feather pattern and bicycle details form a finished coherent scene. Ornamental feather repetition, simple grip and angular legs are unevenly resolved compared with the clean head/neck, below consistent 5-anchor refinement.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "gait-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 3,
+        "evidence": "Three earlier observed cycles show clear alternating pedal action with both feet attached. Sharp knees, rigid flat feet and near-constant progression convey little load/force modulation: the readable 3 anchor rather than natural 5-anchor effort.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "posture-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "Low torso, curved neck and steering-wing contact establish seated riding; slight head movement adds coordination. Nearly steady torso and staged wing/flat-foot pose provide too little weight transfer for the natural top anchor.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "rhythm-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "Earlier viewed short wheel/leg/road cycles have a steady beat, and the three published slow-cloud boundary groups have no obvious sampled interruption. Minimal body response and constant mechanical pacing prevent expressive top-anchor unity; desktop long-seam evidence remains coarse, not a subframe test.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-desktop",
+          "20261012-pauli-long-cycle-claude-opus-5-5-high-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "svg-valid",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Earlier independent XML inspection and the viewed original mobile img establish successful SVG decoding; the new long video also displays the original scene, not an error screen.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "viewbox",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The same valid viewBox scales with the whole bill, tail and wheels retained in the original mobile screenshot. White surrounding bands are harness letterboxing.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "no-script",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The same fully inspected source contains no script/event/javascript URL. The viewed mobile img animates without executing an artifact script.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "standalone",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The earlier mobile network observation and full source inspection found no external resource/import. The viewed scene, feathers and bicycle are drawn within the original SVG.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "animation",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The previously viewed original mobile timeline exceeds 12 seconds and visibly shows rotating wheels, crank, alternating legs and road; the new long video corroborates continued motion.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "declarative",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Original embedded SMIL visibly drives the wheel/crank/leg movement in the mobile img; the mechanism is not JavaScript.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "pelican",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "At normal mobile size the long bill, red hanging sac, S-shaped chestnut neck and pale/yellow head remain specifically recognizable as a brown pelican.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "pouch",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The large hanging volume underneath the lower bill is plainly visible at normal mobile scale; it is not merely a line or title claim.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "crown",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The small mobile head still shows both yellow and white head-top regions, not only one required color.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "nape",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The brown rear-neck curve visibly joins the pale/yellow head to the body; it is not a same-colored bicycle component.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "red-pouch",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The hanging throat sac is visibly red in the original normal-size mobile picture and new long-video scene.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "frame",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The red diamond, rear triangle and front fork remain connected and separately locatable at mobile scale.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "spokes",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Thin radial spokes are visible within both whole wheel circles at normal mobile scale.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "front-spin",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Earlier viewed archived mobile wheel sequences followed three revolutions of the front spoke/marker pattern about its fixed axle.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "rear-spin",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The separately followed rear spoke/marker pattern revolves about the rear hub in three previously viewed archived mobile cycles.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "crank-spin",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Across three previously inspected mobile crank/leg cycles, the endpoints trace a circle centered at the frame bottom bracket.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "left-contact",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Three earlier mobile leg cycles and boundary frames were inspected for the nearer foot separately; its visible sole remains on its paired pedal throughout the observed arcs.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "right-contact",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The farther foot was separately checked at exposed opposed phases in all three earlier mobile cycles and stays with its own pedal; this is not inferred from the nearer leg.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "pedal-phase",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Viewed mobile time sequences show opposite crank endpoints and alternating flexion/extension, not two feet traveling together.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "crank-sync",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Each foot travels with its corresponding crank endpoint through three previously inspected complete mobile cycles; phase does not independently wander.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "seamless",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "New public mobile WebM was actually decoded and visually inspected: three 64-second cycle overviews (video positions 0.040-192 seconds, 4-second spacing) and continuous row-major 25fps neighborhoods 62-66, 126-130 and 190-194 seconds. Cloud travel, landscape/road and alternating crank/legs continue through all three neighborhoods without an obvious reset jump. This closes the former missing second mobile boundary. Capture is Chromium 154.0.8037.98, 390x844 DPR1, 2026-10-12T04:55:59.439Z to 04:59:17.456Z. Video positions and the decode-elapsed timer are not an exact SMIL epoch; no subframe claim.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-high"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "feathers",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The earlier normal mobile view retains feather rows distinct from lower dark wing layers and tail; enlargement shows overlapping individual shapes rather than a flat fill.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "handlebar",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The small bar at the wing tip is connected by the visible stem to the red steering tube/front fork, despite overlap.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "saddle",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The visible post terminates at the belly support region rather than open air or high inside the torso. Earlier source reading confirms the saddle in that occluded region.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "crank",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The silver chainring/hub and crank arm are separately locatable at the base of the main frame, not at a wheel hub.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "pedals",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Both black pedals can be individually located as the feet alternate through the earlier observed mobile sequence.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "composition",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Original mobile screenshots and the new long-video scene retain the entire bill, tail and both wheels with no subject clipping by the viewBox.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "silhouette-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 4,
+        "evidence": "The neck curve and broad sac keep an expressive, specific profile on mobile. Tiny head and compressed steering-wing detail weaken local contour clarity, keeping it below the completely integrated top anchor.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "proportion-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "The seated rider and leg reach remain readable. The large sac/tiny head and thin angular knees feel diagrammatic, limiting the credibility of the otherwise workable proportions.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "palette-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 4,
+        "evidence": "Breeding colors, gray bird, red bicycle and blue/green setting remain distinct at small size. The quiet background supports reading, but the bright sun and equally strong red accents share emphasis.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "line-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 3,
+        "evidence": "Clean bill/neck/frame edges survive reduction, but feather ovals compress into a patterned mesh and tiny hinges/flat feet look mechanical. This meets the tidy ordinary 3 anchor, not refined density control.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "layout-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 4,
+        "evidence": "The whole rider/bike is balanced within the landscape image with useful surrounding space and no edge crowding. The sun competes near the bill, so the focal hierarchy is not completely resolved.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "finish-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "A complete illustration with a consistent style survives at mobile scale. Dense wing ornament and simplified steering/leg treatment hold it only modestly above the uniform-but-ordinary 3 anchor.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "gait-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 3,
+        "evidence": "Previously observed three-cycle mobile motion clearly reads as cycling and feet remain attached. Thin mechanical pivots and limited ankle/load response keep the gait at the ordinary continuous 3 anchor.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "posture-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "The seated relation and small head movement coordinate with the visible legs. A near-fixed body and compressed grip contact still show little responsive weight transfer, modestly beyond the ordinary posture anchor.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "rhythm-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "Actually viewed new mobile video cycle overviews span three slow-cloud periods; dense 25fps neighborhoods 62-66, 126-130 and 190-194 seconds keep cloud/road movement and alternating pedal action visually continuous. Fast wheel/leg beat against slower scenery is readable and restrained, above merely ordinary 3-anchor flow. Constant pacing and little body load response remain mechanical, below the 5 anchor. This is new 2026-10-12T04:55:59.439Z capture evidence, not an old-capture time or a precision frame-rate/SMIL-origin measurement.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-high-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-high"
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": 5,
+    "source": "ai",
+    "id": "62d21922-7147-4a90-97f4-c84f6c65932a",
+    "experiment": "02-pelican-bicycle",
+    "version": 1,
+    "fingerprint": "2c7b4c2b4365d9094735122cb76fc97a4203a43c50ef1799cdd72be90245d577",
+    "reviewer": "svg-independent-b+01a12db0-f78c-7312-9c3a-2fa29953ed0e",
+    "model": "inherited-parent-unreported",
+    "hashes": {
+      "claude-opus-5-5-xhigh": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f"
+    },
+    "at": "2026-10-12T14:34:55.010Z",
+    "checks": [
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "svg-valid",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Retained from my earlier independent observation under this frozen standard: the original desktop img decoded into the complete coastal bird/bicycle illustration without an XML error screen. My full-source and XML inspection found the SVG root and correct namespace.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "viewbox",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier full-source inspection confirmed viewBox 0 0 800 600, four finite values with positive extents. The viewed desktop image contains the whole bill, tail and both wheel rims, rather than merely declaring a viewBox.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "no-script",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier complete-source reading and independent XML DOM inspection found no script element, on-event attribute or javascript URL. The original img visibly animated without artifact JavaScript.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "standalone",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier complete source/CSS-reference inspection found internal SVG resources and fragment references, not external files or imports. Independent img-mode network observation contained only the local harness and original SVG; the viewed coast and bicycle rendered within that file.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "animation",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "I previously decoded and viewed the archived desktop img timeline over more than 12 seconds. Spoke directions, crank angle, alternating legs and roadway visibly move; this observation establishes running animation, not foot contact or seamlessness by itself.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "declarative",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The embedded animate/animateTransform SMIL elements were read in my earlier complete source inspection. Actual desktop img-mode wheel, crank and leg movement corroborates this declarative mechanism rather than a script-based playback claim.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "pelican",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier normal-size desktop view shows a long hooked bill, large hanging pouch, elongated chestnut neck, dark belly and layered gray wing. The head, neck and pouch breeding colors make a recognizable brown pelican independently of the title.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "pouch",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The previously viewed desktop picture has a broad red sac hanging underneath most of the long bill, visibly separated from the thin upper mandible and neck; this is a volume, not only a bill outline.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "crown",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Both the yellow crown and adjacent white head-top/face region are visible above the chestnut neck in my earlier normal desktop observation. Neither required color is inferred from a label.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "nape",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Chestnut brown occupies the rear of the neck below the white head, with lighter streaks. In my earlier desktop view this area is anatomically distinct from the wing and teal bicycle frame.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "red-pouch",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The large hanging throat sac in my earlier desktop observation is filled with saturated red and darker curved internal folds; the required red is on the pouch itself.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "frame",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier desktop view resolves connected teal top/down/seat tubes, a rear triangle reaching the rear axle and a steering tube/front fork reaching the front axle. The main diamond and load-bearing connections are coherent, not merely a collection of tubes.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "spokes",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier normal desktop image shows thin radial silver spokes extending from each of the two wheel hubs to its rim. Both wheels were independently located.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "front-spin",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "In my earlier three complete wheel-cycle sequences, front-wheel spoke and colored-marker directions repeatedly swept around the stationary front hub. This is observed rotation, not bicycle translation or a frame-difference test.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "rear-spin",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "I separately followed the rear spoke pattern and marker through three complete earlier desktop rotations. Their directions revolve around the fixed rear axle rather than moving the entire wheel across the image.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "crank-spin",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Three earlier viewed 1.6-second crank/leg cycles show opposed arms and pedal endpoints revolving around the frame bottom bracket. The center is not a knee or wheel hub.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "left-contact",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "I assigned this item to the nearer leg and previously followed its foot separately through upper, forward, lower and return phases in three complete cycles and boundary frames. Its sole stays on its corresponding pedal throughout the observed phases.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "right-contact",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The farther foot was independently followed through its exposed phases before and after foreground overlap over three earlier complete cycles. It follows the opposite pedal without visible separation. Brief overlap was not treated as proof from the nearer foot or as a wholly hidden leg.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "pedal-phase",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Across my earlier three viewed cycles, the pedal endpoints remain approximately 180 degrees opposed across the crank center while the two legs alternate extension and flexion, not advancing together in phase.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "crank-sync",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Both feet preserve their pairing and phase with the corresponding crank endpoints over three earlier inspected complete desktop cycles; knee bending changes with pedal travel, with no visible accumulated drift or independent leg swing.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "seamless",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier archived short-cycle boundary sequences showed no obvious subject/wheel/road restart. I also actually viewed the published slow-cloud samples straddling 90/180/270 seconds: request-elapsed ranges 89.924-91.290, 179.932-181.396 and 269.947-271.255 seconds showed no obvious sampled cloud reset. Those Chromium 153.0.8010.12 requests were made from 2026-10-12T01:28:40.160Z through 01:31:41.491Z, not during the old archive capture. Sampling gaps up to about 0.60 seconds limit this to visible sampled continuity, not subframe continuity or every combined-period alignment.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop",
+          "20261012-pauli-long-cycle-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "feathers",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier normal and enlarged desktop views show overlapping silver outlined feather rows, dark flight-feather ends and a separate tapered tail fan. The wing/back are layered rather than flat undifferentiated fills.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "handlebar",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The previously viewed curved black drop bar connects to the steering stem above the front fork. The wing overlaps its upper part, but the visible lower bar and stem-to-fork connection remain identifiable.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "saddle",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "In my earlier desktop view the seatpost rises from the frame seat junction to the belly underside. The mostly covered saddle occupies that support region. Original source geometry corroborated plausible body occlusion, rather than a floating seat or an inference from a saddle label alone.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "crank",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "A toothed silver chainring, central hub and opposed crank arms are visible at the main-frame bottom bracket in my earlier desktop observation. This is not merely an unconnected spinning circle.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "pedals",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "I previously located two distinct black pedal blocks separately on opposite crank ends through successive desktop phases, including the farther pedal when it clears the foreground leg. The second pedal is not inferred from the first.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "composition",
+        "viewport": "desktop",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Throughout my earlier observed desktop phases the bill tip, tail fan and full circumference of both wheel rims stay inside the original image; no viewBox clipping of these extremities was visible.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "silhouette-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 4,
+        "evidence": "My earlier desktop image judgment is above the recognizable 3 anchor: hooked bill, folded pouch, chestnut nape and broad wing form a distinctive expressive pelican profile. The long finger-like black steering-wing extension is awkward and prevents the fully unified 5-anchor silhouette.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "proportion-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "The earlier viewed low horizontal body balances the wheels and has plausible underbelly seat support, modestly beyond the overall-established 3 anchor. The elongated steering reach and angular knees make rider/bicycle proportions less convincingly controlled than the 5 anchor.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "palette-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 4,
+        "evidence": "In my earlier desktop image, silver/brown breeding plumage, red pouch and teal metal separate clearly against the blue coast; warm sun and sand add balance beyond ordinary coordinated color. The intense sky and sunlight compete with small pale head details, below the refined 5-anchor material/background hierarchy.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "line-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "The earlier viewed frame lines and spokes are clean, with controlled flight-feather edges, modestly beyond the tidy 3 anchor. Pale scale-like feather outlines are densely repeated, and the wing-to-bar fingers depart from the orderly curve language; restraint and line consistency fall short of the 5 anchor.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "layout-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 4,
+        "evidence": "My earlier desktop view has a balanced horizontal bird/bicycle group, clear rightward direction, bill clearance and intact wheels, beyond the merely clear 3 anchor. Palm, sun, rail and dense spokes add competing vertical/radial accents, keeping negative-space hierarchy below the exceptionally resolved 5 anchor.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "finish-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "Coastal setting, metal highlights and layered feathers made the earlier viewed scene completed and stylistically identifiable, slightly beyond uniform-but-ordinary 3. Ornamental feather repetition and finger-like steering-wing treatment are unevenly resolved, below the 5 anchor's consistent refinement of every detail.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "gait-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 3,
+        "evidence": "My earlier three-cycle desktop observation showed coherent opposite pedaling and sustained foot contact: the continuous, readable 3 anchor. Sharply hinged knees, almost rigid feet and uniform angular progression convey little pressure or weight transfer, short of the 5 anchor's credible joint articulation and effort.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "posture-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 3,
+        "evidence": "The low seated body and steering reach in my earlier desktop motion make riding viable, matching the established-riding-pose 3 anchor. Torso and neck remain very steady and the finger-like grip looks posed, with little coordinated weight response to the active legs, below the natural 5 anchor.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "rhythm-taste",
+        "viewport": "desktop",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "My earlier wheel/leg/road sequences have a readable steady beat, and the three actually viewed published 90/180/270-second cloud boundary groups have no obvious sampled interruption, modestly beyond ordinary 3-anchor flow. Constant speed and minimal body weighting limit top-anchor expressiveness and unified effort. Desktop long-period gaps up to about 0.60 seconds do not establish subframe smoothness; supplemental requests retain their actual 2026-10-12 capture time.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-desktop",
+          "20261012-pauli-long-cycle-claude-opus-5-5-xhigh-desktop"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "svg-valid",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier independent XML inspection and actual original mobile img decoding established the correct SVG root/namespace and a complete illustration without a parser error. The newly viewed public long-video frames corroborate that the original mobile scene renders.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "viewbox",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The previously inspected valid viewBox 0 0 800 600 scales to the original narrow mobile img with the whole bill, tail and wheels retained. Newly viewed long-video scene frames corroborate no subject clipping; outer white bands are harness letterboxing, not missing SVG content.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "no-script",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Retained from my earlier complete-source and independent XML DOM inspection: the same mobile artifact has no script element, on-event attribute or javascript URL. Its observed img animation does not require artifact JavaScript.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "standalone",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier full source/CSS-reference inspection found no external file or import, and independent mobile img-mode network observation showed only the harness and artifact requests. The original coastal scene and bicycle are internally drawn, not supplied by external media.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "animation",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier viewed mobile img timeline exceeds 12 seconds and visibly contains rotating wheels/crank, alternating legs and moving roadway. The new long-video continuous neighborhoods also show those motions; this is not a deduction from changed frame hashes or a success label.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "declarative",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier complete-source reading found embedded animate/animateTransform SMIL. Actual mobile img wheel, crank and leg movement corroborates execution of that declarative mechanism, with no artifact script needed.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "pelican",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier normal-size mobile picture shows a long bill, red hanging pouch, chestnut neck and gray/dark wing-body separation recognizable as a brown pelican. The new long-video scene retains those features independently of the SVG title.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "pouch",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The large lower-bill sac was plainly visible in my earlier normal mobile image and remains clear in the new video. Its broad hanging contour distinguishes a pouch from a red line outlining the bill.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "crown",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Both the yellow crown and adjoining white head-top region were discernible in my earlier normal-size mobile view. The same two regions remain visible in the newly decoded scene frames; neither color is replaced by a title-based inference.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "nape",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier mobile image locates a clear chestnut rear-neck strip between the pale head and dark body. The newly viewed video confirms its anatomical position, not merely a brown object elsewhere in the scene.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "red-pouch",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "The hanging throat sac itself is visibly red in my earlier normal-size mobile picture and the newly viewed long video, with darker curved folds rather than a red accent elsewhere.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "frame",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier mobile view separately resolves a connected teal main diamond, rear triangle and front fork, ending at the seat, crank and axle regions. New scene frames retain the same connected geometry rather than disconnected decorative tubes.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "spokes",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Both complete wheels contain radial spokes in my earlier normal-size mobile image. Newly viewed video frames again resolve spoke sets in both wheels; neither is a solid disk or an inferred hidden wheel.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "front-spin",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "I previously followed three complete mobile front-wheel cycles, with spokes and the colored marker rotating about the fixed front axle. The newly viewed dense video neighborhoods corroborate rotation while the hub remains stationary in the image.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "rear-spin",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "In my earlier separately inspected three mobile rear-wheel cycles, spoke/marker directions revolved around the stationary rear hub. Newly viewed video boundary sequences also show this rear pattern turning, not translation of the bicycle.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "crank-spin",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Across three earlier inspected complete mobile crank/leg cycles, the opposed arm endpoints circle the main-frame bottom bracket. Newly viewed dense long-video boundary neighborhoods retain that rotation center, not a knee or wheel axle.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "left-contact",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Retained from my earlier phase-by-phase observation: I followed the nearer foot independently through upper, forward, lower and return arcs in three complete mobile leg-cycle sequences and boundary frames. Its sole stayed with its own pedal throughout those observed phases, not merely at one static pose.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "right-contact",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "I separately checked the farther foot on the opposite pedal in three earlier complete mobile cycles, including exposed phases before and after foreground overlap. No visible detachment occurred; its contact is not inferred from the nearer foot, and overlap is brief rather than complete unobserved concealment.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "pedal-phase",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier three-cycle mobile sequence resolves opposite crank endpoints and alternating leg extension/flexion. Newly viewed dense video neighborhoods corroborate this alternation; the two pedals do not advance together in phase.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "crank-sync",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier three complete mobile leg/crank cycles show both feet rising and falling with their own crank endpoints, preserving the pairing without phase drift. Newly viewed video neighborhoods remain consistent with that coupled motion, not an independent leg swing.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "seamless",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "New public WebM was actually decoded and viewed as three nominal 90-second cycle overview grids (5.625-second spacing) plus row-major continuous neighborhoods 88-92, 178-182 and 268-272 seconds at 0.04-second steps. Clouds continue across all three long-period seams without an obvious reset; palms, road markings and alternating crank/legs also continue rather than snapping back. This supplies the previously missing first and third mobile long-boundary sides. The 0.040-second overview entry is an initial blank frame and is excluded from motion judgment; later overview entries and all three seam neighborhoods visibly contain the SVG. Earlier short-cycle observations are retained. The referenced capture is Chromium 154.0.8037.98, 390x844 DPR1, 2026-10-12T04:59:17.734Z to 05:03:53.739Z. Video positions and the decode-elapsed timer are not an exact SMIL epoch; no subframe or every combined-period alignment claim is made.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "feathers",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier normal mobile view resolves silver layered back feathers, distinct dark flight feathers and a separate tail fan; earlier enlargement confirms overlapping individual shapes. Newly viewed scene frames retain this visible layering despite reduced detail density.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "handlebar",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier mobile view follows the connected stem and curved drop bar above the front fork. Wing overlap does not erase the lower bar or its steering connection; the newly viewed scene keeps that assembly visible.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "saddle",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "In my earlier mobile observation the visible seatpost meets the belly/seat region above the rear frame. The low belly plausibly covers most of the saddle; my original source inspection corroborated the saddle at that contact region, rather than assuming support from its label.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "crank",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "My earlier mobile view separately locates the silver chainring/hub and crank arm at the main-frame bottom bracket. The new video continues to show that assembly in the same frame location, not a wheel-centered spinning circle.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "pedals",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "I individually located both black pedals at opposing crank ends through earlier mobile time sequences, including phases exposing the farther block. The second pedal was not inferred from the foreground foot or from a source element name.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "composition",
+        "viewport": "mobile",
+        "status": "pass",
+        "score": 5,
+        "evidence": "Earlier original mobile screenshots and newly viewed long-video scene frames retain the entire bill, tail and both wheel rims within the landscape img. No subject edge is cut by the viewBox; surrounding harness white space is not scored as SVG clipping.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "silhouette-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 4,
+        "evidence": "My earlier mobile image and new scene frames keep an immediately recognizable, expressive hooked-bill/red-pouch/chestnut-neck profile, beyond the recognizable 3 anchor. The claw-like wing extension and dense back outline are less anatomically integrated than the head and neck, below the fully unified 5 anchor.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "proportion-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "The previously viewed rider sits coherently over the rear half of the bicycle and the bill clears the bars, modestly beyond the overall-established 3 anchor; new scene frames preserve that relation. Narrow scale emphasizes the long wing reach and thin hinged legs, so support is credible but exaggeration is not finely controlled at the 5 anchor.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "palette-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 4,
+        "evidence": "Earlier normal-size mobile viewing and the new video show red pouch and teal bicycle separating cleanly from gray plumage and blue sea. Warm sand and sun add balanced color beyond the coordinated 3 anchor. Bright sky/sun still rival the small pale head, below a fully refined 5-anchor focal and material hierarchy.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "line-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 3,
+        "evidence": "My earlier normal mobile view has clean frame and bill edges, but silver feather outlines compress into a busy mesh; newly viewed reduced scene frames corroborate that density. The layered feathers remain readable, matching the tidy middle anchor, without the 5 anchor's restrained density and unified curve treatment.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "layout-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "The whole rider/bicycle grouping stays balanced in my earlier mobile landscape image, with forward space beyond the merely clear 3 anchor; new scene frames retain that balance. Palm foliage and dense wing/wheel textures crowd the smaller field, below the 5 anchor's finely resolved negative space. Harness letterboxing is excluded from the SVG layout judgment.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "finish-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "My earlier mobile observation and new video show a completed coast/bicycle/breeding-plumage scene with a consistent style, modestly beyond uniform-but-ordinary 3. Dense silver ornament and the awkward steering extension remain conspicuous when finer metallic details shrink, below the 5 anchor's consistent refinement.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "gait-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 3,
+        "evidence": "My earlier three complete mobile leg cycles clearly read as alternating cycling with both feet attached; newly viewed dense boundary sequences remain coherent. The narrow limbs pivot like hinged links with little ankle articulation or force variation: continuous/readable 3-anchor action, not the 5 anchor's credible joint mechanics and effort.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "posture-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 3,
+        "evidence": "The seat relation and forward wing reach in my earlier mobile motion make riding recognizable, matching the established-pose 3 anchor. The new dense sequences likewise show an almost fixed upper body against the active legs; claw-like bar contact and limited responsive weight transfer prevent natural 5-anchor coordination.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "rhythm-taste",
+        "viewport": "mobile",
+        "status": "scored",
+        "score": 3.5,
+        "evidence": "Actually viewed new mobile WebM overview grids cover three nominal slow-cloud periods, and dense 0.04-second neighborhoods 88-92, 178-182 and 268-272 seconds show no obvious cloud/road restart interrupting the alternating wheel/leg beat. Slow cloud travel and faster palms/road/pedaling remain legible and restrained, modestly beyond ordinary 3-anchor flow. Constant mechanical pacing, rigid feet and little body weighting prevent the 5 anchor's naturally unified, expressive rhythm. The initial 0.040-second blank overview frame is excluded; this is sampled visual judgment, not uninterrupted full-clip playback or a precision frame-rate/subframe test. The new capture is 2026-10-12T04:59:17.734Z to 05:03:53.739Z in Chromium 154.0.8037.98 at 390x844 DPR1, and video/decode elapsed positions are not exact SMIL start times.",
+        "refs": [
+          "20261011071227453-claude-opus-5-5-xhigh-mobile",
+          "20261012-mobile-long-video-claude-opus-5-5-xhigh"
+        ]
+      }
+    ]
   }
 ]
 ```
 
 ## 评测结论
 
-协议 5 已在重评前冻结。2026-10-12 已归档两批独立 Agent 的 576 项真实观察，覆盖四份产物及桌面 / 手机。当前 GPT 6.1 综合分 90.3 / 100、有效 Agent 数 2；GPT 5.6 综合分 65.8 / 100、有效 Agent 数 1。两份 Claude 的接缝或循环节奏仍有未观察项，不完整批次不计入均分，也不拼接其他批次补齐。
+协议 5 已在重评前冻结。2026-10-12 已归档两位独立 Agent 的四批评审、720 条逐项记录，覆盖四份产物及桌面 / 手机；四份产物均已有完整评审。GPT 6.1 综合分 90.3 / 100、有效 Agent 数 2；Claude High 为 88.5 / 100、Claude Extra High 为 87.8 / 100、GPT 5.6 为 65.8 / 100，各有 1 位完整 Agent。原未完成批次保留，不计入均分，也不拼接多个批次补齐。
 
-已追加两份 Claude 手机 img 模式的连续长周期录像与边界前后截图，分别真实观察约 198 秒和 276 秒；这些是新的浏览器证据，不是自动评分。后续 Agent 须真实查看再生成新批次，不重标旧 pending。品味分是 AI 判断，不代表人类或多模型共识；后续独立批次按冻结规则持续汇总。
+两份 Claude 的补评实际查看了手机 img 模式的长周期录像、三轮周期概览及 25fps 边界时序，所用录像分别真实观察约 198 秒和 276 秒。观看范围、采样时间精度及各项优缺点均写入新批次，未改旧 pending 或媒体采集指纹。证据只支持实际采样范围，不证明逐帧连续性或实体设备性能。品味分是 AI 判断，不代表人类或多模型共识；后续独立批次按冻结规则持续汇总。
