@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { POLICY, POINTS, date, name } from "../review.js";
 
+export const PROTOCOL = 6;
 export const digest = (value) => createHash("sha256").update(value).digest("hex");
 export const artifactDigest = (path) => digest(readFileSync(path));
 export function readPrompt(path) {
@@ -11,6 +12,8 @@ export function readPrompt(path) {
   return blocks[0][1];
 }
 export const STATUSES = ["pass", "partial", "fail", "scored", "pending"];
+export const JUDGES = { "脚本": "script", "AI": "ai" };
+export const MEDIA = /^assets\/evidence\/[a-zA-Z0-9/_-]+\.(png|jpg)$/;
 export function sections(text) {
   const result = { _head: [] };
   let current = "_head", fenced = false;
@@ -38,15 +41,18 @@ export function jsonSection(parts, name) {
   return value;
 }
 export function protocolFingerprint(criteria, dimensions, prompt) {
-  return digest(JSON.stringify({ protocol: 5, policy: POLICY, criteria, dimensions, prompt: digest(prompt) }));
+  return digest(JSON.stringify({ protocol: PROTOCOL, policy: POLICY, criteria, dimensions, prompt: digest(prompt) }));
 }
 export function parseProtocol(text, prompt) {
-  if (!/^- \*\*评测协议\*\*：5\s*$/m.test(text)) throw new Error("仅支持评测协议 5");
+  if (!new RegExp(`^- \\*\\*评测协议\\*\\*：${PROTOCOL}\\s*$`, "m").test(text)) throw new Error(`仅支持评测协议 ${PROTOCOL}`);
   const parts = sections(text);
-  if (parts["用户评价"]) throw new Error("协议 5 不接受人工评分章节");
+  for (const legacy of ["用户评价", "AI 评分", "浏览器证据", "功能检查证据"]) {
+    if (parts[legacy]) throw new Error(`协议 ${PROTOCOL} 不接受旧章节：${legacy}`);
+  }
   const dimensions = tableRows(parts["评分维度"]).slice(1).map(([id, name, kind, weight, rubric]) =>
     ({ id, name, kind, weight: Number(weight), rubric }));
-  const criteria = tableRows(parts["评分细则"]).slice(1).map(([id, dimension, text, how]) => ({ id, dimension, text, how }));
+  const criteria = tableRows(parts["评分细则"]).slice(1).map(([id, dimension, judge, text, how]) =>
+    ({ id, dimension, by: JUDGES[judge], text, how }));
   for (const list of [criteria, dimensions]) {
     const ids = list.map((item) => item.id);
     if (!ids.length || new Set(ids).size !== ids.length || ids.some((id) => !/^[a-z][a-z0-9-]*$/.test(id))) throw new Error("标准 ID 无效或重复");
@@ -56,85 +62,74 @@ export function parseProtocol(text, prompt) {
     throw new Error("维度权重必须是正整数且合计为 100");
   }
   if (!dimensions.some((item) => item.kind === "objective") || !dimensions.some((item) => item.kind === "taste")) {
-    throw new Error("必须同时包含确定性与品味维度，全部由 Agent 评分");
+    throw new Error("必须同时包含确定性与品味维度");
   }
-  if (criteria.some((item) => !dimensions.some((dimension) => dimension.id === item.dimension) || !name(item.text) || !name(item.how)) ||
-      dimensions.some((item) => !criteria.some((criterion) => criterion.dimension === item.id))) throw new Error("每项须归属有效维度，每个维度须有细则");
-  return { protocol: 5, policy: POLICY, criteria, dimensions, fingerprint: protocolFingerprint(criteria, dimensions, prompt),
-    records: jsonSection(parts, "AI 评分"), aiReviews: jsonSection(parts, "AI 评审"), browserEvidence: jsonSection(parts, "浏览器证据"),
-    facts: jsonSection(parts, "功能检查证据") };
+  const kindOf = (item) => dimensions.find((dimension) => dimension.id === item.dimension)?.kind;
+  if (criteria.some((item) => !kindOf(item) || !item.by || !name(item.text) || !name(item.how) ||
+      (kindOf(item) === "taste" && item.by !== "ai")) ||
+      dimensions.some((item) => !criteria.some((criterion) => criterion.dimension === item.id))) {
+    throw new Error("每项须归属有效维度并标明脚本或 AI 判定；品味只能由 AI 判定；每个维度须有细则");
+  }
+  if (!criteria.some((item) => item.by === "ai")) throw new Error("至少需要一项 AI 细则");
+  return { protocol: PROTOCOL, policy: POLICY, criteria, dimensions, fingerprint: protocolFingerprint(criteria, dimensions, prompt),
+    autoChecks: jsonSection(parts, "自动检查"), aiReviews: jsonSection(parts, "AI 评审") };
 }
-export function validateBrowserEvidence(items, protocol, hashes) {
+const kindOf = (protocol, criterion) => protocol.dimensions.find((item) => item.id === criterion?.dimension)?.kind;
+export function validateAutoChecks(items, protocol, hashes) {
   const seen = new Set();
+  const scripted = protocol.criteria.filter((item) => item.by === "script").map((item) => item.id);
   for (const item of items) {
-    // Capture provenance stays immutable when media supports a newly frozen rubric.
+    const ids = (item.results ?? []).map((result) => result.id);
     if (!name(item.id) || seen.has(item.id) || !hashes[item.key] || hashes[item.key] !== item.sha256 ||
-        !/^[a-f0-9]{64}$/.test(item.fingerprint) || !["desktop", "mobile", "dpr2", "reduced"].includes(item.viewport) ||
-        !date(item.at) || !Array.isArray(item.files) || !item.files.length) throw new Error("浏览器证据指纹或环境无效");
+        item.fingerprint !== protocol.fingerprint || !date(item.at) || !name(item.checker) ||
+        !Array.isArray(item.results) || ids.length !== scripted.length || scripted.some((id) => !ids.includes(id)) ||
+        item.results.some((result) => !["pass", "partial", "fail", "pending"].includes(result.status) ||
+          typeof result.evidence !== "string" || !result.evidence.trim()) ||
+        !Array.isArray(item.files)) throw new Error("自动检查记录的产物、标准指纹或脚本细则覆盖无效");
     for (const file of item.files) {
-      if (!/^assets\/evidence\/[a-zA-Z0-9/_-]+\.(png|webm)$/.test(file.path) || !/^[a-f0-9]{64}$/.test(file.sha256) ||
-          !["frame", "video"].includes(file.kind)) throw new Error("证据媒体路径或指纹无效");
+      if (!MEDIA.test(file.path) || !/^[a-f0-9]{64}$/.test(file.sha256) || !["sheet", "frame"].includes(file.kind) ||
+          !["desktop", "mobile"].includes(file.viewport)) throw new Error("证据媒体路径、类型或指纹无效");
     }
     seen.add(item.id);
   }
 }
-export function validateRecord(record, protocol, hashes) {
-  const criterion = protocol.criteria.find((item) => item.id === record?.id);
-  const kind = protocol.dimensions.find((item) => item.id === criterion?.dimension)?.kind;
-  const validScore = kind === "objective" ? Object.hasOwn(POINTS, record?.status) && record.score === POINTS[record.status] :
-    record?.status === "pending" ? record.score === null : record?.status === "scored" && typeof record.score === "number" &&
-      Number.isFinite(record.score) && record.score >= 0 && record.score <= POLICY.scale && record.score % POLICY.tasteStep === 0;
-  if (!criterion || !validScore || !STATUSES.includes(record.status) || record.source !== "ai" ||
-      hashes[record.key] !== record.sha256 || !hashes[record.key] || record.fingerprint !== protocol.fingerprint ||
-      !name(record.reviewer) || !name(record.model) || !name(record.session) || !date(record.at) ||
-      !POLICY.viewports.includes(record.viewport) || typeof record.evidence !== "string" ||
-      !record.evidence.trim() || !Array.isArray(record.refs) || (record.status !== "pending" && !record.refs.length)) throw new Error("AI 评分身份、标准、证据或产物无效");
+export function validateCheck(check, protocol) {
+  const criterion = protocol.criteria.find((item) => item.id === check?.id && item.by === "ai");
+  const kind = kindOf(protocol, criterion);
+  const validScore = check?.status === "pending" ? check.score === null :
+    kind === "objective" ? ["pass", "partial", "fail"].includes(check?.status) && check.score === POINTS[check.status] :
+      check?.status === "scored" && typeof check.score === "number" && Number.isFinite(check.score) &&
+        check.score >= 0 && check.score <= POLICY.scale && check.score % POLICY.tasteStep === 0;
+  // A plain pass needs no essay; anything else must say what was seen.
+  const needsNote = check?.status !== "pass";
+  if (!criterion || !validScore || typeof check.note !== "string" || (needsNote && !check.note.trim())) {
+    throw new Error("AI 细则、状态分数或说明无效：非通过项必须写一句依据");
+  }
 }
 export function validateAIReview(batch, protocol, hashes) {
   const selected = Object.keys(batch?.hashes ?? {});
-  if (!batch || batch.protocol !== 5 || batch.source !== "ai" || batch.fingerprint !== protocol.fingerprint ||
+  if (!batch || batch.protocol !== PROTOCOL || batch.source !== "ai" || batch.fingerprint !== protocol.fingerprint ||
       !name(batch.id) || !name(batch.reviewer) || !name(batch.model) || !date(batch.at) ||
       !selected.length || selected.some((key) => !hashes[key] || batch.hashes[key] !== hashes[key])) throw new Error("AI 评审身份、日期或产物无效");
-  if (!Array.isArray(batch.checks) || batch.checks.length !== selected.length * protocol.criteria.length * POLICY.viewports.length) {
-    throw new Error("AI 必须完整覆盖所选产物的全部细则和两个视口；未观察项明确 pending");
+  const aiCriteria = protocol.criteria.filter((item) => item.by === "ai");
+  if (!Array.isArray(batch.checks) || batch.checks.length !== selected.length * aiCriteria.length) {
+    throw new Error("AI 必须覆盖所选产物的全部 AI 细则；没看到的明确 pending");
   }
   const seen = new Set();
   for (const check of batch.checks) {
-    const token = `${check.key}|${check.id}|${check.viewport}`;
+    const token = `${check.key}|${check.id}`;
     if (!selected.includes(check.key)) throw new Error("AI 检查超出所选产物");
-    if (seen.has(token)) throw new Error("AI 功能标准重复");
-    validateRecord({ ...check, source: "ai", reviewer: batch.reviewer, model: batch.model, session: batch.id,
-      at: batch.at, fingerprint: batch.fingerprint, sha256: hashes[check.key] }, protocol, hashes);
-    const cited = check.refs.map((ref) => protocol.browserEvidence.find((item) => item.id === ref));
-    if (new Set(check.refs).size !== check.refs.length || cited.some((item) => !item || item.key !== check.key ||
-      (item.viewport !== check.viewport && !["dpr2", "reduced"].includes(item.viewport)) ||
-      (item.harnessError && check.status !== "pending") || item.sha256 !== hashes[check.key] ||
-      Date.parse(item.at) > Date.parse(batch.at)) ||
-      (check.status !== "pending" && !cited.some((item) => item.viewport === check.viewport))) {
-      throw new Error("AI 引用了错误视口、错误产物、采集失败或未来证据；必须包含本视口证据");
-    }
+    if (seen.has(token)) throw new Error("AI 细则重复");
+    validateCheck(check, protocol);
     seen.add(token);
   }
-}
-export function validateRecordSession(record, protocol) {
-  const batch = protocol.aiReviews.find((item) => item.id === record.session);
-  const check = batch?.checks.find((item) => item.key === record.key && item.id === record.id && item.viewport === record.viewport);
-  if (!check || batch.reviewer !== record.reviewer || batch.model !== record.model || batch.at !== record.at ||
-      check.status !== record.status || check.score !== record.score || check.evidence !== record.evidence || JSON.stringify(check.refs) !== JSON.stringify(record.refs)) {
-    throw new Error("AI 评分与真实评审批次不一致");
-  }
-}
-export function validateAIRecords(protocol, hashes) {
-  const seen = new Set();
-  for (const record of protocol.records) {
-    validateRecord(record, protocol, hashes);
-    validateRecordSession(record, protocol);
-    const token = JSON.stringify([record.session, record.key, record.id, record.viewport]);
-    if (seen.has(token)) throw new Error("AI 评分记录重复");
-    seen.add(token);
-  }
-  if (seen.size !== protocol.aiReviews.reduce((sum, batch) => sum + batch.checks.length, 0)) {
-    throw new Error("AI 评审与评分记录数量不匹配");
+  const cited = (batch.evidence ?? []).map((id) => protocol.autoChecks.find((item) => item.id === id));
+  if (!Array.isArray(batch.evidence) || new Set(batch.evidence).size !== batch.evidence.length ||
+      cited.some((item) => !item || !selected.includes(item.key) || item.sha256 !== hashes[item.key] ||
+        Date.parse(item.at) > Date.parse(batch.at)) ||
+      selected.some((key) => batch.checks.some((check) => check.key === key && check.status !== "pending") &&
+        !cited.some((item) => item.key === key && item.files.length))) {
+    throw new Error("AI 评审必须引用本产物此前已采集的自动检查截图");
   }
 }
 export function replaceJsonSection(text, name, records) {

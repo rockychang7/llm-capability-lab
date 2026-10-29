@@ -1,5 +1,7 @@
 const VIEWPORTS = { desktop: { label: "桌面", width: 1440, height: 900 }, mobile: { label: "手机", width: 390, height: 844 } };
 const KINDS = { objective: "确定性", taste: "品味" };
+const JUDGES = { script: "脚本判定", ai: "AI 判定" };
+const PROTOCOL = 6;
 const STATUS_LABELS = { pass: "做到", partial: "部分做到", fail: "未做到", scored: "已评分", pending: "待评" };
 const app = document.querySelector("#app"), live = document.querySelector("#live");
 const e = (value) => String(value ?? "").replace(/[&<>"']/g, (char) =>
@@ -25,10 +27,10 @@ function hash(experiment, options = {}) {
   return `#/${experiment.id}${params.size ? `?${params}` : ""}`;
 }
 function scoreFor(version, result) {
-  // Only generated protocol-5 scores are authoritative; older data stays unscored.
-  if (version.evaluation?.protocol === 5 && result.score) return result.score;
+  // Only generated current-protocol scores are authoritative; older data stays unscored.
+  if (version.evaluation?.protocol === PROTOCOL && result.score) return result.score;
   const dimensions = dimensionsFor(version);
-  return { total: null, objective: null, taste: null, count: 0, aiJudges: 0,
+  return { total: null, objective: null, taste: null, count: 0, aiJudges: 0, auto: null,
     dimensions: dimensions.map((item) => ({ ...item, score: null })),
     checks: (version.evaluation?.criteria ?? []).flatMap((item) => {
       const dimension = dimensions.find((dimension) => dimension.id === item.dimension);
@@ -57,9 +59,9 @@ function renderHome(params) {
       const score = scoreFor(version, result);
       return `<a class="cell" href="${hash(experiment, { model: result.key })}"><span data-home-score="${e(experiment.id)}:${e(result.key)}">${number(score.total)}</span><span class="cell-note" data-home-count="${e(experiment.id)}:${e(result.key)}">${score.count} 位 Agent</span></a>`;
     }).join("") || "—"}</td>`).join("")}</tr>`).join("")}</tbody></table></div></section>
-    <section class="block" id="method">${heading("评分规则")}<dl class="cells"><div><dt>确定性分</dt><dd>Agent 逐项判断实现情况。做到 / 部分做到 / 未做到为 5 / 2.5 / 0 分，每项取桌面与手机较低分。</dd></div>
-      <div><dt>品味分</dt><dd>Agent 按冻结标准给出 0–5 分，步进 0.5，每项取两个视口均值。品味是 AI 判断，不是人类共识。</dd></div>
-      <div><dt>综合分</dt><dd>每位完整评审按本实验冻结权重合成，再等权平均各 Agent 总分。缺项批次不计入，不补分；无完整评审时待评。</dd></div>
+    <section class="block" id="method">${heading("评分规则")}<dl class="cells"><div><dt>确定性分</dt><dd>能自动量的（能否运行、时长、读数）由脚本跑一次真实浏览器直接判；画面要求由 AI 看时间轴拼图打勾。做到 / 部分做到 / 未做到为 5 / 2.5 / 0 分。</dd></div>
+      <div><dt>品味分</dt><dd>AI 看拼图和关键画面，按冻结锚点给出 0–5 分，步进 0.5。品味是 AI 判断，不是人类共识。</dd></div>
+      <div><dt>综合分</dt><dd>脚本结果加每位 AI 的完整评审，按本实验冻结权重合成，再等权平均各 AI 总分。缺项不补分；无完整评审时待评。</dd></div>
       <div><dt>比较范围</dt><dd>只比较同一实验、同一 Prompt 版本。保留评审模型、批次、分差与真实浏览器证据，不合并跨实验总榜。</dd></div></dl></section></div>`;
   if (params.get("section")) requestAnimationFrame(() => document.getElementById(params.get("section"))?.scrollIntoView());
 }
@@ -107,39 +109,22 @@ function excludedMarkup(score) {
   return `<details class="runlog excluded-reviews"><summary><h2>未完整评审 · ${score.excluded.length} 批</h2><span class="muted">不计入汇总</span></summary><ul class="excluded-list">
     ${score.excluded.map((item) => `<li data-excluded="${e(item.session)}"><b>${e(item.reviewer)} · ${e(item.model)}</b><p class="muted small">${e(item.at)} · ${e(item.session)}</p><p>${e(pendingLabel(item.pending))}</p></li>`).join("")}</ul></details>`;
 }
-function mediaMarkup(capture) {
-  return `<div class="evidence-media">${(capture.files ?? []).map((file) =>
-    /^assets\/evidence\/[a-zA-Z0-9/_-]+\.(png|webm)$/.test(file.path) ?
-      `<a href="${e(file.path)}" target="_blank" rel="noopener" data-media-ref="${e(capture.id)}">${file.kind === "video" ? "录像" : "截图"} · ${e(file.path.split("/").at(-1))}</a><span class="mono small muted">媒体 SHA-256：${e(file.sha256)}</span>` : "").join("")}</div>`;
-}
-function captureMarkup(capture) {
-  return `<div class="capture"><p class="small">${e(capture.id)} · ${e(VIEWPORTS[capture.viewport]?.label ?? capture.viewport)} · 采集 ${e(capture.at)}</p>${mediaMarkup(capture)}
-    <p class="mono small muted">采集标准指纹：${e(capture.fingerprint)}</p><p class="mono small muted">产物 SHA-256：${e(capture.sha256)}</p>
-    ${capture.harnessError ? `<p class="is-fail small">采集错误：${e(capture.harnessError)}</p>` : ""}</div>`;
-}
-function recordScore(record, kind) {
-  if (kind === "objective") return ({ pass: 5, partial: 2.5, fail: 0 })[record.status] ?? null;
-  return record.status === "scored" ? record.score : null;
+function mediaMarkup(auto) {
+  return `<div class="evidence-media">${(auto?.files ?? []).map((file) =>
+    /^assets\/evidence\/[a-zA-Z0-9/_-]+\.(png|jpg)$/.test(file.path) ?
+      `<a href="${e(file.path)}" target="_blank" rel="noopener" data-media-ref="${e(auto.id)}">${e(VIEWPORTS[file.viewport]?.label ?? file.viewport)} · ${e(file.label ?? file.kind)}</a>` : "").join("")}</div>`;
 }
 function checkTable(version, result, score) {
-  if (!score.checks.length) return '<p class="muted agent-empty">尚无 protocol 5 逐项标准。</p>';
-  const captures = version.evaluation?.browserEvidence ?? [];
-  return `<div class="box scroll"><table class="acceptance-table"><thead><tr><th>评分规则</th><th>判断依据</th><th>Agent 分 / 5</th><th>评审记录与证据</th></tr></thead><tbody>
-    ${score.checks.map((item) => `<tr data-check="${e(item.id)}"><th>${e(item.text)}<span class="muted small">${e(KINDS[item.kind])} · ${e(score.dimensions.find((dimension) => dimension.id === item.dimension)?.name)}</span><span class="mono small muted">${e(item.id)}</span></th>
+  if (!score.checks.length) return '<p class="muted agent-empty">尚无当前协议的逐项标准。</p>';
+  return `<div class="box scroll"><table class="acceptance-table"><thead><tr><th>评分规则</th><th>判断依据</th><th>得分 / 5</th><th>判定记录</th></tr></thead><tbody>
+    ${score.checks.map((item) => `<tr data-check="${e(item.id)}"><th>${e(item.text)}<span class="muted small">${e(JUDGES[item.by])} · ${e(KINDS[item.kind])} · ${e(score.dimensions.find((dimension) => dimension.id === item.dimension)?.name)}</span><span class="mono small muted">${e(item.id)}</span></th>
       <td>${e(item.how)}</td><td data-check-score>${number(item.score)}${item.disputed ? '<p class="muted small">存在不同判断</p>' : ""}</td><td>
-      ${item.records.length ? item.records.map((record) => `<details class="evidence" data-counted="${record.counted === true}"><summary>${e(record.reviewer)} · ${e(record.model)} · ${e(VIEWPORTS[record.viewport]?.label ?? record.viewport)} · ${badge(record.status)} · ${number(recordScore(record, item.kind))} / 5<span class="record-counted">${record.counted ? "计入汇总" : "未计入汇总"}</span></summary>
-        <p class="small muted">${e(record.at)} · 批次 ${e(record.session)}</p><p class="evidence-text">${e(record.evidence)}</p>
-        ${(record.refs ?? []).map((ref) => {
-          const capture = captures.find((capture) => capture.id === ref && capture.key === result.key &&
-            (capture.viewport === record.viewport || ["dpr2", "reduced"].includes(capture.viewport)) &&
-            capture.sha256 === result.sha256);
-          return capture ? captureMarkup(capture) : `<p class="muted small">证据引用：${e(ref)}（媒体未发布）</p>`;
-        }).join("")}</details>`).join("") : '<span class="muted">尚无 Agent 判断；浏览器媒体本身不是评分。</span>'}</td></tr>`).join("")}</tbody></table></div>`;
+      ${item.records.length ? item.records.map((record) => `<details class="evidence" data-counted="${record.counted === true}"><summary>${e(record.reviewer)} · ${e(record.model)} · ${badge(record.status)} · ${number(record.score)} / 5<span class="record-counted">${record.counted ? "计入汇总" : "未计入汇总"}</span></summary>
+        <p class="small muted">${e(record.at)} · 批次 ${e(record.session)}</p><p class="evidence-text">${e(record.note || "通过，无需说明。")}</p></details>`).join("") : '<span class="muted">尚无判定。</span>'}</td></tr>`).join("")}</tbody></table></div>`;
 }
-function browserEvidenceMarkup(version, result) {
-  const captures = (version.evaluation?.browserEvidence ?? []).filter((item) => item.key === result.key && item.sha256 === result.sha256);
-  return `<details class="runlog browser-evidence"><summary><h2>浏览器采集证据 · ${captures.length} 组</h2></summary>
-    <p class="muted small">媒体保留原采集时间及指纹；采集证据不等同于 Agent 判断。</p>${captures.length ? captures.map(captureMarkup).join("") : '<p class="muted small">尚无已发布浏览器媒体。</p>'}</details>`;
+function browserEvidenceMarkup(version, result, score) {
+  return `<details class="runlog browser-evidence"><summary><h2>自动检查截图${score.auto ? ` · ${score.auto.files.length} 张` : ""}</h2></summary>
+    ${score.auto ? `<p class="muted small">采集 ${e(score.auto.at)} · ${e(score.auto.id)}。截图是一次真实运行的采样时刻，不证明每一帧。</p>${mediaMarkup(score.auto)}` : '<p class="muted small">尚未运行自动检查。</p>'}</details>`;
 }
 function renderFocus(experiment, version, options) {
   const result = version.results.find((item) => item.key === options.model) ?? version.results[0];
@@ -151,8 +136,8 @@ function renderFocus(experiment, version, options) {
     <section class="score">${heading("Agent 评分", weightLabel(version))}<div data-score="${e(result.key)}">${scoreMarkup(score)}</div>
       <p class="legend">品味是 AI 判断，不是人类共识。仅最新完整评审计入汇总，每位 Agent 等权；未完整评审不补分，无完整评审时待评。</p></section>
     <section class="agent-scores">${heading("各 Agent 得分", "每位 Agent 按冻结维度权重计算")}<div data-judges="${e(result.key)}">${judgesMarkup(score)}</div>${excludedMarkup(score)}</section>
-    <section class="rules">${heading("逐项规则与证据", "确定性项取两个视口较低分；品味项取均值")}${checkTable(version, result, score)}</section>
-    ${browserEvidenceMarkup(version, result)}
+    <section class="rules">${heading("逐项规则与判定", "脚本项取桌面与手机较差的一次；AI 项看拼图判断")}${checkTable(version, result, score)}</section>
+    ${browserEvidenceMarkup(version, result, score)}
     <details class="runlog"><summary><h2>原始运行记录</h2></summary><dl class="cells">${Object.entries(result.record).map(([name, value]) => `<div><dt class="mono">${e(name)}</dt><dd>${e(value)}</dd></div>`).join("")}<div><dt>SHA-256</dt><dd class="mono small">${e(result.sha256)}</dd></div></dl></details></div></section>`;
 }
 function renderComparison(experiment, version, options) {

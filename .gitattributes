@@ -1,3 +1,4 @@
 # Exact-byte inputs and outputs must not change with Git line-ending settings.
 prompts/** -text
 results/**/outputs/** -text
+/rocket-launch.html -text

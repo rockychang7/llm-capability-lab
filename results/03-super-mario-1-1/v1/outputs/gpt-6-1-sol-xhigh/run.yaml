@@ -1,0 +1,10 @@
+prompt: 03-super-mario-1-1
+prompt_version: 1
+provider: custom
+model: gpt-6.1-sol
+mode: xhigh
+harness: codex-desktop-subagent
+web_access: no
+turns: 1
+generated_at: 2026-10-26
+entrypoint: gpt-6-1-sol-xhigh.html

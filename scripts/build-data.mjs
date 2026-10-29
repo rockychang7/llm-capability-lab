@@ -2,8 +2,7 @@
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, posix } from "node:path";
 import { root } from "./browser-tools.mjs";
-import { artifactDigest, parseProtocol, validateAIRecords,
-  validateBrowserEvidence, validateAIReview, sections } from "./evaluation.mjs";
+import { artifactDigest, parseProtocol, validateAutoChecks, validateAIReview, sections } from "./evaluation.mjs";
 import { summarizeScore } from "../review.js";
 
 const checkOnly = process.argv.includes("--check");
@@ -77,8 +76,8 @@ function buildVersion(config, version) {
   if (evaluation) {
     const hashes = Object.fromEntries(results.map((result) => [result.key, result.sha256]));
     const attempt = (fn) => { try { fn(); } catch (error) { errors.push(`${evaluationPath}: ${error.message}`); } };
-    attempt(() => validateBrowserEvidence(evaluation.browserEvidence, evaluation, hashes));
-    for (const item of evaluation.browserEvidence) for (const file of item.files) attempt(() => {
+    attempt(() => validateAutoChecks(evaluation.autoChecks, evaluation, hashes));
+    for (const item of evaluation.autoChecks) for (const file of item.files) attempt(() => {
       if (!existsSync(join(root, file.path)) || artifactDigest(join(root, file.path)) !== file.sha256) throw new Error(`证据媒体不匹配：${file.path}`);
     });
     const ids = new Set();
@@ -88,7 +87,6 @@ function buildVersion(config, version) {
       if (session.experiment !== id || session.version !== version) throw new Error("会话实验版本无效");
       validateAIReview(session, evaluation, hashes);
     });
-    attempt(() => validateAIRecords(evaluation, hashes));
     for (const result of results) result.score = summarizeScore({ evaluation, results }, result.key);
   }
   results.sort((a, b) => a.label.localeCompare(b.label) || a.key.localeCompare(b.key));

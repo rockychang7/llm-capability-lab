@@ -1,0 +1,10 @@
+prompt: 01-rocket-launch
+prompt_version: 1
+provider: unknown
+model: unknown
+mode: xhigh
+harness: unknown
+web_access: unknown
+turns: unknown
+generated_at: unknown
+entrypoint: rocket-launch.html

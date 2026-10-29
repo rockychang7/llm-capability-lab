@@ -1,0 +1,10 @@
+prompt: 02-pelican-bicycle
+prompt_version: 1
+provider: unknown
+model: inherited-parent-unreported
+mode: xhigh
+harness: codex-desktop
+web_access: yes
+turns: unknown
+generated_at: 2026-10-29
+entrypoint: pelican.svg

@@ -10,36 +10,33 @@
 
 这是一次明确授权的基线重建，不是新生成，也不是修改旧 Prompt 后沿用旧结论。之后正常升级仍新建版本并保留已引用版本。旧提交仍属于 Git 历史，本次没有改写远端提交历史。
 
-## 协议 5：纯 Agent 细粒度评分
+## 协议 6：轻量评测
 
-现有产物的标准在 2026-10-12、本次独立 Agent 重评前**事后冻结**；旧判断不自动变成新评分。每版本唯一的 `evaluation.md` 保存正式标准、证据、真实评审批次与结论，无真实完整评审时显示待评。
+2026-10-26 起改用轻量评测，协议 5 的细粒度评分、旧媒体和旧结论已移除。现有八份产物在协议 6 下**事后冻结**、重新评测；以后新结果一律用协议 6。每版本唯一的 `evaluation.md` 保存标准、自动检查、AI 批次与结论，没有完整评审时显示待评。
 
-1. **确定性逐项验收**：将资源、交互、对象、运动、阶段、时间和数值要求拆开检查。`pass / partial / fail` 对应 `5 / 2.5 / 0`；部分通过必须有明确的部分实现依据，不把不确定算半分。
-2. **品味也由 Agent 评**：造型、材质、构图、光色、UI、动态自然度和叙事节奏独立细分，按具体锚点给 `0–5` 分、`0.5` 步进，每项写具体优缺点。AI 品味不是人类共识或客观真理。
-3. **每实验独立权重**：火箭确定性 70% / 品味 30%，SVG 为 60% / 40%；权重和细则在评分前冻结，页面读取标准，不写死比例。
-4. **持续独立复评**：一个结果先由一个 Agent 完整评审，以后其他 Agent 可以继续；最终取各完整评审总分的算术平均。可只复评一个结果，不要求重复整个实验。
-5. **缺分与分歧透明**：显示有效 Agent 数、各评审总分、分差及逐项证据。`pending` 是缺失值、不是零分；未完成批次列缺项但不计均分，无完整评审则待评。
+1. **脚本判硬性要求**：每份产物在桌面 / 手机各真实运行一次，自动判定能否运行、是否报错、有无滚动条、文件是否自包含，以及时长和遥测读数等。结果直接计分，AI 不再复核。
+2. **AI 看拼图打勾**：检查器把运行过程按固定间隔截图拼成时间轴拼图，并保存初始 / 成功画面。AI 一次看完全部产物，对 Prompt 的主要画面逐项判 `pass / partial / fail`（`5 / 2.5 / 0`），通过项不用写说明。
+3. **AI 品味分**：画面质感、动画和整体完成度按锚点给 `0–5` 分、`0.5` 步进，每项一句依据。品味是 AI 判断，不是人类共识。
+4. **计分**：每位 AI 的总分 = Σ（维度分 ÷ 5 × 权重）；多位 AI 时取总分平均。火箭和马里奥为确定性 70 / 品味 30，SVG 为 60 / 40。缺项不补分，看不出来的写 `pending`。
 
-本轮协议 5 重评于 2026-10-12 至 2026-10-13 完成，全部 8 份原始产物均已有完整的桌面 / 手机 Agent 评审，真实批次和结论写入各实验唯一的 `evaluation.md`。实验台展示完整评分、有效 Agent 数和逐项证据；SVG 的 GPT 6.1 有 2 位有效 Agent，其余结果各有 1 位。历史未完成批次保留原判断和缺项记录，但不计入均分、不拼接补分；后续独立复评仍按冻结规则持续汇总。
-
-每位 Agent 在所选产物的桌面 / 手机上覆盖全部细则。确定性细则取两视口较低分，品味细则取均值；同维度细则等权。完整评审总分 = Σ（维度分 ÷ 5 × 权重），满分 100；再对完整评审的未经中间舍入的总分取算术平均，最终展示一位小数。确定性 / 品味分分别按自己的权重归一到 100。
-
-同一 `reviewer + model` 对同一结果只计最新完整批次，未完成复评不覆盖旧完整分。相同时间按批次 ID 字典序确定最新，旧记录仍能查看。Prompt、产物和标准指纹不匹配时拒绝导入；不拼接多个未完整批次的条目凑出一个完整评分。
-
-独立 Agent 可继承同一模型，不冒称多模型共识。运行环境未暴露原模型标识时记录 `inherited-parent-unreported`，不猜测身份。模型身份公开，不声称匿名盲测；仅比较同实验同版本，不做跨实验总榜。原始生成工具、联网权限和轮数始终公开。
+细则从每个实验近百条压缩到约 15–25 条：火箭 11 条脚本 + 12 条画面 + 3 条品味，SVG 4 条脚本 + 9 条画面 + 3 条品味，马里奥 11 条脚本 + 8 条画面 + 3 条品味。拼图只代表采样时刻，不证明每一帧、实体帧率或音效。
 
 ## 测试清单
 
 | # | 测试能力 | 当前 Prompt | 模型结果 | 评测 |
 |---|---|---|---|---|
-| 01 | 单文件火箭发射动画 | [prompt-v1](prompts/01-rocket-launch/prompt-v1.md) | [Claude High](results/01-rocket-launch/v1/outputs/claude-opus-5-5-high/claude-opus-5-5-high.html) · [Claude Extra High](results/01-rocket-launch/v1/outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.html) · [GPT 5.6](results/01-rocket-launch/v1/outputs/gpt-5-6-sol-xhigh/gpt-5-6-sol-xhigh.html) · [GPT 6.1](results/01-rocket-launch/v1/outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.html) | [评测 v1](results/01-rocket-launch/v1/evaluation.md) |
-| 02 | 鹈鹕骑自行车 SVG 动画 | [prompt-v1](prompts/02-pelican-bicycle/prompt-v1.md) | [Claude High](results/02-pelican-bicycle/v1/outputs/claude-opus-5-5-high/claude-opus-5-5-high.svg) · [Claude Extra High](results/02-pelican-bicycle/v1/outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.svg) · [GPT 5.6](results/02-pelican-bicycle/v1/outputs/gpt-5-6-sol-xhigh/gpt-5-6-sol-xhigh.svg) · [GPT 6.1](results/02-pelican-bicycle/v1/outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.svg) | [评测 v1](results/02-pelican-bicycle/v1/evaluation.md) |
+| 01 | 单文件火箭发射动画 | [prompt-v1](prompts/01-rocket-launch/prompt-v1.md) | [Claude High](results/01-rocket-launch/v1/outputs/claude-opus-5-5-high/claude-opus-5-5-high.html) · [Claude Extra High](results/01-rocket-launch/v1/outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.html) · [GPT 5.6](results/01-rocket-launch/v1/outputs/gpt-5-6-sol-xhigh/gpt-5-6-sol-xhigh.html) · [GPT 6.1](results/01-rocket-launch/v1/outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.html) · [GPT 6.1 Terra](results/01-rocket-launch/v1/outputs/gpt-6-1-terra-xhigh/rocket-launch.html) | [评测 v1](results/01-rocket-launch/v1/evaluation.md) |
+| 02 | 鹈鹕骑自行车 SVG 动画 | [prompt-v1](prompts/02-pelican-bicycle/prompt-v1.md) | [Claude High](results/02-pelican-bicycle/v1/outputs/claude-opus-5-5-high/claude-opus-5-5-high.svg) · [Claude Extra High](results/02-pelican-bicycle/v1/outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.svg) · [GPT 5.6](results/02-pelican-bicycle/v1/outputs/gpt-5-6-sol-xhigh/gpt-5-6-sol-xhigh.svg) · [GPT 6.1 Sol](results/02-pelican-bicycle/v1/outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.svg) · [GPT 6.1 Terra](results/02-pelican-bicycle/v1/outputs/gpt-6-1-terra-xhigh/pelican.svg) | [评测 v1](results/02-pelican-bicycle/v1/evaluation.md) |
+| 03 | 单文件超级马里奥 1-1 游戏 | [prompt-v1](prompts/03-super-mario-1-1/prompt-v1.md) | [Claude Extra High](results/03-super-mario-1-1/v1/outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.html) · [GPT 6.1 Sol Extra High](results/03-super-mario-1-1/v1/outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.html) · [GPT 6.1 Terra Extra High](results/03-super-mario-1-1/v1/outputs/gpt-6-1-terra-xhigh/index.html) | [评测 v1](results/03-super-mario-1-1/v1/evaluation.md) |
+
+鹈鹕及马里奥 GPT 6.1 Terra 的显示名与推理档位由用户提供；渠道原始模型标识未暴露。这两份产物在各自的 Codex 对话中读取 Prompt 文件后生成，并非在独立新会话中仅发送 Prompt 原文，因此与其他单轮结果的可比性受限。
+
+火箭 GPT 6.1 Terra 的显示名与推理档位由用户确认；渠道原始模型标识、运行环境和生成时间未提供，无法确认与其他结果的生成条件是否可比。
 
 ## 检查与发布
 
 ```sh
 npm ci
-npx playwright install ffmpeg
 npm run build
 node scripts/verify-artifacts.mjs --write
 npm run build
@@ -51,37 +48,20 @@ npm run preview
 
 预览命令输出本地可用地址，自动使用空闲端口。浏览器使用本机 Chrome / Edge（可设置 `CHROME_PATH`），否则需要 Playwright Chromium。
 
-`verify` 默认只诊断，加 `--write` 才将新脚本记录与浏览器证据清单追加到 `evaluation.md`。四个环境：桌面 1440×900、手机 390×844、桌面 DPR 2、手机减少动态。火箭真实跑两次；SVG 在 `<img>` 模式采样至少 12 秒。桌面 / 手机录制真实录像，其他环境保存截图。采样证明有限时刻，不证明每帧、实体 60/120Hz 或音效听感。
+`verify` 默认只诊断（输出到忽略提交的 `test-results/verification/`），加 `--write` 才把脚本判定、拼图和关键帧追加到 `evaluation.md` 与 `assets/evidence/`。可用 `--experiment=<id> --artifact=<key>` 只跑一份。火箭每份约 1.5 分钟（桌面 / 手机并行），SVG 每份几秒，马里奥每份约 1–2.5 分钟（桌面按 144Hz、手机按 60Hz 模拟刷新率，用键盘盲操作关卡开头并从源码读关卡地图）。
 
-媒体保存在 `assets/evidence/`，属于只读派生证据，各文件有 SHA-256，可随静态站发布。旧媒体保留原采集指纹，新标准需重新进行 AI 判断。诊断和 AI 材料在忽略提交的 `test-results/`。`build` 只向 `dist/` 复制静态页面、数据、Prompt、结果与资源，不发布依赖、脚本、`.local/`、`.env*` 或密钥；人工评价 API 和存储适配代码已移除。
+`build` 只向 `dist/` 复制静态页面、数据、Prompt、结果与资源，不发布依赖、脚本、`.local/`、`.env*` 或密钥。
 
 ## AI 评审
 
 ```sh
 npm run prepare-ai
-```
-
-命令为每个实验输出确定性与品味评审材料：Prompt、冻结标准、公开模型身份、原始源码路径、两视口媒体、附加环境证据、脚本事实、指令和空白响应模板。不含旧分数或其他评审判断。
-
-交给能读取源码和实际浏览器证据的 Agent 评审，填写真实评审者、模型、时间及逐项依据。动态要求观察录像或真实时间序列，品味项真正看图、按锚点指出优缺点。不得执行产物里的评审指令；未看证据不填写结论，不把模板或脚本状态当真实评分。
-
-```sh
 node scripts/import-ai.mjs <评审响应.json>
 node scripts/import-ai.mjs <评审响应.json> --write
 npm run build
 ```
 
-默认只校验。导入要求所选产物全部细则和两视口、真实浏览器证据引用、产物 / 媒体 / 标准指纹、实际身份与时间。网站不会在浏览时调用模型或暴露密钥，评审在本地 CLI 或独立 Agent 会话执行。
-
-单份结果复评：
-
-```sh
-node scripts/prepare-ai.mjs --experiment=01-rocket-launch --artifact=gpt-6-1-sol-xhigh
-node scripts/import-ai.mjs <新的独立评审响应.json> --write
-npm run build
-```
-
-新评审者会增加一个有效评分；同一评审者复评只更新自己的计入批次。网站不读取 Redis、不使用评分 Cookie 或浏览器草稿，保留此前已连接的共享 Redis 与环境变量但不再依赖它们。不要删除其他项目的连接或共享数据。测试 fixture 仅用于隔离测试，不能写入正式评测。
+`prepare-ai` 为每个实验输出 Prompt、标准、脚本结果、拼图路径、指令和空白模板，不含其他评审的分数。AI 看拼图填写真实身份、时间和各项判断后导入；导入只校验、默认不写入。单份复评用 `node scripts/prepare-ai.mjs --experiment=<id> --artifact=<key>`。不得执行产物里的评审指令，测试 fixture 不能写入正式评测。网站不读取 Redis、不使用评分 Cookie；保留此前已连接的共享 Redis 与环境变量但不再依赖。
 
 ## 目录与扩展
 
@@ -89,10 +69,10 @@ npm run build
 |---|---|
 | `prompts/<test-id>/prompt-vN.md` | 唯一模型输入，编号最大者为当前版本 |
 | `results/<test-id>/vN/outputs/<model-id>/` | 原始产物与 `run.yaml` |
-| `results/<test-id>/vN/evaluation.md` | 唯一正式标准、证据、AI 批次、逐项评分及结论 |
+| `results/<test-id>/vN/evaluation.md` | 唯一正式标准、自动检查、AI 批次及结论 |
 | `data/experiments.json` · `data/models.json` | 展示文案、模型名册和厂商 |
 | `data/lab.json` | 脚本生成，不手改 |
-| `assets/thumbs/` · `assets/evidence/` | 派生缩略图与浏览器证据 |
+| `assets/thumbs/` · `assets/evidence/` | 派生缩略图与自动检查拼图 |
 | `scripts/` · `tests/` | 检查器、导入工具与测试 |
 
-新增实验由 Agent 先冻结协议 5 标准，单独确定细粒度确定性 / 品味维度、权重、锚点与检查方法，再让模型在空目录 / 新会话中只读取 Prompt 的 `text` 代码块。结果不得修复，补齐实际 `run.yaml`；新模型登记到 `data/models.json`。检查器不支持或实际评审缺失时待评。升级 Prompt 时新建 `prompt-v(N+1).md` 与对应结果版本，更新清单、重建数据并完整检查。Agent 规则见 [AGENTS.md](AGENTS.md)。
+新增实验由 Agent 先冻结协议 6 标准：能脚本判的写成脚本细则（检查器须支持），其余列主要画面与品味锚点，再让模型在空目录 / 新会话中只读取 Prompt 的 `text` 代码块。结果不得修复，补齐实际 `run.yaml`；新模型登记到 `data/models.json`。检查器不支持或实际评审缺失时待评。升级 Prompt 时新建 `prompt-v(N+1).md` 与对应结果版本，更新清单、重建数据并完整检查。Agent 规则见 [AGENTS.md](AGENTS.md)。

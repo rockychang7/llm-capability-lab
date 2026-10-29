@@ -23,15 +23,31 @@ const out = await mkdtemp(join(tmpdir(), "llm-lab-static-ui-"));
 const server = await localServer();
 let browser, checks = 0;
 const base = server.url;
-const currentScore = (version, result) => version.evaluation?.protocol === 5 ? result.score : {
-  total: null, objective: null, taste: null, count: 0, dimensions: [], checks: [], judges: [], excluded: [], spread: null
+const currentScore = (version, result) => version.evaluation?.protocol === 6 ? result.score : {
+  total: null, objective: null, taste: null, count: 0, auto: null, dimensions: [], checks: [], judges: [], excluded: [], spread: null
 };
 const imageExperiment = lab.experiments.find((item) => item.artifactType === "image");
 const rocket = lab.experiments.find((item) => item.artifactType === "page");
+const artifactSources = new Set(lab.experiments.flatMap((item) =>
+  item.versions.flatMap((version) => version.results.map((result) => result.url))));
+const gameSources = new Set(lab.experiments.filter((item) => item.artifactType === "game")
+  .flatMap((item) => item.versions.flatMap((version) => version.results.map((result) => result.url))));
 const imageVersion = latest(imageExperiment), imageResult = imageVersion.results[0];
 const routeURL = (experiment, options = {}) => `${base}/#/${experiment.id}?${new URLSearchParams(options)}`;
 async function newContext(viewport, data = null) {
   const context = await browser.newContext({ viewport });
+  const page = await context.newPage(), errors = [], artifactErrors = [], apiRequests = [];
+  await context.exposeBinding("__labReportError", ({ frame }, message) => {
+    let path = "";
+    try { path = new URL(frame.url()).pathname.slice(1); } catch {}
+    if (frame !== page.mainFrame() && artifactSources.has(path)) artifactErrors.push(`${path}: ${message}`);
+    else errors.push(message);
+  });
+  await context.addInitScript(() => {
+    window.addEventListener("error", (event) => window.__labReportError(event.message));
+    window.addEventListener("unhandledrejection", (event) =>
+      window.__labReportError(String(event.reason)));
+  });
   if (data) await context.route("**/data/lab.json", (route) => route.fulfill({ json: data }));
   await context.addInitScript(() => {
     if (window !== window.top) return;
@@ -47,12 +63,10 @@ async function newContext(viewport, data = null) {
       set() { window.__labStorageAccess.push("cookie"); }
     });
   });
-  const page = await context.newPage(), errors = [], apiRequests = [];
-  page.on("pageerror", (error) => errors.push(error.message));
   page.on("request", (request) => {
     if (new URL(request.url()).pathname.startsWith("/api/")) apiRequests.push(request.url());
   });
-  return { context, page, errors, apiRequests };
+  return { context, page, errors, artifactErrors, apiRequests };
 }
 async function assertStatic(state) {
   assert.deepEqual(state.errors, [], "UI exceptions");
@@ -85,8 +99,9 @@ async function stable(page, name) {
     assert.equal(size.viewport, Number(await owner.getAttribute("width")), `${name}: wrong embedded viewport`);
     assert.ok(size.width > 100 && size.height > 100, `${name}: blank canvas size`);
     const colors = await canvasColors(canvas);
-    if (colors <= 30) await page.screenshot({ path: resolve(out, `${name}-blank-diagnostic.png`) });
-    assert.ok(colors > 30, `${name}: ${await owner.getAttribute("title")} has only ${colors} canvas colors`);
+    const minimum = gameSources.has(await owner.getAttribute("data-src")) ? 3 : 30;
+    if (colors <= minimum) await page.screenshot({ path: resolve(out, `${name}-blank-diagnostic.png`) });
+    assert.ok(colors > minimum, `${name}: ${await owner.getAttribute("title")} has only ${colors} canvas colors`);
   }
   for (const image of await page.locator(".image-box img").all()) await image.evaluate((img) => img.decode());
   await page.evaluate(() => window.scrollTo(0, 0));
@@ -214,51 +229,34 @@ function fixtureData() {
     { id: "ui-taste", name: "Synthetic 品味", kind: "taste", weight: 40, rubric: "Synthetic UI fixture rubric <img src=x onerror=alert(1)>." }
   ];
   const criteria = [
-    { id: "ui-objective-rule", dimension: "ui-objective", text: "Synthetic 确定性规则", how: "Synthetic 浏览器证据测试" },
-    { id: "ui-taste-rule", dimension: "ui-taste", text: "Synthetic 品味规则", how: "Synthetic 冻结标准 <img src=x onerror=alert(1)>" }
+    { id: "ui-script-rule", dimension: "ui-objective", by: "script", text: "Synthetic 脚本规则", how: "Synthetic 自动检查" },
+    { id: "ui-objective-rule", dimension: "ui-objective", by: "ai", text: "Synthetic 确定性规则", how: "Synthetic 拼图测试" },
+    { id: "ui-taste-rule", dimension: "ui-taste", by: "ai", text: "Synthetic 品味规则", how: "Synthetic 冻结标准 <img src=x onerror=alert(1)>" }
   ];
-  const capture = (imageVersion.evaluation.browserEvidence ?? []).find((item) => item.key === result.key && item.viewport === "desktop" && item.sha256 === result.sha256);
-  assert.ok(capture?.files.length, "evidence rendering fixture requires published browser media");
-  const captures = ["desktop", "mobile", "dpr2", "reduced"].map((viewport) =>
-    ({ ...structuredClone(capture), id: `synthetic-ui-${viewport}`, viewport }));
-  captures.push(
-    { ...structuredClone(captures[2]), id: "synthetic-ui-other-artifact", key: "synthetic-other-artifact" },
-    { ...structuredClone(captures[3]), id: "synthetic-ui-other-hash", sha256: "0".repeat(64) }
-  );
-  const at = new Date(Math.max(Date.parse("2026-10-12T12:00:00Z"), Date.parse(capture.at) + 1000)).toISOString();
-  const record = (id, viewport, status, score, session, counted) => ({ id, key: result.key, viewport, status, score,
-    reviewer: `Synthetic ${session}`, model: "synthetic-ui-fixture-not-a-model", session, at, counted,
-    source: "ui-test-fixture", evidence: "Synthetic UI rendering only <img src=x onerror=alert(1)>",
-    refs: [], sha256: result.sha256 });
-  const objectiveRecords = [
-    record(criteria[0].id, "desktop", "pass", 5, "ui-complete-a", true),
-    record(criteria[0].id, "mobile", "pass", 5, "ui-complete-a", true),
-    record(criteria[0].id, "desktop", "pass", 5, "ui-complete-b", true),
-    record(criteria[0].id, "mobile", "partial", 2.5, "ui-complete-b", true),
-    record(criteria[0].id, "desktop", "fail", 0, "ui-old-complete", false),
-    record(criteria[0].id, "desktop", "pending", null, "ui-incomplete", false)
-  ];
-  for (const record of objectiveRecords.slice(0, 2)) {
-    record.refs = captures.map((capture) => capture.id);
-  }
-  const tasteRecords = [
-    record(criteria[1].id, "desktop", "scored", 4.5, "ui-complete-a", true),
-    record(criteria[1].id, "mobile", "scored", 3.5, "ui-complete-a", true),
-    record(criteria[1].id, "desktop", "scored", 3, "ui-complete-b", true),
-    record(criteria[1].id, "mobile", "scored", 4, "ui-complete-b", true)
+  const at = "2026-10-26T12:00:00.000Z";
+  const auto = { id: "synthetic-ui-auto", at, files: [
+    { path: "assets/evidence/synthetic/desktop-sheet-1.jpg", kind: "sheet", viewport: "desktop", label: "时间轴 0–30s", sha256: "0".repeat(64) },
+    { path: "assets/evidence/synthetic/mobile-ready.jpg", kind: "frame", viewport: "mobile", label: "初始画面", sha256: "0".repeat(64) },
+    { path: "https://example.invalid/not-evidence.jpg", kind: "frame", viewport: "desktop", label: "外部", sha256: "0".repeat(64) }] };
+  const record = (status, score, session, counted, note = "Synthetic UI rendering only <img src=x onerror=alert(1)>") => ({
+    source: "ai", reviewer: `Synthetic ${session}`, model: "synthetic-ui-fixture-not-a-model", session, at, status, score, note, counted });
+  const records = [
+    [{ source: "script", reviewer: "fixture-checker", model: "script", session: auto.id, at, status: "pass", score: 5, note: "Synthetic script fact", counted: true }],
+    [record("pass", 5, "ui-complete-a", true, ""), record("partial", 2.5, "ui-complete-b", true),
+      record("fail", 0, "ui-old-complete", false), record("pending", null, "ui-incomplete", false)],
+    [record("scored", 4.5, "ui-complete-a", true), record("scored", 3, "ui-complete-b", true)]
   ];
   const judge = (session, objective, taste, total, values) => ({ session, reviewer: `Synthetic ${session}`,
     model: "synthetic-ui-fixture-not-a-model", at, objective, taste, total,
     dimensions: dimensions.map((item, index) => ({ ...item, score: values[index] })) });
-  result.score = { total: 75, objective: 75, taste: 75, count: 2, aiJudges: 2,
+  result.score = { total: 75, objective: 75, taste: 75, count: 2, aiJudges: 2, auto,
     dimensions: dimensions.map((item) => ({ ...item, score: 3.75 })),
-    checks: criteria.map((item, index) => ({ ...item, kind: dimensions[index].kind, score: 3.75, value: 0.75,
-      records: index ? tasteRecords : objectiveRecords, disputed: true })),
-    judges: [judge("ui-complete-a", 100, 80, 92, [5, 4]), judge("ui-complete-b", 50, 70, 58, [2.5, 3.5])],
+    checks: criteria.map((item, index) => ({ ...item, kind: dimensions.find((dimension) => dimension.id === item.dimension).kind,
+      score: 3.75, value: 0.75, records: records[index], disputed: index > 0 })),
+    judges: [judge("ui-complete-a", 100, 90, 96, [5, 4.5]), judge("ui-complete-b", 75, 60, 69, [3.75, 3])],
     excluded: [{ session: "ui-incomplete", reviewer: "Synthetic ui-incomplete", model: "synthetic-ui-fixture-not-a-model", at,
-      pending: [{ id: criteria[0].id, viewport: "desktop" }] }], spread: { min: 58, max: 92, range: 34 } };
-  version.evaluation = { protocol: 5, dimensions, criteria, records: [...objectiveRecords, ...tasteRecords],
-    aiReviews: [], browserEvidence: captures, freezeDate: "2026-10-12 (Synthetic UI fixture only)" };
+      pending: [criteria[1].id] }], spread: { min: 69, max: 96, range: 27 } };
+  version.evaluation = { protocol: 6, dimensions, criteria, autoChecks: [], aiReviews: [], freezeDate: "2026-10-26 (Synthetic UI fixture only)" };
   version.results = [result];
   experiment.versions = [version];
   experiment.latestVersion = version.version;
@@ -300,6 +298,7 @@ try {
     await page.locator(`.frame-box.is-${name === "desktop" ? "mobile" : "desktop"}`).waitFor();
     assert.equal(Number(await page.locator("iframe").getAttribute("width")), name === "desktop" ? 390 : 1440);
     await assertStatic(state);
+    for (const error of new Set(state.artifactErrors)) console.log(`artifact error (${name}): ${error}`);
     await context.close();
 
     const data = fixtureData(), synthetic = await newContext(viewport, data);
@@ -309,32 +308,20 @@ try {
     await assertHome(synthetic.page, data);
     await synthetic.page.goto(routeURL(syntheticExperiment));
     await assertScore(synthetic.page, syntheticVersion, syntheticResult);
-    const records = syntheticVersion.results[0].score.checks[0].records;
-    for (const [index, record] of records.slice(0, 2).entries()) {
-      const evidence = synthetic.page.locator('[data-check="ui-objective-rule"] .evidence').nth(index);
-      await clickAfterScroll(synthetic.page, evidence.locator("summary"));
-      const text = await evidence.innerText();
-      assert.ok(text.includes("Synthetic UI rendering only <img"));
-      const allowedRefs = new Set([`synthetic-ui-${record.viewport}`, "synthetic-ui-dpr2", "synthetic-ui-reduced"]);
-      for (const capture of syntheticVersion.evaluation.browserEvidence) {
-        const media = evidence.locator(`[data-media-ref="${capture.id}"]`);
-        if (allowedRefs.has(capture.id)) {
-          assert.equal(await media.count(), capture.files.length, `${capture.id}: valid evidence reference omitted`);
-          assert.equal(await media.first().isVisible(), true);
-          assert.equal(await media.first().getAttribute("href"), capture.files[0].path);
-          assert.ok(text.includes(capture.at));
-          assert.ok(text.includes(capture.fingerprint));
-          assert.ok(text.includes(capture.files[0].sha256));
-        } else {
-          assert.equal(await media.count(), 0, `${capture.id}: incompatible evidence reference accepted`);
-          assert.ok(text.includes(`证据引用：${capture.id}（媒体未发布）`));
-        }
-      }
-      checks++;
-    }
+    const noted = synthetic.page.locator('[data-check="ui-objective-rule"] .evidence').nth(1);
+    await clickAfterScroll(synthetic.page, noted.locator("summary"));
+    assert.ok((await noted.innerText()).includes("Synthetic UI rendering only <img"));
+    const plain = synthetic.page.locator('[data-check="ui-objective-rule"] .evidence').first();
+    await clickAfterScroll(synthetic.page, plain.locator("summary"));
+    assert.ok((await plain.innerText()).includes("通过，无需说明。"));
+    const media = synthetic.page.locator(".browser-evidence");
+    await clickAfterScroll(synthetic.page, media.locator("summary"));
+    const links = media.locator("[data-media-ref]");
+    assert.equal(await links.count(), 2, "evidence links must be limited to published evidence paths");
+    assert.equal(await links.first().getAttribute("href"), "assets/evidence/synthetic/desktop-sheet-1.jpg");
+    assert.ok((await media.innerText()).includes("桌面 · 时间轴 0–30s"));
+    checks++;
     assert.equal(await synthetic.page.locator(".rules img,.standards img").count(), 0, "AI content interpreted as HTML");
-    const capture = syntheticVersion.evaluation.browserEvidence[0];
-    assert.equal((await fetch(`${base}/${capture.files[0].path}`)).status, 200);
     await clickAfterScroll(synthetic.page, synthetic.page.locator(".excluded-reviews > summary"));
     assert.ok((await synthetic.page.locator(".excluded-reviews").innerText()).includes("ui-objective-rule"));
     assert.equal(await synthetic.page.locator('[data-excluded="ui-old-complete"]').count(), 0, "replaced complete session shown as incomplete");
@@ -355,13 +342,17 @@ try {
     await assertScore(unscored.page, latest(pending.experiments[0]), pendingResult);
     await stable(unscored.page, `${name}-synthetic-pending`);
     await assertStatic(unscored);
+    await unscored.page.evaluate(() => setTimeout(() => { throw new Error("top-level-error-probe"); }, 0));
+    await unscored.page.waitForTimeout(100);
+    assert.ok(unscored.errors.some((error) => error.includes("top-level-error-probe")),
+      "top-level UI errors must remain observable");
     await unscored.context.close();
   }
   for (const path of ["/.local/reviews.json", "/.env", "/server/reviews.mjs", "/api/reviews.js"]) {
     assert.equal((await fetch(base + path)).status, 403, "private server file exposed");
   }
   for (const [path, hash] of originals) assert.equal(digest(readFileSync(resolve(root, path))), hash, `original source changed: ${path}`);
-  console.log(`ok    ${checks} 组静态 UI 检查：桌面、手机、Agent 分数与细项、对照、无表单/API/存储、原始 SVG/Canvas 动画及源码保护`);
+  console.log(`ok    ${checks} 组静态 UI 检查：桌面、手机、脚本与 AI 分数及细项、对照、无表单/API/存储、原始 SVG/Canvas 动画及源码保护`);
 } finally {
   if (browser) await browser.close();
   await server.close();
