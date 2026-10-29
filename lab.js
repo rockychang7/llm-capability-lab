@@ -135,6 +135,7 @@ function renderFocus(experiment, version, options) {
     </ul></aside><div class="bench-main"><div class="stage"><div class="stage-bar"><b>${e(label(result))}</b><a href="${e(result.url)}" target="_blank" rel="noopener">打开原始文件</a></div>${preview(experiment, result, options.viewport)}</div>
     <section class="score">${heading("Agent 评分", weightLabel(version))}<div data-score="${e(result.key)}">${scoreMarkup(score)}</div>
       <p class="legend">品味是 AI 判断，不是人类共识。仅最新完整评审计入汇总，每位 Agent 等权；未完整评审不补分，无完整评审时待评。</p></section>
+    ${version.evaluation?.conclusion?.length ? `<details class="runlog evaluation-conclusion"><summary><h2>本实验评测结论</h2></summary><pre class="prompt-source">${e(version.evaluation.conclusion.join("\n\n"))}</pre></details>` : ""}
     <section class="agent-scores">${heading("各 Agent 得分", "每位 Agent 按冻结维度权重计算")}<div data-judges="${e(result.key)}">${judgesMarkup(score)}</div>${excludedMarkup(score)}</section>
     <section class="rules">${heading("逐项规则与判定", "脚本项取桌面与手机较差的一次；AI 项看拼图判断")}${checkTable(version, result, score)}</section>
     ${browserEvidenceMarkup(version, result, score)}

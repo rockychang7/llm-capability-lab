@@ -159,8 +159,13 @@ async function assertScore(page, version, result) {
   }
   assert.equal(await page.locator("[data-excluded]").count(), score.excluded.length);
   assert.ok((await page.locator(".score > .legend").innerText()).includes("品味是 AI 判断，不是人类共识"));
-  assert.equal(await page.locator(".prompt-source").textContent(), version.prompt);
+  assert.equal(await page.locator(".prompt .prompt-source").textContent(), version.prompt);
   const standards = page.locator(".standards");
+  const conclusion = page.locator(".evaluation-conclusion");
+  if (version.evaluation?.conclusion?.length) {
+    await clickAfterScroll(page, conclusion.locator("summary"));
+    assert.equal(await conclusion.locator("pre").textContent(), version.evaluation.conclusion.join("\n\n"));
+  } else assert.equal(await conclusion.count(), 0);
   await clickAfterScroll(page, standards.locator("summary"));
   await standards.locator(".cells").waitFor({ state: "visible" });
   for (const dimension of version.evaluation.dimensions.filter((item) => ["objective", "taste"].includes(item.kind))) {
