@@ -2,7 +2,7 @@
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, posix } from "node:path";
 import { root } from "./browser-tools.mjs";
-import { artifactDigest, parseProtocol, validateAutoChecks, validateAIReview, sections } from "./evaluation.mjs";
+import { artifactDigest, parseProtocol, parseReferenceScores, validateAutoChecks, validateAIReview, sections } from "./evaluation.mjs";
 import { summarizeScore } from "../review.js";
 
 const checkOnly = process.argv.includes("--check");
@@ -87,7 +87,12 @@ function buildVersion(config, version) {
       if (session.experiment !== id || session.version !== version) throw new Error("会话实验版本无效");
       validateAIReview(session, evaluation, hashes);
     });
-    for (const result of results) result.score = summarizeScore({ evaluation, results }, result.key);
+    const references = parseReferenceScores(readText(evaluationPath), evaluation, hashes);
+    for (const result of results) {
+      result.score = summarizeScore({ evaluation, results }, result.key);
+      const reference = references.find((item) => item.key === result.key);
+      if (reference) result.referenceScore = { value: reference.value, note: reference.note };
+    }
   }
   results.sort((a, b) => a.label.localeCompare(b.label) || a.key.localeCompare(b.key));
   return { version, promptPath, prompt, change, evaluationPath, evaluation,

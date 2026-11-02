@@ -119,8 +119,20 @@ async function assertHome(page, data) {
     const version = latest(experiment);
     for (const result of version.results) {
       const score = currentScore(version, result), token = `${experiment.id}:${result.key}`;
-      assert.equal(await page.locator(`[data-home-score="${token}"]`).innerText(), number(score.total));
+      const reference = version.evaluation?.protocol === 6 && score.total === null ? result.referenceScore : null;
+      const cell = page.locator(`[data-home-score="${token}"]`).locator("..");
+      assert.equal(await cell.locator("[data-home-score]").innerText(), number(reference ? reference.value : score.total));
       assert.equal(await page.locator(`[data-home-count="${token}"]`).innerText(), `${score.count} 位 Agent`);
+      assert.equal(await cell.locator("[data-home-reference]").count(), reference ? 1 : 0);
+      if (reference) {
+        assert.equal(await cell.locator("[data-home-reference]").innerText(), "非正式参考分");
+        assert.ok((await cell.getAttribute("title")).includes(reference.note));
+        await clickAfterScroll(page, cell);
+        await page.locator(`[data-score="${result.key}"]`).waitFor();
+        await assertScore(page, version, result);
+        await page.goto(base);
+        await page.locator("[data-home-score]").first().waitFor();
+      }
     }
   }
 }
@@ -254,6 +266,7 @@ function fixtureData() {
   const judge = (session, objective, taste, total, values) => ({ session, reviewer: `Synthetic ${session}`,
     model: "synthetic-ui-fixture-not-a-model", at, objective, taste, total,
     dimensions: dimensions.map((item, index) => ({ ...item, score: values[index] })) });
+  result.referenceScore = { value: 14.8, note: "Synthetic reference must not override a complete score." };
   result.score = { total: 75, objective: 75, taste: 75, count: 2, aiJudges: 2, auto,
     dimensions: dimensions.map((item) => ({ ...item, score: 3.75 })),
     checks: criteria.map((item, index) => ({ ...item, kind: dimensions.find((dimension) => dimension.id === item.dimension).kind,
@@ -342,7 +355,10 @@ try {
       dimensions: pendingResult.score.dimensions.map((item) => ({ ...item, score: null })),
       checks: pendingResult.score.checks.map((item) => ({ ...item, score: null, value: null, records: [], disputed: false })),
       judges: [], excluded: [], spread: null };
+    pendingResult.referenceScore = { value: 14.8, note: "Synthetic reference display only; never a formal score." };
     const unscored = await newContext(viewport, pending);
+    await unscored.page.goto(base);
+    await assertHome(unscored.page, pending);
     await unscored.page.goto(routeURL(pending.experiments[0]));
     await assertScore(unscored.page, latest(pending.experiments[0]), pendingResult);
     await stable(unscored.page, `${name}-synthetic-pending`);

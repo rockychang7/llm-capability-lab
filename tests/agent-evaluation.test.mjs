@@ -5,7 +5,7 @@ import { mkdtemp, readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve, sep } from "node:path";
 import { summarizeScore, latestBy } from "../review.js";
-import { digest, parseProtocol, replaceJsonSection, validateAIReview, validateAutoChecks } from "../scripts/evaluation.mjs";
+import { digest, parseProtocol, parseReferenceScores, replaceJsonSection, validateAIReview, validateAutoChecks } from "../scripts/evaluation.mjs";
 import { importAI } from "../scripts/import-ai.mjs";
 
 const at = "2026-10-26T08:00:00.000Z", before = "2026-10-26T07:00:00.000Z";
@@ -248,4 +248,22 @@ test("malformed or duplicate record blocks cannot be silently rewritten", () => 
   assert.throws(() => parseProtocol(markdown + "## AI 评审\n```json\n[]\n```", "prompt"), /重复/);
   assert.throws(() => parseProtocol(markdown.replace("## AI 评审\n```json\n[]\n```", "## AI 评审\n```json\n{}\n```"), "prompt"), /数组/);
   assert.throws(() => replaceJsonSection(markdown, "用户评价", []), /缺少/);
+});
+test("reference scores are display-only and bound to artifact and frozen rubric", () => {
+  const { evaluation, version } = fixture();
+  const reference = { key: "one", sha256: hashes.one, fingerprint: evaluation.fingerprint,
+    value: 14.8, note: "Synthetic unofficial display value; no complete review." };
+  const source = (items) => `${markdown}\n## 非正式参考分\n\`\`\`json\n${JSON.stringify(items)}\n\`\`\`\n`;
+  assert.deepEqual(parseReferenceScores(markdown, evaluation, hashes), []);
+  assert.deepEqual(parseReferenceScores(source([reference]), evaluation, hashes), [reference]);
+  assert.equal(parseProtocol(source([reference]), "prompt").fingerprint, evaluation.fingerprint);
+  version.results[0].referenceScore = { value: reference.value, note: reference.note };
+  assert.deepEqual([summarizeScore(version, "one").total, summarizeScore(version, "one").count], [null, 0]);
+  assert.equal(parseReferenceScores(source([{ ...reference, value: 0 }]), evaluation, hashes)[0].value, 0);
+  for (const patch of [{ key: "missing" }, { sha256: digest("changed") }, { fingerprint: digest("old") },
+    { value: -1 }, { value: 101 }, { value: "14.8" }, { value: null }, { note: "" }]) {
+    assert.throws(() => parseReferenceScores(source([{ ...reference, ...patch }]), evaluation, hashes));
+  }
+  assert.throws(() => parseReferenceScores(source([reference, reference]), evaluation, hashes));
+  assert.throws(() => parseReferenceScores(source({}), evaluation, hashes));
 });

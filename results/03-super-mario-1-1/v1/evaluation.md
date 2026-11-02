@@ -3,7 +3,7 @@
 - **Prompt**：[prompt-v1.md](../../../prompts/03-super-mario-1-1/prompt-v1.md)
 - **评测协议**：6
 - **标准冻结日期**：2026-10-26（新实验，运行模型前冻结）
-- **评测日期**：2026-10-26、2026-10-29
+- **评测日期**：2026-10-26、2026-10-29、2026-11-02
 - **评测者**：脚本 verify-artifacts；AI 评审 GPT 6.1 Sol Medium subagent（gpt-6.1-sol / medium，评 Sol 产物）、Claude Code subagent（claude-sonnet-5-5，评 Claude 产物）与 Codex AI reviewer（模型原标识未暴露，评 Terra 产物）
 - **评测方式**：轻量评测：脚本一次真实运行判硬性要求，AI 看时间轴拼图逐项打勾和打分
 - **评测环境**：Windows，Chrome 155.0.8059.85，Node.js v22.17.0；真实浏览器桌面 1440×900 / 手机 390×844 各跑一次；桌面把 requestAnimationFrame 模拟为 144Hz、手机模拟为 60Hz；检查器只用键盘盲操作关卡开头一段，不测地下房间、道具、乌龟壳、旗杆结算、实体帧率、音色与手感细节
@@ -538,6 +538,161 @@
         "label": "时间轴 40.8–62.1s"
       }
     ]
+  },
+  {
+    "id": "20261102032255689-gpt-6-1-terra-xhigh",
+    "key": "gpt-6-1-terra-xhigh",
+    "sha256": "054b7ea84643f5f5240cf696d80d88ed51dad493bd6c63e8774edf77b49b7ae2",
+    "fingerprint": "47c925ac54a49a845fd4bd3b63345aa392a7abe158c8230b7d250cdce8f9f9f0",
+    "at": "2026-11-02T03:24:00.588Z",
+    "checker": "verify-artifacts@9edd49ce2d41",
+    "environment": {
+      "browser": "156.0.8078.48",
+      "platform": "win32",
+      "node": "v22.17.0",
+      "viewports": {
+        "desktop": {
+          "width": 1440,
+          "height": 900
+        },
+        "mobile": {
+          "width": 390,
+          "height": 844
+        }
+      },
+      "clock": "real",
+      "concurrency": 4,
+      "limit": "单次真实运行的采样；不测实体帧率、音效或每一帧"
+    },
+    "results": [
+      {
+        "id": "standalone",
+        "status": "pass",
+        "evidence": "桌面 144Hz：目录 1 个文件，外部引用 0 个；手机 60Hz：目录 1 个文件，外部引用 0 个"
+      },
+      {
+        "id": "console",
+        "status": "fail",
+        "evidence": "桌面 144Hz：2 条错误：particles is not iterable；手机 60Hz：2 条错误：particles is not iterable"
+      },
+      {
+        "id": "pixel-display",
+        "status": "partial",
+        "evidence": "桌面 144Hz：画布 256×240，游戏画面显示 768×702（非整数倍），完整在视口内，image-rendering crisp-edges；有 256×240 画布或缓冲；手机 60Hz：画布 256×240，游戏画面显示 256×240（1 倍），完整在视口内，image-rendering crisp-edges；有 256×240 画布或缓冲"
+      },
+      {
+        "id": "config",
+        "status": "pass",
+        "evidence": "CONFIG 对象含特征数值 9/9"
+      },
+      {
+        "id": "level-format",
+        "status": "fail",
+        "evidence": "源码中找不到 13 行以上、每行约 212 字符的字符串地图"
+      },
+      {
+        "id": "layout",
+        "status": "fail",
+        "evidence": "没有可读取的关卡地图"
+      },
+      {
+        "id": "playable",
+        "status": "fail",
+        "evidence": "桌面 144Hz：开始方式 无，按住 → 2.6s 镜头卷动 0 像素（未能从标题开始）；手机 60Hz：开始方式 无，按住 → 2.6s 镜头卷动 0 像素（未能从标题开始）"
+      },
+      {
+        "id": "jump-control",
+        "status": "fail",
+        "evidence": "桌面 144Hz：短按起落差 无 像素，长按 无 像素（未能从标题开始）；手机 60Hz：短按起落差 无 像素，长按 无 像素（未能从标题开始）"
+      },
+      {
+        "id": "speed",
+        "status": "fail",
+        "evidence": "桌面 144Hz：走 无 像素/帧（目标 1.5625），跑 无（目标 2.5625），跑步在刷新后测得（未能从标题开始）；手机 60Hz：走 无 像素/帧（目标 1.5625），跑 无（目标 2.5625），跑步在刷新后测得（未能从标题开始）"
+      },
+      {
+        "id": "refresh-rate",
+        "status": "fail",
+        "evidence": "走速 桌面 144Hz 无、手机 60Hz 无，比值 测不到；跑速 无 / 无，比值 测不到"
+      },
+      {
+        "id": "audio",
+        "status": "fail",
+        "evidence": "桌面 144Hz：AudioContext 0 个，振荡器启动 0 次（无），缓冲源 0 次；按 Z 后 0.3s 内没有方波；手机 60Hz：AudioContext 0 个，振荡器启动 0 次（无），缓冲源 0 次；按 Z 后 0.3s 内没有方波"
+      }
+    ],
+    "files": [
+      {
+        "path": "assets/evidence/03-super-mario-1-1/v1/20261102032255689/gpt-6-1-terra-xhigh-desktop-ready.jpg",
+        "sha256": "ea5a4ef13f8c254545bc784d3825b3f572e64c8934ce7a81df2fa982d92ef960",
+        "kind": "frame",
+        "viewport": "desktop",
+        "label": "初始画面"
+      },
+      {
+        "path": "assets/evidence/03-super-mario-1-1/v1/20261102032255689/gpt-6-1-terra-xhigh-desktop-complete.jpg",
+        "sha256": "ea5a4ef13f8c254545bc784d3825b3f572e64c8934ce7a81df2fa982d92ef960",
+        "kind": "frame",
+        "viewport": "desktop",
+        "label": "结束画面"
+      },
+      {
+        "path": "assets/evidence/03-super-mario-1-1/v1/20261102032255689/gpt-6-1-terra-xhigh-desktop-sheet-1.jpg",
+        "sha256": "2688ad57d1e28fdec5ddc1bafc40ba93dfc2088177bfd94577fc122d080e20fa",
+        "kind": "sheet",
+        "viewport": "desktop",
+        "label": "时间轴 2.2–22.6s"
+      },
+      {
+        "path": "assets/evidence/03-super-mario-1-1/v1/20261102032255689/gpt-6-1-terra-xhigh-desktop-sheet-2.jpg",
+        "sha256": "75c219ec666944b7f553bd10aa283d79426b98bc09e70712ee84311634bc9207",
+        "kind": "sheet",
+        "viewport": "desktop",
+        "label": "时间轴 23.1–41.4s"
+      },
+      {
+        "path": "assets/evidence/03-super-mario-1-1/v1/20261102032255689/gpt-6-1-terra-xhigh-desktop-sheet-3.jpg",
+        "sha256": "142a7daf856c0118ff82dd8178c526ddc33a590b96c8ffa492e93350e73839da",
+        "kind": "sheet",
+        "viewport": "desktop",
+        "label": "时间轴 43.9–53.2s"
+      },
+      {
+        "path": "assets/evidence/03-super-mario-1-1/v1/20261102032255689/gpt-6-1-terra-xhigh-desktop-sheet-4.jpg",
+        "sha256": "c57f668e921d5bf0e9624304f2128e3f08d512161bdc70e24090cdc105ba58ce",
+        "kind": "sheet",
+        "viewport": "desktop",
+        "label": "时间轴 53.8–62.8s"
+      },
+      {
+        "path": "assets/evidence/03-super-mario-1-1/v1/20261102032255689/gpt-6-1-terra-xhigh-mobile-ready.jpg",
+        "sha256": "af850a90fef3de168745963a84ac51d563e05ddd6eaa2762384a610fe1c71af1",
+        "kind": "frame",
+        "viewport": "mobile",
+        "label": "初始画面"
+      },
+      {
+        "path": "assets/evidence/03-super-mario-1-1/v1/20261102032255689/gpt-6-1-terra-xhigh-mobile-complete.jpg",
+        "sha256": "af850a90fef3de168745963a84ac51d563e05ddd6eaa2762384a610fe1c71af1",
+        "kind": "frame",
+        "viewport": "mobile",
+        "label": "结束画面"
+      },
+      {
+        "path": "assets/evidence/03-super-mario-1-1/v1/20261102032255689/gpt-6-1-terra-xhigh-mobile-sheet-1.jpg",
+        "sha256": "4efc7bbc48f19254529a961e760dee30156eba2b50667364dc3a6abb61b18549",
+        "kind": "sheet",
+        "viewport": "mobile",
+        "label": "时间轴 1.6–38s"
+      },
+      {
+        "path": "assets/evidence/03-super-mario-1-1/v1/20261102032255689/gpt-6-1-terra-xhigh-mobile-sheet-2.jpg",
+        "sha256": "6477878d8d514fb4db42850ee90c91fca7c7d524aeca2088090669e2bdbdb76c",
+        "kind": "sheet",
+        "viewport": "mobile",
+        "label": "时间轴 40.6–61.9s"
+      }
+    ]
   }
 ]
 ```
@@ -835,11 +990,113 @@
         "note": "桌面和手机从初始到结束均只有简化标题，过场、关卡和死亡流程没有呈现。"
       }
     ]
+  },
+  {
+    "protocol": 6,
+    "source": "ai",
+    "id": "761a6dfb-5bd3-4583-930c-355958676f97",
+    "experiment": "03-super-mario-1-1",
+    "version": 1,
+    "fingerprint": "47c925ac54a49a845fd4bd3b63345aa392a7abe158c8230b7d250cdce8f9f9f0",
+    "reviewer": "Codex",
+    "model": "inherited-parent-unreported",
+    "hashes": {
+      "gpt-6-1-terra-xhigh": "054b7ea84643f5f5240cf696d80d88ed51dad493bd6c63e8774edf77b49b7ae2"
+    },
+    "at": "2026-11-02T03:30:58.947Z",
+    "evidence": [
+      "20261102032255689-gpt-6-1-terra-xhigh"
+    ],
+    "checks": [
+      {
+        "key": "gpt-6-1-terra-xhigh",
+        "id": "title",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-terra-xhigh",
+        "id": "intermission",
+        "status": "pending",
+        "score": null,
+        "note": "桌面 3–10.6s 的多种开始操作后仍是蓝底标题，没有可供判断的黑底过场及命数画面。"
+      },
+      {
+        "key": "gpt-6-1-terra-xhigh",
+        "id": "hud",
+        "status": "pending",
+        "score": null,
+        "note": "桌面 13.5–21.4s 及手机对应操作帧仍为标题，无法观察关卡顶部 HUD 与 TIME 的递减。"
+      },
+      {
+        "key": "gpt-6-1-terra-xhigh",
+        "id": "overworld",
+        "status": "pending",
+        "score": null,
+        "note": "桌面 13.5–21.4s 的开局和行走采样没有进入关卡，不能判断未呈现的地形与背景。"
+      },
+      {
+        "key": "gpt-6-1-terra-xhigh",
+        "id": "mario",
+        "status": "pending",
+        "score": null,
+        "note": "桌面短跳、长跳和行走采样均停在标题，没有可供辨认的小马里奥及三种动作姿态。"
+      },
+      {
+        "key": "gpt-6-1-terra-xhigh",
+        "id": "goomba",
+        "status": "pending",
+        "score": null,
+        "note": "桌面 20.4–27.8s 及手机行走采样始终为标题，无法观察栗子怪形象和移动。"
+      },
+      {
+        "key": "gpt-6-1-terra-xhigh",
+        "id": "death",
+        "status": "pending",
+        "score": null,
+        "note": "桌面 22–27.8s 及 49.2–54.9s 的等待采样仍为标题，没有可供判断的碰撞死亡及减命流程。"
+      },
+      {
+        "key": "gpt-6-1-terra-xhigh",
+        "id": "game-over",
+        "status": "fail",
+        "score": 0,
+        "note": "桌面 62.8s 与手机 61.9s 的结束帧仍为标题，检查器完整操作结束后未出现 GAME OVER。"
+      },
+      {
+        "key": "gpt-6-1-terra-xhigh",
+        "id": "pixel-taste",
+        "status": "pending",
+        "score": null,
+        "note": "桌面与手机从开始操作到结束都未呈现关卡，无法评价未观察到的精灵、砖块、云山灌木美术。"
+      },
+      {
+        "key": "gpt-6-1-terra-xhigh",
+        "id": "motion-taste",
+        "status": "pending",
+        "score": null,
+        "note": "桌面 15.9s 短跳、17.9s 长跳、20.4s 行走和 49s 刹车采样仍为标题，无法评价角色动作与卷屏。"
+      },
+      {
+        "key": "gpt-6-1-terra-xhigh",
+        "id": "fidelity-taste",
+        "status": "scored",
+        "score": 1,
+        "note": "桌面与手机全序列只呈现简化标题和开始提示，未能进入过场与关卡，整体流程残缺。"
+      }
+    ]
   }
 ]
 ```
 
 ## 评测结论
+
+2026-11-02 针对唯一未获正式综合分的 GPT 6.1 Terra Extra High 重新进行桌面 / 手机真实运行，追加自动检查 `20261102032255689-gpt-6-1-terra-xhigh`，未修改原始产物或冻结标准。两端仍报 `particles is not iterable`，所有开始、跳跃、行走和刹车操作后的采样均停留在标题；桌面 62.8s、手机 61.9s 的结束画面也没有进入关卡。
+
+本次 Codex 图像评审批次 `761a6dfb-5bd3-4583-930c-355958676f97` 引用此次新证据；模型原标识未暴露，记 `inherited-parent-unreported`。标题通过，GAME OVER 按“检查器结束仍未出现”的冻结细则判未通过，整体还原度为 1 / 5；其余八项仍因关卡和角色动作未呈现而待评，不能把未观察到的画面直接当作零分。有效 AI 数仍为 0，正式综合分仍待评；此前两份已完成产物的分数保持 96.0 与 83.7 不变。
+
+此前另列的 14.8 / 100 非正式参考分继续单独保留，既不是本次补出的正式分，也不进入网站综合分或有效评审数。要让这份原始失败产物取得正式总分，不能在验收时修补它，也不能为它临时改掉“缺项不补零”的协议规则。
 
 2026-10-29 新增 [GPT 6.1 Terra Extra High](outputs/gpt-6-1-terra-xhigh/index.html)。显示名与推理档位由用户提供，生成对话未暴露渠道原始模型标识；此产物在已有对话上下文中读取 Prompt 后生成，并非独立新会话仅接收 Prompt 原文，与以下单轮结果的可比性受限。
 
@@ -877,3 +1134,19 @@ Claude Opus 5.5 Extra High（AI 批次 `da79e634-5aee-4e11-a184-5f8075071f8c`）
 - 三项品味分依次为像素美术 4.5 / 5、动作与镜头 4 / 5、整体还原度 4.5 / 5；扣分理由是灌木缺深色描边、刹车与死亡姿势在拼图中不够清楚、手机上只有 1 倍显示偏小。这是该 AI 按冻结锚点作出的判断，不代表人类共识。
 
 正式证据仅为本文件所列自动检查记录及其关键帧 / 拼图（两份产物各 11 张）。生成器的自查未计入评分。当前结果不等于全关卡实玩通关，也不证明未采样的地下房间、道具、龟壳、旗杆结算、实体帧率或音色均满足要求。
+
+## 非正式参考分
+
+2026-11-02 按维护者要求在首页展示既有参考值。仅供展示，不改变协议 6 正式分数、待评项或有效 Agent 数；首页有正式综合分时优先展示正式分。产物与标准指纹用于防止参考值误用于其他结果。
+
+```json
+[
+  {
+    "key": "gpt-6-1-terra-xhigh",
+    "sha256": "054b7ea84643f5f5240cf696d80d88ed51dad493bd6c63e8774edf77b49b7ae2",
+    "fingerprint": "47c925ac54a49a845fd4bd3b63345aa392a7abe158c8230b7d250cdce8f9f9f0",
+    "value": 14.8,
+    "note": "未观察项暂按零计算的非正式参考分，不属于协议 6 正式综合分，不计入有效 Agent。"
+  }
+]
+```

@@ -3,8 +3,8 @@
 - **Prompt**：[prompt-v1.md](../../../prompts/02-pelican-bicycle/prompt-v1.md)
 - **评测协议**：6
 - **标准冻结日期**：2026-10-26（已有产物，事后冻结；协议 5 的旧评分与旧媒体已按维护者要求移除，不再展示）
-- **评测日期**：未评测
-- **评测者**：尚未登记
+- **评测日期**：2026-10-29、2026-11-02
+- **评测者**：Codex（模型原标识未暴露）
 - **评测方式**：轻量评测：脚本一次真实渲染判硬性要求，AI 看连续帧拼图逐项打勾和打分
 - **评测环境**：真实浏览器 img 模式，桌面 1440×900 / 手机 390×844 各一次；不测实体帧率与 DPR
 
@@ -736,10 +736,385 @@
         "note": "桌面连续帧能读出腿部变化，但身体较静止且蹬踏细节不够清楚。"
       }
     ]
+  },
+  {
+    "protocol": 6,
+    "source": "ai",
+    "id": "ed276355-b142-4620-91ee-c12249e692d0",
+    "experiment": "02-pelican-bicycle",
+    "version": 1,
+    "fingerprint": "c9569c4bbc9c5878c757f21e0107fe4da2c130a78f66a2622226b8b19a178c69",
+    "reviewer": "Codex",
+    "model": "inherited-parent-unreported",
+    "hashes": {
+      "claude-opus-5-5-xhigh": "3317e843e5ae913bbc1418f9e61d021929694fedb2f6ed43cba1d5d9d8deef5f",
+      "claude-opus-5-5-high": "17012f4617610958c65cb937d5465715bd2a53571549b8712d0de5389665e9ef",
+      "gpt-5-6-sol-xhigh": "c884bdf6ec95d3911e1131bee2d2f315ab01770edc6c4b84d24c011e985a8492",
+      "gpt-6-1-sol-xhigh": "3998adef2a8c45e1668dd3cf0c7a7cecb29e57c79cc58ebe2d624b717db61cf5"
+    },
+    "at": "2026-11-02T03:26:05.677Z",
+    "evidence": [
+      "20261029065148840-claude-opus-5-5-xhigh",
+      "20261029065148840-claude-opus-5-5-high",
+      "20261029065148840-gpt-5-6-sol-xhigh",
+      "20261029065148840-gpt-6-1-sol-xhigh"
+    ],
+    "checks": [
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "pelican",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "plumage",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "feathers",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "bicycle",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "framing",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "wheels",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "pedaling",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "feet",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "loop",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "shape-taste",
+        "status": "scored",
+        "score": 4,
+        "note": "首帧大图的长喙、红囊、栗色后颈和伏身骑姿鲜明，羽毛层次丰富，但翼端像手指般抓把的造型稍生硬。"
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "color-taste",
+        "status": "scored",
+        "score": 4,
+        "note": "首帧大图中灰白羽毛、红囊与青绿车架层次清楚，海岸配色统一，但密集重复的羽纹和辐条略显拥挤。"
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "motion-taste",
+        "status": "scored",
+        "score": 3.5,
+        "note": "桌面 0–8.13s 可见双腿围绕相对踏板反复交替且轮标转动，身体较稳定，但长腿的折叠仍显机械。"
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "pelican",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "plumage",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "feathers",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "bicycle",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "framing",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "wheels",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "pedaling",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "feet",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "loop",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "shape-taste",
+        "status": "scored",
+        "score": 4,
+        "note": "首帧大图的长喙、大喉囊和弯颈一眼可认，身体与车的比例成立，但腿和握把处的造型较硬。"
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "color-taste",
+        "status": "scored",
+        "score": 3.5,
+        "note": "首帧大图的红囊、栗色颈、灰褐羽与红色车架清楚整洁，重复鳞片式羽纹和背景色块的层次较简单。"
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "motion-taste",
+        "status": "scored",
+        "score": 3.5,
+        "note": "桌面 0–7.73s 和手机 0–3.40s 中两腿交替、轮上标记转动，姿态可重复辨认，但上身几乎不随蹬踏起伏。"
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "pelican",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "plumage",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "feathers",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "bicycle",
+        "status": "partial",
+        "score": 2.5,
+        "note": "首帧大图中两轮与菱形车架齐全，但黑色弯把与橙色把立之间明显断开，连接不成立。"
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "framing",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "wheels",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "pedaling",
+        "status": "partial",
+        "score": 2.5,
+        "note": "桌面 0–4.68s 的曲柄和两腿都在运动，但腿端经常位于曲柄圆周之外，双腿与相对踏板没有可靠同步。"
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "feet",
+        "status": "fail",
+        "score": 0,
+        "note": "首帧及桌面 0、0.95、2.11、4.12s 等帧中至少一只脚持续远离对应黑色踏板，不能视为脚始终踩踏。"
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "loop",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "shape-taste",
+        "status": "scored",
+        "score": 3,
+        "note": "首帧大图能辨认繁殖期鹈鹕，但身体过于直立圆块化，长腿、细颈和悬空车把使骑姿的可信度下降。"
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "color-taste",
+        "status": "scored",
+        "score": 3.5,
+        "note": "首帧大图的红囊、栗色后颈与灰褐身体配色协调，粗线和羽纹清楚，但喙与身体的几何拼接较硬。"
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "motion-taste",
+        "status": "scored",
+        "score": 2,
+        "note": "桌面 0–4.68s 的轮转有节奏，但双腿像独立摆杆伸缩，多帧脚与踏板分离，缺少可信的蹬踏关系。"
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "pelican",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "plumage",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "feathers",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "bicycle",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "framing",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "wheels",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "pedaling",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "feet",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "loop",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "shape-taste",
+        "status": "scored",
+        "score": 4.5,
+        "note": "首帧大图的长喙、饱满喉囊、栗色弯颈与层叠羽毛相互统一，伏身握把的骑姿成立，腿关节略像机械连杆。"
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "color-taste",
+        "status": "scored",
+        "score": 4.5,
+        "note": "首帧大图中红橙喉囊、黄白头顶、灰绿羽与绿车架层次克制统一，羽毛线宽和明暗细节整洁。"
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "motion-taste",
+        "status": "scored",
+        "score": 4,
+        "note": "桌面 0–2.27s 与手机 0–1.52s 中双脚随相对曲柄交替、轮标持续变化并出现重复姿态，节奏连贯但上身参与较少。"
+      }
+    ]
   }
 ]
 ```
 
 ## 评测结论
 
-尚无实际评分，不补造结论。
+2026-11-02 为此前未评的四份产物补齐 AI 评审，批次 `ed276355-b142-4620-91ee-c12249e692d0` 共 48 项。评审者为 Codex，模型原标识未暴露，记录为 `inherited-parent-unreported`；仅依据已校验指纹的 2026-10-29 桌面首帧大图、桌面和手机连续帧拼图判断，脚本项不由 AI 改判。GPT 6.1 Terra 沿用此前完整批次，不重评或改分。
+
+| 产物 | 综合 / 100 | 确定性 / 100 | 品味 / 100 | 有效 AI |
+|---|---|---|---|---|
+| [GPT 6.1 Sol Extra High](outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.svg) | 94.5 | 100.0 | 86.3 | 1 |
+| [Claude Opus 5.5 Extra High](outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.svg) | 90.5 | 100.0 | 76.3 | 1 |
+| [Claude Opus 5.5 High](outputs/claude-opus-5-5-high/claude-opus-5-5-high.svg) | 89.3 | 100.0 | 73.1 | 1 |
+| [GPT 6.1 Terra Extra High](outputs/gpt-6-1-terra-xhigh/pelican.svg) | 80.0 | 95.8 | 56.3 | 1 |
+| [GPT 5.6 Sol Extra High](outputs/gpt-5-6-sol-xhigh/gpt-5-6-sol-xhigh.svg) | 72.3 | 83.3 | 55.6 | 1 |
+
+新增四份的文件与运行四项均通过，均有可辨认的长喙、大喉囊、繁殖期羽色与羽毛层次，桌面和手机主体完整。GPT 6.1 Sol 与两份 Claude 在采样中可见轮转、两腿交替和重复姿态，主要区别是造型、线条与蹬踏的自然度：造型 / 配色 / 动态三项品味分别为 GPT 6.1 Sol 4.5 / 4.5 / 4，Claude Extra High 4 / 4 / 3.5，Claude High 4 / 3.5 / 3.5。
+
+GPT 5.6 的黑色弯把与橙色把立断开，自行车结构部分通过；两腿虽然运动，但腿端多帧偏离曲柄圆周，蹬踏同步部分通过，脚持续离开对应踏板判未通过；品味为 3 / 3.5 / 2。这些是渲染画面中的判断，不依据源码意图。
+
+循环通过仅表示在保存的采样中找到重复姿态、未见明显跳变，不证明周期边界的每一帧严格连续。实际拼图时间以各帧标签为准。全部分数只适用于本实验 Prompt v1；品味是 AI 判断。Terra 来自既有批次，与本次四份不是同批横评；本次评审来自当前维护对话，不宣称独立新上下文，原始 Prompt、产物和冻结标准均未改动。

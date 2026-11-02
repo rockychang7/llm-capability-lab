@@ -57,7 +57,8 @@ function renderHome(params) {
     <section class="block" id="matrix">${heading("模型 × 实验")}<div class="box scroll"><table class="matrix"><thead><tr><th>模型</th>${entries.map(({ experiment }) => `<th>${e(experiment.title)}</th>`).join("")}</tr></thead><tbody>
     ${[...new Set(results.map((item) => item.model))].sort().map((model) => `<tr><th>${e(results.find((item) => item.model === model).label)}</th>${entries.map(({ experiment, version }) => `<td>${version.results.filter((item) => item.model === model).map((result) => {
       const score = scoreFor(version, result);
-      return `<a class="cell" href="${hash(experiment, { model: result.key })}"><span data-home-score="${e(experiment.id)}:${e(result.key)}">${number(score.total)}</span><span class="cell-note" data-home-count="${e(experiment.id)}:${e(result.key)}">${score.count} 位 Agent</span></a>`;
+      const reference = version.evaluation?.protocol === PROTOCOL && score.total === null ? result.referenceScore : null;
+      return `<a class="cell${reference ? " cell-reference" : ""}" href="${hash(experiment, { model: result.key })}"${reference ? ` title="${e(`正式综合分待评；${reference.note}`)}"` : ""}><span data-home-score="${e(experiment.id)}:${e(result.key)}">${number(reference ? reference.value : score.total)}</span><span class="cell-note">${reference ? '<span class="reference-label" data-home-reference>非正式参考分</span>' : ""}<span data-home-count="${e(experiment.id)}:${e(result.key)}">${score.count} 位 Agent</span></span></a>`;
     }).join("") || "—"}</td>`).join("")}</tr>`).join("")}</tbody></table></div></section>
     <section class="block" id="method">${heading("评分规则")}<dl class="cells"><div><dt>确定性分</dt><dd>能自动量的（能否运行、时长、读数）由脚本跑一次真实浏览器直接判；画面要求由 AI 看时间轴拼图打勾。做到 / 部分做到 / 未做到为 5 / 2.5 / 0 分。</dd></div>
       <div><dt>品味分</dt><dd>AI 看拼图和关键画面，按冻结锚点给出 0–5 分，步进 0.5。品味是 AI 判断，不是人类共识。</dd></div>

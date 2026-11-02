@@ -3,7 +3,7 @@
 - **Prompt**：[prompt-v1.md](../../../prompts/01-rocket-launch/prompt-v1.md)
 - **评测协议**：6
 - **标准冻结日期**：2026-10-26（已有产物，事后冻结；协议 5 的旧评分与旧媒体已按维护者要求移除，不再展示）
-- **评测日期**：2026-10-29
+- **评测日期**：2026-10-29、2026-11-02
 - **评测者**：Codex（模型原标识未暴露）
 - **评测方式**：轻量评测：脚本一次真实运行判硬性要求，AI 看时间轴拼图逐项打勾和打分
 - **评测环境**：真实浏览器桌面 1440×900 / 手机 390×844 各跑一次；不测实体帧率、音效、DPR 与减少动态
@@ -934,10 +934,469 @@
         "note": "桌面有明确的成功与重发画面，但手机未完整呈现关键飞行和卫星画面。"
       }
     ]
+  },
+  {
+    "protocol": 6,
+    "source": "ai",
+    "id": "16f3839b-9118-4e59-a8b9-69d87219a535",
+    "experiment": "01-rocket-launch",
+    "version": 1,
+    "fingerprint": "5369c560fd5863215c2865a1a0f47eab37944a775c14d936b2a2daca0a883cb9",
+    "reviewer": "Codex",
+    "model": "inherited-parent-unreported",
+    "hashes": {
+      "claude-opus-5-5-xhigh": "b9f1e2b1eb837f25d56e86adc96dd965e8b38c5c335a97ed72269c549a8a0092",
+      "claude-opus-5-5-high": "42076058bb04ee338f9cd948b4265b7d8602de5c886ec65a970fadcb480931be",
+      "gpt-5-6-sol-xhigh": "94bb21d78dd81c48b0b94e39f65f8c7dd18ec057a4e3be67afde5ed1f940e941",
+      "gpt-6-1-sol-xhigh": "a7d94a526261dd09f0449f7ddd4c37f74e5d1e7db67df10fb03af6c75c3b00af"
+    },
+    "at": "2026-11-02T03:26:05.660Z",
+    "evidence": [
+      "20261029070702049-claude-opus-5-5-xhigh",
+      "20261029070702049-claude-opus-5-5-high",
+      "20261029070702049-gpt-5-6-sol-xhigh",
+      "20261029070702049-gpt-6-1-sol-xhigh"
+    ],
+    "checks": [
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "rocket-look",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "launch-site",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "ignition",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "liftoff",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "tracking",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "plume",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "sky",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "staging",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "fairing",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "orbit",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "deploy",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "mobile-layout",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "visual-taste",
+        "status": "scored",
+        "score": 4,
+        "note": "待命大图的箭体接缝与明暗清楚，桌面 51–66s 的大气边缘和晨光统一，但云团与陆地仍较图案化。"
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "motion-taste",
+        "status": "scored",
+        "score": 4.5,
+        "note": "桌面 9–24s 的缓慢离台到转弯、36–45s 分离和 57–66s 关机部署层次清楚，采样序列的收尾有明显放缓。"
+      },
+      {
+        "key": "claude-opus-5-5-xhigh",
+        "id": "finish-taste",
+        "status": "scored",
+        "score": 4.5,
+        "note": "手机待命、飞行拼图与成功大图中主体、遥测和重发按钮分区清楚，任务视觉统一，成功浮层稍遮挡部署主体。"
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "rocket-look",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "launch-site",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "ignition",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "liftoff",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "tracking",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "plume",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "sky",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "staging",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "fairing",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "orbit",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "deploy",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "mobile-layout",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "visual-taste",
+        "status": "scored",
+        "score": 4,
+        "note": "待命大图的箭体体积、塔架与黎明光色协调，桌面 54–75s 的地球和晨光有层次，但云雾与地表纹理仍偏简化。"
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "motion-taste",
+        "status": "scored",
+        "score": 4,
+        "note": "桌面 12–33s 起飞转弯、45–57s 分离和 66–75s 卫星展开均可顺序辨认，采样中镜头稳定但部分阶段构图变化较少。"
+      },
+      {
+        "key": "claude-opus-5-5-high",
+        "id": "finish-taste",
+        "status": "scored",
+        "score": 4,
+        "note": "手机全程拼图中的箭体、遥测与重发按钮保持可见，画面完整，但事件字幕和遥测在桌面缩览中偏细小。"
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "rocket-look",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "launch-site",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "ignition",
+        "status": "partial",
+        "score": 2.5,
+        "note": "桌面 9–18s 可见明亮尾焰，但烟雾主要是随箭体上移的两团圆形雾斑，贴地翻涌扩散的烟云表现不足。"
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "liftoff",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "tracking",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "plume",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "sky",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "staging",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "fairing",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "orbit",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "deploy",
+        "status": "partial",
+        "score": 2.5,
+        "note": "桌面 57–72s 可见卫星与展开的双侧电池板，但手机 54–72s 的部署主体移出右侧画框，竖屏只剩二级与罩瓣。"
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "mobile-layout",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "visual-taste",
+        "status": "scored",
+        "score": 2.5,
+        "note": "待命箭体有明暗与接缝，但桌面 33–60s 的三角形火焰、椭圆陆地与线圈状云层明显偏几何插画，写实质感不足。"
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "motion-taste",
+        "status": "scored",
+        "score": 3,
+        "note": "桌面 12–57s 的转弯、级间分离与开罩可读，但烟团随箭体漂移，手机 54s 后部署主体出框，镜头叙事受损。"
+      },
+      {
+        "key": "gpt-5-6-sol-xhigh",
+        "id": "finish-taste",
+        "status": "scored",
+        "score": 3,
+        "note": "初始按钮和成功读数清楚，桌面流程完整，但手机 54–75s 看不到展开后的卫星，且桌面遥测字号偏小。"
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "rocket-look",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "launch-site",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "ignition",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "liftoff",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "tracking",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "plume",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "sky",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "staging",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "fairing",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "orbit",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "deploy",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "mobile-layout",
+        "status": "pass",
+        "score": 5,
+        "note": ""
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "visual-taste",
+        "status": "scored",
+        "score": 3.5,
+        "note": "待命大图的铆钉、接缝与金属明暗清楚，桌面 54–79s 的陆地和高空尾焰仍是较硬的几何色面，细腻度有限。"
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "motion-taste",
+        "status": "scored",
+        "score": 4,
+        "note": "桌面 12–33s 缓慢离塔并转弯、39–54s 关机分离开罩、60–75s 部署拉远均可读，一级残段在数帧中逗留较久。"
+      },
+      {
+        "key": "gpt-6-1-sol-xhigh",
+        "id": "finish-taste",
+        "status": "scored",
+        "score": 4,
+        "note": "手机成功大图中卫星、地球、读数与重发按钮完整分区，界面语言统一，但飞行时浅色遥测与雾层的对比度偏弱。"
+      }
+    ]
   }
 ]
 ```
 
 ## 评测结论
 
-GPT 6.1 Terra Extra High：一次脚本检查和一位 AI 评审计算总分 75.3；确定性 86.1，品味 50.0。桌面画面呈现发射、级间分离与卫星展开，手机飞行后段主体多次出框。拼图只覆盖采样时刻，品味分为 AI 判断；运行来源部分信息未知，生成条件与其他结果的可比性无法确认。其余产物仅有自动检查，尚无完整 AI 评分。
+2026-11-02 为此前未评的四份产物补齐 AI 评审，批次 `16f3839b-9118-4e59-a8b9-69d87219a535` 共 60 项。评审者为 Codex，运行环境未暴露渠道模型原标识，记录为 `inherited-parent-unreported`。脚本项沿用已校验指纹的 2026-10-29 桌面 / 手机自动检查，本次只对其初始画面、时间轴拼图与成功画面作图像判断，没有改动标准、原始 Prompt 或产物。
+
+| 产物 | 综合 / 100 | 确定性 / 100 | 品味 / 100 | 有效 AI |
+|---|---|---|---|---|
+| [Claude Opus 5.5 Extra High](outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.html) | 96.0 | 100.0 | 86.7 | 1 |
+| [Claude Opus 5.5 High](outputs/claude-opus-5-5-high/claude-opus-5-5-high.html) | 92.6 | 98.1 | 80.0 | 1 |
+| [GPT 6.1 Sol Extra High](outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.html) | 90.3 | 96.1 | 76.7 | 1 |
+| [GPT 5.6 Sol Extra High](outputs/gpt-5-6-sol-xhigh/gpt-5-6-sol-xhigh.html) | 80.9 | 91.3 | 56.7 | 1 |
+| [GPT 6.1 Terra Extra High](outputs/gpt-6-1-terra-xhigh/rocket-launch.html) | 75.3 | 86.1 | 50.0 | 1 |
+
+新增四份产物均能在采样序列中辨认起飞转弯、级间分离、开罩和弧形地球。Claude Extra High 的主要画面项全部通过，三项品味依次为 4 / 4.5 / 4.5；Claude High 的品味依次为 4 / 4 / 4，脚本的重发复位项部分通过。GPT 6.1 Sol 的品味为 3.5 / 4 / 4，主要扣分是较几何化的地球与尾焰，脚本的复位和离台时刻部分通过。GPT 5.6 的贴地烟云与部署项部分通过：桌面能看到卫星太阳能板，但手机后段部署主体出框；品味为 2.5 / 3 / 3，脚本的复位和离台时刻部分通过。
+
+GPT 6.1 Terra 的既有评分保持不变：桌面画面呈现发射、级间分离与卫星展开，手机飞行后段主体多次出框。它与新增四份不是同一图像评审批次，运行来源部分信息未知，生成条件与其他结果的可比性无法确认。
+
+全部分数只适用于本实验 Prompt v1。拼图只证明采样时刻，不证明每一帧、实体帧率或音效；品味是 AI 判断，不宣称人类共识。本次补评分来自当前维护对话，不冒充独立新上下文或已知原标识模型的评审。

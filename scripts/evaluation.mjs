@@ -74,6 +74,20 @@ export function parseProtocol(text, prompt) {
   return { protocol: PROTOCOL, policy: POLICY, criteria, dimensions, fingerprint: protocolFingerprint(criteria, dimensions, prompt),
     autoChecks: jsonSection(parts, "自动检查"), aiReviews: jsonSection(parts, "AI 评审") };
 }
+export function parseReferenceScores(text, protocol, hashes) {
+  const parts = sections(text);
+  if (!parts["非正式参考分"]) return [];
+  const seen = new Set();
+  return jsonSection(parts, "非正式参考分").map((item) => {
+    if (!hashes[item?.key] || hashes[item.key] !== item.sha256 || item.fingerprint !== protocol.fingerprint ||
+        seen.has(item.key) || typeof item.value !== "number" || !Number.isFinite(item.value) ||
+        item.value < 0 || item.value > 100 || !name(item.note)) {
+      throw new Error("非正式参考分的产物、标准指纹、数值或说明无效");
+    }
+    seen.add(item.key);
+    return { key: item.key, sha256: item.sha256, fingerprint: item.fingerprint, value: item.value, note: item.note };
+  });
+}
 const kindOf = (protocol, criterion) => protocol.dimensions.find((item) => item.id === criterion?.dimension)?.kind;
 export function validateAutoChecks(items, protocol, hashes) {
   const seen = new Set();

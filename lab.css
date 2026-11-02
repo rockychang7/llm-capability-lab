@@ -202,6 +202,8 @@ a.exp-row:hover .exp-arrow { color: var(--accent); transform: translateX(4px); }
 .cell:hover { outline: 1px solid var(--ink); outline-offset: -1px; }
 .cell.is-top { outline: 1.5px solid var(--accent); outline-offset: -1.5px; }
 .cell-note { color: var(--ink-2); font: 11px var(--mono); text-align: right; }
+.cell-reference { background: var(--panel); border: 1px dashed var(--pending-line); }
+.reference-label { display: block; margin-bottom: 3px; color: var(--pending); }
 .cell-none { background: none; color: var(--ink-4); }
 .cell-pending { border: 1px dashed var(--pending-line); background: none; color: var(--pending); font-size: 13px; }
 .legend { margin-top: 12px; color: var(--ink-3); font: 12px var(--mono); }
