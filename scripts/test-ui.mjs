@@ -5,6 +5,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve, join, sep } from "node:path";
 import { localServer, launchBrowser, root } from "./browser-tools.mjs";
+import { siteIndex, siteVersion } from "./site-data.mjs";
 
 if (process.argv.some((arg) => arg.startsWith("--url="))) throw new Error("UI 测试只运行本地静态预览");
 const lab = JSON.parse(readFileSync(resolve(root, "data/lab.json"), "utf8"));
@@ -48,7 +49,13 @@ async function newContext(viewport, data = null) {
     window.addEventListener("unhandledrejection", (event) =>
       window.__labReportError(String(event.reason)));
   });
-  if (data) await context.route("**/data/lab.json", (route) => route.fulfill({ json: data }));
+  if (data) {
+    await context.route("**/data/site.json", (route) => route.fulfill({ json: siteIndex(data) }));
+    for (const experiment of data.experiments) for (const version of experiment.versions) {
+      await context.route(`**/data/views/${experiment.id}/v${version.version}.json`,
+        (route) => route.fulfill({ json: siteVersion(version) }));
+    }
+  }
   await context.addInitScript(() => {
     if (window !== window.top) return;
     document.addEventListener("DOMContentLoaded", () => { document.documentElement.style.scrollBehavior = "auto"; });
@@ -103,7 +110,11 @@ async function stable(page, name) {
     if (colors <= minimum) await page.screenshot({ path: resolve(out, `${name}-blank-diagnostic.png`) });
     assert.ok(colors > minimum, `${name}: ${await owner.getAttribute("title")} has only ${colors} canvas colors`);
   }
-  for (const image of await page.locator(".image-box img").all()) await image.evaluate((img) => img.decode());
+  for (const image of await page.locator(".image-box img,.preview-poster,.sheet-item img").all()) {
+    await image.scrollIntoViewIfNeeded();
+    await image.evaluate((img) => img.decode());
+    assert.ok(await image.evaluate((img) => img.naturalWidth > 0), `${name}: missing preview image`);
+  }
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(150);
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, `${name}: page overflow`);
@@ -138,6 +149,7 @@ async function assertHome(page, data) {
 }
 async function assertScore(page, version, result) {
   const score = currentScore(version, result), panel = page.locator(`[data-score="${result.key}"]`);
+  await panel.waitFor({ state: "visible" });
   assert.equal(await panel.isVisible(), true);
   for (const [metric, value] of [["total", number(score.total)], ["objective", number(score.objective)],
     ["taste", number(score.taste)], ["count", String(score.count)], ["spread", number(score.spread?.range)]]) {
@@ -191,14 +203,111 @@ async function assertScore(page, version, result) {
 }
 async function assertComparison(page, version) {
   assert.equal(await page.locator(".compare-card").count(), version.results.length);
-  for (const result of version.results) {
+  for (const [index, result] of version.results.entries()) {
     const score = currentScore(version, result), row = page.locator(`[data-score-row="${result.key}"]`);
     assert.deepEqual(await row.locator("td").allTextContents(), [
       number(score.total), number(score.objective), number(score.taste), String(score.count), number(score.spread?.range)
     ]);
     assert.equal(await page.locator(`[data-small-score="${result.key}"]`).innerText(), number(score.total));
+    const preview = page.locator("[data-preview]").nth(index);
+    if (await preview.locator(".frame-box.is-mobile").count()) {
+      const poster = result.score?.auto?.files.find((file) =>
+        file.viewport === "mobile" && file.kind === "frame" && file.label === "初始画面");
+      assert.equal(await preview.locator(".preview-poster").count(), poster ? 1 : 0);
+      if (poster) assert.equal(await preview.locator(".preview-poster").getAttribute("src"), poster.path,
+        "mobile posters must show the actual mobile viewport");
+    }
   }
   assert.equal(await page.getByRole("link", { name: "评分与证据", exact: true }).count(), version.results.length);
+  assert.equal(await page.locator(".preview-live").count(), 0, "comparison must not auto-run artifacts");
+  assert.equal(await page.locator('[data-action="start-preview"]').count(), version.results.length);
+}
+async function assertPlayback(page, experiment) {
+  const previews = page.locator("[data-preview]"), first = previews.first();
+  const isImage = experiment.artifactType === "image";
+  await clickAfterScroll(page, first.locator('[data-action="start-preview"]'));
+  await first.locator(".preview-live").waitFor();
+  assert.equal(await page.locator(".preview-live").count(), 1, "starting one preview must not start others");
+  if (isImage) await first.locator("img.preview-live").evaluate((img) => img.decode());
+  else {
+    const owner = first.locator("iframe");
+    await owner.contentFrame().locator("canvas").first().waitFor();
+    assert.equal(await owner.contentFrame().locator("body").evaluate(() => innerWidth), Number(await owner.getAttribute("width")));
+    assert.equal(await owner.getAttribute("sandbox"), "allow-scripts");
+  }
+  const size = await first.boundingBox();
+  await clickAfterScroll(page, first.locator('[data-action="stop-preview"]'));
+  assert.equal(await page.locator(".preview-live").count(), 0, "stopping must remove the live document");
+  assert.equal(await page.locator("iframe").count(), 0);
+  assert.ok(await first.locator(".preview-poster").isVisible());
+  const stopped = await first.boundingBox();
+  assert.ok(Math.abs(stopped.height - size.height) < 1, "playback must not resize its preview");
+  await clickAfterScroll(page, page.getByRole("button", { name: "重新加载", exact: true }));
+  assert.equal(await page.locator(".preview-live").count(), 0, "reload must not start idle previews");
+  await clickAfterScroll(page, first.locator('[data-action="start-preview"]'));
+  await first.locator(".preview-live").waitFor();
+  if (await previews.count() > 1) {
+    await clickAfterScroll(page, previews.nth(1).locator('[data-action="start-preview"]'));
+    assert.equal(await page.locator(".preview-live").count(), 2, "independent previews must still support parallel playback");
+  }
+  checks++;
+}
+async function assertLoading() {
+  const state = await newContext({ width: 1440, height: 900 }), { page, context } = state;
+  const requests = [];
+  page.on("request", (request) => requests.push(new URL(request.url()).pathname));
+  let releaseFont;
+  const fontGate = new Promise((resolve) => { releaseFont = resolve; });
+  await context.route("https://fonts.googleapis.com/**", async (route) => {
+    await fontGate;
+    await route.fulfill({ contentType: "text/css", body: "" });
+  });
+  try {
+    await page.goto(base, { waitUntil: "commit" });
+    await page.locator("#app .page").waitFor({ timeout: 5000 });
+    assert.equal(requests.filter((path) => path.startsWith("/data/views/")).length, 0);
+    assert.equal(requests.includes("/data/lab.json"), false);
+    assert.equal(requests.filter((path) => path.includes("/outputs/")).length, 0, "home must not load animated originals");
+    assert.ok(requests.includes("/data/site.json"));
+  } finally { releaseFont(); }
+  const detailPath = `/data/views/${rocket.id}/v${latest(rocket).version}.json`;
+  let releaseDetail;
+  const detailGate = new Promise((resolve) => { releaseDetail = resolve; });
+  await context.route(`**${detailPath}`, async (route) => {
+    await detailGate;
+    await route.continue();
+  });
+  const detailRequested = page.waitForRequest((request) => new URL(request.url()).pathname === detailPath);
+  await page.evaluate((id) => { location.hash = `#/${id}`; }, rocket.id);
+  await detailRequested;
+  await page.evaluate(() => { location.hash = "#/"; });
+  await page.locator(".intro").waitFor();
+  const detailReceived = page.waitForResponse((response) => new URL(response.url()).pathname === detailPath);
+  releaseDetail();
+  await detailReceived;
+  await page.waitForTimeout(150);
+  assert.equal(await page.locator(".intro").count(), 1, "stale detail responses must not replace a newer route");
+  await page.evaluate((id) => { location.hash = `#/${id}`; }, rocket.id);
+  await page.locator("[data-score]").waitFor();
+  assert.equal(requests.filter((path) => path === detailPath).length, 1, "details must be reused within a session");
+  assert.equal(requests.filter((path) => path.startsWith("/data/views/") && path !== detailPath).length, 0);
+  await assertStatic(state);
+  await context.close();
+
+  const failed = await newContext({ width: 390, height: 844 });
+  let attempts = 0;
+  await failed.context.route(`**${detailPath}`, (route) => {
+    attempts++;
+    return attempts === 1 ? route.fulfill({ status: 503, body: "Unavailable" }) : route.continue();
+  });
+  await failed.page.goto(routeURL(rocket));
+  await failed.page.getByRole("button", { name: "重试", exact: true }).waitFor();
+  await failed.page.getByRole("button", { name: "重试", exact: true }).click();
+  await failed.page.locator("[data-score]").waitFor();
+  assert.equal(attempts, 2, "failed detail requests must be retryable");
+  await assertStatic(failed);
+  await failed.context.close();
+  checks += 2;
 }
 async function svgPixels(page) {
   const image = page.locator(".image-box img").first();
@@ -282,6 +391,7 @@ function fixtureData() {
 }
 try {
   browser = await launchBrowser();
+  await assertLoading();
   for (const [name, viewport] of [["desktop", { width: 1440, height: 900 }], ["mobile", { width: 390, height: 844 }]]) {
     const state = await newContext(viewport), { page, context } = state;
     await page.goto(base);
@@ -297,6 +407,7 @@ try {
       await page.goto(routeURL(experiment, { view: "compare", viewport: name }));
       await stable(page, `${name}-${experiment.id}-compare`);
       await assertComparison(page, version);
+      await assertPlayback(page, experiment);
       await clickAfterScroll(page, page.getByRole("link", { name: "评分与证据", exact: true }).first());
       await page.locator("[data-score]").waitFor();
       assert.equal(await page.locator('nav[aria-label="产物视图"] a[aria-current="true"]').innerText(), "单个查看");
@@ -373,7 +484,7 @@ try {
     assert.equal((await fetch(base + path)).status, 403, "private server file exposed");
   }
   for (const [path, hash] of originals) assert.equal(digest(readFileSync(resolve(root, path))), hash, `original source changed: ${path}`);
-  console.log(`ok    ${checks} 组静态 UI 检查：桌面、手机、脚本与 AI 分数及细项、对照、无表单/API/存储、原始 SVG/Canvas 动画及源码保护`);
+  console.log(`ok    ${checks} 组静态 UI 检查：桌面、手机、评分细项、按需加载与播放、慢字体/切页/重试、无表单/API/存储、原始 SVG/Canvas 动画及源码保护`);
 } finally {
   if (browser) await browser.close();
   await server.close();

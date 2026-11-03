@@ -7,6 +7,7 @@ import { join, resolve, sep } from "node:path";
 import { summarizeScore, latestBy } from "../review.js";
 import { digest, parseProtocol, parseReferenceScores, replaceJsonSection, validateAIReview, validateAutoChecks } from "../scripts/evaluation.mjs";
 import { importAI } from "../scripts/import-ai.mjs";
+import { siteIndex, siteVersion } from "../scripts/site-data.mjs";
 
 const at = "2026-10-26T08:00:00.000Z", before = "2026-10-26T07:00:00.000Z";
 const keys = ["one", "two"], hashes = Object.fromEntries(keys.map((key) => [key, digest(`raw:${key}`)]));
@@ -68,6 +69,36 @@ function pending(input, id = "moving") {
   Object.assign(input.checks.find((item) => item.key === "one" && item.id === id), { status: "pending", score: null, note: "Not shown." });
   return input;
 }
+
+test("display index keeps authoritative summaries without downloading prompts or review records", () => {
+  const { lab, version } = fixture();
+  publish(version.evaluation, batch(version.evaluation));
+  version.results.forEach((result) => { result.score = summarizeScore(version, result.key); });
+  version.results[0].referenceScore = { value: 14.8, note: "Synthetic display reference only." };
+  lab.vendors = { fixture: { label: "Fixture" } };
+  const before = JSON.stringify(lab), index = siteIndex(lab);
+  const summary = index.experiments[0].versions[0], details = siteVersion(version);
+  assert.equal(summary.dataPath, "data/views/test/v1.json");
+  assert.equal(summary.promptLength, version.prompt.length);
+  assert.equal(summary.prompt, undefined);
+  assert.equal(summary.evaluation.criteria, undefined);
+  assert.deepEqual(summary.evaluation.dimensions.map((item) => [item.id, item.kind, item.weight]),
+    version.evaluation.dimensions.map((item) => [item.id, item.kind, item.weight]));
+  for (let i = 0; i < version.results.length; i++) {
+    assert.deepEqual(summary.results[i].score, { total: version.results[i].score.total, count: version.results[i].score.count });
+    assert.equal(summary.results[i].score.checks, undefined);
+    assert.deepEqual(details.results[i].score, version.results[i].score);
+  }
+  assert.deepEqual(summary.results[0].referenceScore, version.results[0].referenceScore);
+  assert.equal(details.prompt, version.prompt);
+  assert.deepEqual(details.evaluation.criteria, version.evaluation.criteria);
+  assert.equal(details.evaluation.autoChecks, undefined);
+  assert.equal(details.evaluation.aiReviews, undefined);
+  assert.equal(JSON.stringify(lab), before);
+  const unscored = { ...version, evaluation: null };
+  assert.equal(siteIndex({ ...lab, experiments: [{ ...lab.experiments[0], versions: [unscored] }] }).experiments[0].versions[0].evaluation, null);
+  assert.deepEqual(siteVersion(unscored), unscored);
+});
 
 test("protocol 6 needs judge column, ai-only taste and positive weights", () => {
   const protocol = parseProtocol(markdown, "prompt");

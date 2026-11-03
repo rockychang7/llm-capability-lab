@@ -15,7 +15,8 @@ const heading = (title, note = "") => `<div class="section-head"><h2>${e(title)}
 const readouts = (items) => `<div class="readouts">${items.map(([name, value, id]) => `<div class="readout"${id ? ` data-metric="${e(id)}"` : ""}><span class="readout-label">${e(name)}</span><span class="readout-value">${e(value)}</span></div>`).join("")}</div>`;
 const latest = (experiment) => experiment.versions.find((version) => version.version === experiment.latestVersion);
 const dimensionsFor = (version) => (version.evaluation?.dimensions ?? []).filter((item) => Object.hasOwn(KINDS, item.kind));
-let lab, current;
+let lab, current, renderSequence = 0;
+const versionCache = new Map();
 const observer = new ResizeObserver((entries) => entries.forEach(({ target }) => fitFrame(target)));
 function announce(text) { live.textContent = text; }
 function route() {
@@ -50,8 +51,8 @@ function renderHome(params) {
     ${readouts([["实验", entries.length], ["模型", new Set(results.map((item) => item.model)).size], ["原始产物", results.length]])}</section>
     <section class="block">${heading("实验")}<div class="box scroll"><div class="exp-table"><div class="exp-row exp-row-head"><span>编号</span><span>实验</span><span>提示词</span><span>产物</span><span>评分权重</span><span>评分维度</span><span></span></div>
     ${entries.map(({ experiment, version }) => `<a class="exp-row" href="${hash(experiment)}"><span class="exp-no">${e(experiment.number)}</span><span class="exp-main"><span class="chip">${e(experiment.capability)}</span><span class="exp-title">${e(experiment.title)}</span><span class="exp-question">${e(experiment.question)}</span></span>
-      <span class="exp-prompt">v${version.version}<span class="muted">${version.prompt.length.toLocaleString("zh-CN")} 字</span></span>
-      <span class="sheet">${version.results.map((result) => `<span class="sheet-item">${result.thumb || experiment.artifactType === "image" ? `<img src="${e(result.thumb ?? result.url)}" alt="" loading="lazy">` : ""}</span>`).join("")}<span class="sheet-count">${version.results.length} 份</span></span>
+      <span class="exp-prompt">v${version.version}<span class="muted">${version.promptLength.toLocaleString("zh-CN")} 字</span></span>
+      <span class="sheet">${version.results.map((result) => `<span class="sheet-item">${result.thumb ? `<img src="${e(result.thumb)}" alt="" width="52" height="33" loading="lazy" decoding="async">` : ""}</span>`).join("")}<span class="sheet-count">${version.results.length} 份</span></span>
       <span class="progress-text">${weightLabel(version)}</span><span class="mono">${dimensionsFor(version).length} 项</span><span class="exp-arrow">${arrow}</span></a>`).join("")}
     </div></div></section>
     <section class="block" id="matrix">${heading("模型 × 实验")}<div class="box scroll"><table class="matrix"><thead><tr><th>模型</th>${entries.map(({ experiment }) => `<th>${e(experiment.title)}</th>`).join("")}</tr></thead><tbody>
@@ -66,10 +67,19 @@ function renderHome(params) {
       <div><dt>比较范围</dt><dd>只比较同一实验、同一 Prompt 版本。保留评审模型、批次、分差与真实浏览器证据，不合并跨实验总榜。</dd></div></dl></section></div>`;
   if (params.get("section")) requestAnimationFrame(() => document.getElementById(params.get("section"))?.scrollIntoView());
 }
-function preview(experiment, result, viewport) {
-  if (experiment.artifactType === "image") return `<div class="image-box"><img src="${e(result.url)}" alt="${e(label(result))}"></div>`;
+function posterMarkup({ poster, name }) {
+  return `${poster ? `<img class="preview-poster" src="${e(poster)}" alt="" loading="lazy" decoding="async">` : ""}
+    <button class="btn preview-start" type="button" data-action="start-preview" aria-label="${e(`播放 ${name} 预览`)}"><span class="preview-symbol" aria-hidden="true">&#9654;</span>播放预览</button>`;
+}
+function preview(experiment, result, viewport, deferred = false) {
   const size = VIEWPORTS[viewport];
-  return `<div class="frame-box is-${viewport}" style="--vw:${size.width};--vh:${size.height}"><iframe data-src="${e(result.url)}" width="${size.width}" height="${size.height}" title="${e(label(result))}" sandbox="allow-scripts"></iframe></div>`;
+  const kind = experiment.artifactType === "image" ? "image" : "frame";
+  const poster = kind === "frame" && viewport === "mobile" ? result.score?.auto?.files.find((file) =>
+    file.viewport === "mobile" && file.kind === "frame" && file.label === "初始画面")?.path : result.thumb;
+  const data = { poster, name: label(result) };
+  return `<div class="artifact-preview" data-preview data-kind="${kind}" data-url="${e(result.url)}" data-poster="${e(poster)}" data-name="${e(data.name)}" data-autoplay="${!deferred}">
+    <div class="${kind === "image" ? "image-box" : `frame-box is-${viewport}`}"${kind === "frame" ? ` style="--vw:${size.width};--vh:${size.height}"` : ""}>${posterMarkup(data)}</div>
+    <button class="btn preview-stop" type="button" data-action="stop-preview" aria-label="停止预览" title="停止预览，下次从头开始" hidden><span class="preview-symbol" aria-hidden="true">&#9632;</span></button></div>`;
 }
 function fitFrame(box) {
   const width = Number(box.style.getPropertyValue("--vw")), height = Number(box.style.getPropertyValue("--vh"));
@@ -80,10 +90,27 @@ function observeFrames() {
   observer.disconnect();
   app.querySelectorAll(".frame-box").forEach((box) => {
     fitFrame(box); observer.observe(box);
-    const frame = box.querySelector("iframe");
-    frame.getBoundingClientRect();
-    frame.src = frame.dataset.src;
   });
+  app.querySelectorAll('[data-preview][data-autoplay="true"]').forEach(startPreview);
+}
+function startPreview(preview) {
+  if (preview.classList.contains("is-playing")) return;
+  const { kind, url, name } = preview.dataset, box = preview.firstElementChild;
+  if (kind === "image") box.innerHTML = `<img class="preview-live" src="${e(url)}" alt="${e(name)}" decoding="async">`;
+  else {
+    const width = Number(box.style.getPropertyValue("--vw")), height = Number(box.style.getPropertyValue("--vh"));
+    box.innerHTML = `<iframe class="preview-live" data-src="${e(url)}" width="${width}" height="${height}" title="${e(name)}" sandbox="allow-scripts"></iframe>`;
+    fitFrame(box);
+    box.querySelector("iframe").src = url;
+  }
+  preview.classList.add("is-playing");
+  preview.querySelector(".preview-stop").hidden = false;
+}
+function stopPreview(preview) {
+  // Removing the live element releases its document without changing the original artifact.
+  preview.firstElementChild.innerHTML = posterMarkup(preview.dataset);
+  preview.classList.remove("is-playing");
+  preview.querySelector(".preview-stop").hidden = true;
 }
 function scoreMarkup(score) {
   return `${readouts([["综合 / 100", number(score.total), "total"], ["确定性 / 100", number(score.objective), "objective"],
@@ -146,7 +173,7 @@ function renderComparison(experiment, version, options) {
   return `<section class="bench"><div class="compare-grid ${experiment.artifactType === "image" ? "is-image" : ""} is-${options.viewport}">
     ${version.results.map((result) => {
       const score = scoreFor(version, result);
-      return `<article class="compare-card"><header><b>${e(label(result))}</b><span class="compare-score" data-small-score="${e(result.key)}">${number(score.total)}</span></header>${preview(experiment, result, options.viewport)}
+      return `<article class="compare-card"><header><b>${e(label(result))}</b><span class="compare-score" data-small-score="${e(result.key)}">${number(score.total)}</span></header>${preview(experiment, result, options.viewport, true)}
       <p class="compare-meta">${score.count} 位 Agent · ${e(result.record.harness)} · 联网 ${e(result.record.web_access)} · ${e(result.record.turns)} 轮</p><footer><a href="${hash(experiment, { ...options, view: "focus", model: result.key })}">评分与证据</a><a href="${e(result.url)}" target="_blank" rel="noopener">原始文件</a></footer></article>`;
     }).join("")}
     </div></section><section class="block">${heading("Agent 评分对照", weightLabel(version))}<div class="box scroll"><table class="matrix comparison-table"><thead><tr><th>产物</th><th>综合 / 100</th><th>确定性 / 100</th><th>品味 / 100</th><th>完整 Agent 数</th><th>Agent 分差</th></tr></thead><tbody>
@@ -155,8 +182,7 @@ function renderComparison(experiment, version, options) {
       return `<tr data-score-row="${e(result.key)}"><th><a href="${hash(experiment, { ...options, view: "focus", model: result.key })}">${e(label(result))}</a></th><td>${number(score.total)}</td><td>${number(score.objective)}</td><td>${number(score.taste)}</td><td>${score.count}</td><td>${number(score.spread?.range)}</td></tr>`;
     }).join("")}</tbody></table></div><p class="legend">品味是 AI 判断，不是人类共识。分差为本产物完整 Agent 综合分的最高值减最低值。</p></section>`;
 }
-function renderExperiment(experiment, params) {
-  const version = experiment.versions.find((item) => item.version === Number(params.get("v"))) ?? latest(experiment);
+function renderExperiment(experiment, params, version) {
   const options = { v: version.version, view: params.get("view") === "compare" ? "compare" : "focus",
     viewport: params.get("viewport") === "mobile" ? "mobile" : "desktop", model: params.get("model") ?? undefined };
   current = { experiment, version, options };
@@ -178,31 +204,63 @@ app.addEventListener("change", (event) => {
 });
 app.addEventListener("click", async (event) => {
   const action = event.target.closest("[data-action]")?.dataset.action;
+  if (action === "start-preview") startPreview(event.target.closest("[data-preview]"));
+  if (action === "stop-preview") stopPreview(event.target.closest("[data-preview]"));
+  if (action === "retry") await render();
   if (action === "reload") {
-    app.querySelectorAll(".frame-box iframe,.image-box img").forEach((element) => { element.src = element.getAttribute("src"); });
-    announce("产物已重新加载。");
+    const running = app.querySelectorAll(".preview-live");
+    running.forEach((element) => { element.src = element.getAttribute("src"); });
+    announce(running.length ? "产物已重新加载。" : "尚未启动预览。");
   }
   if (action === "copy-prompt" && current) {
     try { await navigator.clipboard.writeText(current.version.prompt); announce("已复制 Prompt 原文。"); }
     catch { announce("剪贴板不可用，请从完整 Prompt 中选择原文。"); }
   }
 });
-function render() {
+async function json(path) {
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.json();
+}
+function loadVersion(summary) {
+  if (!versionCache.has(summary.dataPath)) {
+    const request = json(summary.dataPath).catch((error) => {
+      versionCache.delete(summary.dataPath);
+      throw error;
+    });
+    versionCache.set(summary.dataPath, request);
+  }
+  return versionCache.get(summary.dataPath);
+}
+async function render() {
+  if (!lab) return;
+  const sequence = ++renderSequence;
   observer.disconnect();
-  const { path, params } = route();
   current = null;
-  const experiment = lab.experiments.find((item) => item.id === path);
-  experiment ? renderExperiment(experiment, params) : renderHome(params);
-  document.querySelectorAll("[data-nav]").forEach((element) => {
-    if (!experiment && element.dataset.nav === (params.get("section") ?? "home")) element.setAttribute("aria-current", "page");
-    else element.removeAttribute("aria-current");
-  });
+  try {
+    const { path, params } = route();
+    const experiment = lab.experiments.find((item) => item.id === path);
+    if (experiment) {
+      const summary = experiment.versions.find((item) => item.version === Number(params.get("v"))) ?? latest(experiment);
+      // Clear the previous live document while fetching another experiment's details.
+      app.innerHTML = '<p class="loading" role="status">正在加载实验数据…</p>';
+      const version = await loadVersion(summary);
+      if (sequence !== renderSequence) return;
+      renderExperiment(experiment, params, version);
+    } else renderHome(params);
+    document.querySelectorAll("[data-nav]").forEach((element) => {
+      if (!experiment && element.dataset.nav === (params.get("section") ?? "home")) element.setAttribute("aria-current", "page");
+      else element.removeAttribute("aria-current");
+    });
+  } catch (error) {
+    if (sequence !== renderSequence) return;
+    app.innerHTML = `<div class="empty"><strong>无法加载实验数据</strong><p>${e(error.message)}</p><button class="btn" type="button" data-action="retry">重试</button></div>`;
+  }
 }
 window.addEventListener("hashchange", render);
 try {
-  const response = await fetch("data/lab.json", { cache: "no-store" });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  lab = await response.json(); render();
+  lab = await json("data/site.json");
+  await render();
 } catch (error) {
   app.innerHTML = `<div class="empty"><strong>无法加载实验数据</strong><p>${e(error.message)}</p></div>`;
 }

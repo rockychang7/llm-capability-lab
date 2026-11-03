@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Captures a thumbnail for every page- or game-type result into assets/thumbs/<test-id>/v<N>/<model>[--run-NN].png,
-// using a local headless Chrome/Edge. SVG results need no thumbnail: the page shows the SVG itself.
+// Captures a static thumbnail for every result into assets/thumbs/<test-id>/v<N>/<model>[--run-NN].png,
+// using a local headless Chrome/Edge, including animated SVGs.
 // Screenshots are derived files; model artifacts are never modified.
 // Usage: node scripts/capture-thumbs.mjs [--force]   then rerun node scripts/build-data.mjs
 import { execFile } from "node:child_process";
@@ -41,7 +41,6 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const { experiments } = JSON.parse(readFileSync(join(root, "data/lab.json"), "utf8"));
 
 for (const experiment of experiments) {
-  if (experiment.artifactType === "image") continue;
   for (const version of experiment.versions) {
     for (const result of version.results) {
       const relative = `assets/thumbs/${experiment.id}/v${version.version}/${result.key.replace("/", "--")}.png`;

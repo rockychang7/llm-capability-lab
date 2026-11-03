@@ -6816,7 +6816,7 @@
               "run": null,
               "vendor": "anthropic",
               "url": "results/02-pelican-bicycle/v1/outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.svg",
-              "thumb": null,
+              "thumb": "assets/thumbs/02-pelican-bicycle/v1/claude-opus-5-5-xhigh.png",
               "record": {
                 "prompt": "02-pelican-bicycle",
                 "prompt_version": "1",
@@ -7366,7 +7366,7 @@
               "run": null,
               "vendor": "anthropic",
               "url": "results/02-pelican-bicycle/v1/outputs/claude-opus-5-5-high/claude-opus-5-5-high.svg",
-              "thumb": null,
+              "thumb": "assets/thumbs/02-pelican-bicycle/v1/claude-opus-5-5-high.png",
               "record": {
                 "prompt": "02-pelican-bicycle",
                 "prompt_version": "1",
@@ -7916,7 +7916,7 @@
               "run": null,
               "vendor": "openai",
               "url": "results/02-pelican-bicycle/v1/outputs/gpt-5-6-sol-xhigh/gpt-5-6-sol-xhigh.svg",
-              "thumb": null,
+              "thumb": "assets/thumbs/02-pelican-bicycle/v1/gpt-5-6-sol-xhigh.png",
               "record": {
                 "prompt": "02-pelican-bicycle",
                 "prompt_version": "1",
@@ -8466,7 +8466,7 @@
               "run": null,
               "vendor": "openai",
               "url": "results/02-pelican-bicycle/v1/outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.svg",
-              "thumb": null,
+              "thumb": "assets/thumbs/02-pelican-bicycle/v1/gpt-6-1-sol-xhigh.png",
               "record": {
                 "prompt": "02-pelican-bicycle",
                 "prompt_version": "1",
@@ -9016,7 +9016,7 @@
               "run": null,
               "vendor": "openai",
               "url": "results/02-pelican-bicycle/v1/outputs/gpt-6-1-terra-xhigh/pelican.svg",
-              "thumb": null,
+              "thumb": "assets/thumbs/02-pelican-bicycle/v1/gpt-6-1-terra-xhigh.png",
               "record": {
                 "prompt": "02-pelican-bicycle",
                 "prompt_version": "1",

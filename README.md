@@ -56,6 +56,10 @@ npm run preview
 
 `build` 只向 `dist/` 复制静态页面、数据、Prompt、结果与资源，不发布依赖、脚本、`.local/`、`.env*` 或密钥。
 
+网站首页只读取生成的轻量索引 `data/site.json`，实验详情按需读取 `data/views/<test-id>/vN.json`；同一会话复用已加载数据。`data/lab.json` 仍保留完整数据供检查与评审工具使用，这些生成文件均不得手改。首页使用静态缩略图；并排对照点击“播放预览”才运行对应原始产物，可独立启动多份，停止会释放页面，下次从头开始。单个查看仍自动运行，原始文件不变。
+
+`node scripts/capture-thumbs.mjs` 为缺少缩略图的产物（包括动态 SVG）生成静态截图，已有缩略图默认保留；之后运行 `npm run build` 更新展示数据。
+
 ## AI 评审
 
 ```sh

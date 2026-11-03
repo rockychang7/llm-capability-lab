@@ -1,9 +1,10 @@
 // Canonical evaluation records live only in evaluation.md; artifacts are read-only.
-import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
-import { join, posix } from "node:path";
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { dirname, join, posix } from "node:path";
 import { root } from "./browser-tools.mjs";
 import { artifactDigest, parseProtocol, parseReferenceScores, validateAutoChecks, validateAIReview, sections } from "./evaluation.mjs";
 import { summarizeScore } from "../review.js";
+import { siteIndex, siteVersion } from "./site-data.mjs";
 
 const checkOnly = process.argv.includes("--check");
 const errors = [];
@@ -98,6 +99,15 @@ function buildVersion(config, version) {
   return { version, promptPath, prompt, change, evaluationPath, evaluation,
     stats: { results: results.length, scored: results.filter((item) => item.score?.total != null).length }, results };
 }
+function generated(path, data, pretty = false) {
+  const output = JSON.stringify(data, null, pretty ? 2 : undefined) + "\n";
+  if (checkOnly) {
+    if (!existsSync(join(root, path)) || readText(path) !== output) throw new Error(`${path} 不是最新的，请运行 npm run build`);
+  } else {
+    mkdirSync(dirname(join(root, path)), { recursive: true });
+    writeFileSync(join(root, path), output);
+  }
+}
 try {
   const experiments = configs.map((config) => {
     if ("promptVersion" in config) throw new Error("当前版本必须自动识别");
@@ -108,10 +118,11 @@ try {
       versions: versions.slice().reverse().map((version) => buildVersion(config, version)) };
   });
   if (errors.length) throw new Error(errors.join("\n"));
-  const output = JSON.stringify({ vendors: registry.vendors, experiments }, null, 2) + "\n";
-  const path = join(root, "data/lab.json");
-  if (checkOnly) {
-    if (readText("data/lab.json") !== output) throw new Error("data/lab.json 不是最新的，请运行 npm run build");
-  } else writeFileSync(path, output);
-  console.log(`ok    ${checkOnly ? "校验" : "生成"} data/lab.json：${experiments.length} 个实验`);
+  const lab = { vendors: registry.vendors, experiments };
+  generated("data/lab.json", lab, true);
+  generated("data/site.json", siteIndex(lab));
+  for (const experiment of experiments) for (const version of experiment.versions) {
+    generated(`data/views/${experiment.id}/v${version.version}.json`, siteVersion(version));
+  }
+  console.log(`ok    ${checkOnly ? "校验" : "生成"} 完整数据与按需展示数据：${experiments.length} 个实验`);
 } catch (error) { console.error(`error ${error.message}`); process.exitCode = 1; }
