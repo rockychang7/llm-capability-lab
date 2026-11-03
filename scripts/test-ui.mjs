@@ -113,7 +113,7 @@ async function stable(page, name) {
     if (colors <= minimum) await page.screenshot({ path: resolve(out, `${name}-blank-diagnostic.png`) });
     assert.ok(colors > minimum, `${name}: ${await owner.getAttribute("title")} has only ${colors} canvas colors`);
   }
-  for (const image of await page.locator(".image-box img,.preview-poster,.sheet-item img").all()) {
+  for (const image of await page.locator(".image-box img,.preview-poster,.exp-cover img,.exp-thumb img").all()) {
     await image.scrollIntoViewIfNeeded();
     await image.evaluate((img) => img.decode());
     assert.ok(await image.evaluate((img) => img.naturalWidth > 0), `${name}: missing preview image`);
@@ -332,7 +332,7 @@ async function assertProgressiveLoading(name, viewport) {
   try {
     await page.goto(base);
     await page.locator(".intro").waitFor();
-    const link = page.locator(`a.exp-row[href="#/${rocket.id}"]`);
+    const link = page.locator(`a.exp-card[href="#/${rocket.id}"]`);
     const requested = page.waitForRequest((request) => new URL(request.url()).pathname === detailPath);
     if (name === "desktop") await link.hover();
     else await link.focus();
@@ -385,6 +385,33 @@ async function assertProgressiveLoading(name, viewport) {
   }
   checks++;
 }
+async function assertTheme() {
+  // Dark follows the system; the toggle overrides it for in-app navigation without touching browser storage.
+  const dark = "rgb(12, 15, 20)", light = "rgb(243, 244, 246)";
+  const background = (page) => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+    const state = await newContext(viewport), { page } = state;
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto(`${base}/#/${rocket.id}`);
+    await page.locator('[data-focus-details][aria-busy="false"]').waitFor();
+    assert.equal(await background(page), dark, "system dark theme not applied");
+    assert.equal(await page.locator("html").getAttribute("data-theme"), null);
+    await page.getByRole("button", { name: "切换到浅色主题", exact: true }).click();
+    assert.equal(await page.locator("html").getAttribute("data-theme"), "light");
+    assert.equal(await background(page), light);
+    await page.getByRole("button", { name: "切换到深色主题", exact: true }).click();
+    assert.equal(await background(page), dark);
+    await page.getByRole("link", { name: "全部实验", exact: true }).click();
+    await page.locator(".intro").waitFor();
+    assert.equal(await background(page), dark, "theme choice lost during in-app navigation");
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, "dark theme page overflow");
+    const header = await page.locator(".topbar-inner").boundingBox();
+    assert.ok(header.height <= 60, "theme toggle wrapped the top bar");
+    await assertStatic(state);
+    await state.context.close();
+  }
+  checks++;
+}
 async function assertPrefetchRecovery() {
   const detailPath = `/data/views/${rocket.id}/v${latest(rocket).version}.json`;
   const state = await newContext({ width: 1440, height: 900 });
@@ -394,7 +421,7 @@ async function assertPrefetchRecovery() {
     return attempts === 1 ? route.fulfill({ status: 503, body: "Unavailable" }) : route.continue();
   });
   await state.page.goto(base);
-  const link = state.page.locator(`a.exp-row[href="#/${rocket.id}"]`);
+  const link = state.page.locator(`a.exp-card[href="#/${rocket.id}"]`);
   const failed = state.page.waitForResponse((response) => new URL(response.url()).pathname === detailPath && response.status() === 503);
   await link.hover();
   await failed;
@@ -414,7 +441,7 @@ async function assertPrefetchRecovery() {
   const requests = [];
   saving.page.on("request", (request) => requests.push(new URL(request.url()).pathname));
   await saving.page.goto(base);
-  const target = saving.page.locator(`a.exp-row[href="#/${rocket.id}"]`);
+  const target = saving.page.locator(`a.exp-card[href="#/${rocket.id}"]`);
   await target.focus();
   await target.hover();
   await saving.page.waitForTimeout(150);
@@ -513,6 +540,7 @@ try {
   browser = await launchBrowser();
   await assertLoading();
   await assertPrefetchRecovery();
+  await assertTheme();
   for (const [name, viewport] of [["desktop", { width: 1440, height: 900 }], ["mobile", { width: 390, height: 844 }]]) {
     await assertProgressiveLoading(name, viewport);
     const state = await newContext(viewport), { page, context } = state;
