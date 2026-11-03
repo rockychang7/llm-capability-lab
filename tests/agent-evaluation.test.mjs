@@ -74,6 +74,8 @@ test("display index keeps authoritative summaries without downloading prompts or
   const { lab, version } = fixture();
   publish(version.evaluation, batch(version.evaluation));
   version.results.forEach((result) => { result.score = summarizeScore(version, result.key); });
+  version.results[0].score.auto.files.push({ ...file, kind: "frame", viewport: "mobile", label: "初始画面", path: "assets/evidence/mobile-ready.jpg" });
+  version.results[0].score.auto.files.push({ ...file, kind: "frame", viewport: "desktop", label: "初始画面", path: "assets/evidence/desktop-ready.jpg" });
   version.results[0].referenceScore = { value: 14.8, note: "Synthetic display reference only." };
   lab.vendors = { fixture: { label: "Fixture" } };
   const before = JSON.stringify(lab), index = siteIndex(lab);
@@ -90,6 +92,11 @@ test("display index keeps authoritative summaries without downloading prompts or
     assert.deepEqual(details.results[i].score, version.results[i].score);
   }
   assert.deepEqual(summary.results[0].referenceScore, version.results[0].referenceScore);
+  assert.equal(summary.results[0].mobileThumb, "assets/evidence/mobile-ready.jpg");
+  assert.equal(summary.results[0].desktopThumb, "assets/evidence/desktop-ready.jpg");
+  assert.equal(summary.results[1].mobileThumb, null);
+  assert.equal(summary.results[1].desktopThumb, null);
+  assert.equal(summary.results[0].score.auto, undefined);
   assert.equal(details.prompt, version.prompt);
   assert.deepEqual(details.evaluation.criteria, version.evaluation.criteria);
   assert.equal(details.evaluation.autoChecks, undefined);

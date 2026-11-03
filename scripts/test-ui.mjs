@@ -97,6 +97,9 @@ async function canvasColors(canvas) {
 }
 async function stable(page, name) {
   await page.locator("#app .page").waitFor();
+  if (await page.locator("[data-focus-details]").count()) {
+    await page.locator('[data-focus-details][aria-busy="false"]').waitFor();
+  }
   for (const owner of await page.locator("#app iframe").all()) {
     await owner.scrollIntoViewIfNeeded();
     const canvas = owner.contentFrame().locator("canvas").first();
@@ -195,7 +198,7 @@ async function assertScore(page, version, result) {
   for (const dimension of version.evaluation.dimensions.filter((item) => ["objective", "taste"].includes(item.kind))) {
     assert.ok((await standards.innerText()).includes(dimension.rubric), "frozen rubric missing");
   }
-  const runlog = page.locator(".bench-main > .runlog").last();
+  const runlog = page.locator("[data-focus-details] > .runlog").last();
   await clickAfterScroll(page, runlog.locator("summary"));
   await runlog.locator(".cells").waitFor({ state: "visible" });
   assert.ok((await runlog.innerText()).includes(result.sha256));
@@ -302,15 +305,130 @@ async function assertLoading() {
   });
   await failed.page.goto(routeURL(rocket));
   await failed.page.getByRole("button", { name: "重试", exact: true }).waitFor();
-  await failed.page.getByRole("button", { name: "重试", exact: true }).click();
+  await clickAfterScroll(failed.page, failed.page.locator('[data-action="start-preview"]'));
+  const canvas = failed.page.locator("iframe").contentFrame().locator("canvas").first();
+  await canvas.waitFor();
+  await canvas.evaluate(() => { window.__retryDocument = "preserve-on-retry"; });
+  await clickAfterScroll(failed.page, failed.page.getByRole("button", { name: "重试", exact: true }));
   await failed.page.locator("[data-score]").waitFor();
   assert.equal(attempts, 2, "failed detail requests must be retryable");
+  assert.equal(await canvas.evaluate(() => window.__retryDocument), "preserve-on-retry",
+    "retrying score data must not replace or restart the preview");
   await assertStatic(failed);
   await failed.context.close();
   checks += 2;
 }
+async function assertProgressiveLoading(name, viewport) {
+  const state = await newContext(viewport), { page, context } = state;
+  const detailPath = `/data/views/${rocket.id}/v${latest(rocket).version}.json`;
+  let release;
+  const gate = new Promise((resolve) => { release = resolve; });
+  const requests = [];
+  page.on("request", (request) => requests.push(new URL(request.url()).pathname));
+  await context.route(`**${detailPath}`, async (route) => {
+    await gate;
+    await route.continue();
+  });
+  try {
+    await page.goto(base);
+    await page.locator(".intro").waitFor();
+    const link = page.locator(`a.exp-row[href="#/${rocket.id}"]`);
+    const requested = page.waitForRequest((request) => new URL(request.url()).pathname === detailPath);
+    if (name === "desktop") await link.hover();
+    else await link.focus();
+    await requested;
+    assert.equal(await page.locator(".intro").count(), 1, "prefetch must not navigate");
+    await link.click();
+    await page.locator(".stage").waitFor();
+    if (name === "mobile") {
+      await page.getByRole("link", { name: "手机", exact: true }).click();
+      await page.locator(".frame-box.is-mobile").waitFor();
+    }
+    assert.equal(await page.locator(".exp-head h1").innerText(), rocket.title);
+    assert.equal(await page.locator(".model-item").count(), latest(rocket).results.length);
+    assert.equal(await page.locator('[data-focus-details][aria-busy="true"]').count(), 1);
+    assert.equal(await page.locator("[data-score],.preview-live").count(), 0);
+    const poster = page.locator(".preview-poster");
+    await poster.evaluate((img) => img.decode());
+    if (name === "mobile") {
+      assert.equal(await poster.getAttribute("src"), siteIndex(lab).experiments.find((item) => item.id === rocket.id)
+        .versions[0].results[0].mobileThumb);
+    } else assert.equal(await poster.getAttribute("src"), siteIndex(lab).experiments.find((item) => item.id === rocket.id)
+      .versions[0].results[0].desktopThumb, "large previews must not enlarge the tiny homepage thumbnail");
+    await page.screenshot({ path: resolve(out, `${name}-progressive-before-details.png`) });
+    await clickAfterScroll(page, page.locator('[data-action="start-preview"]'));
+    const owner = page.locator("iframe"), canvas = owner.contentFrame().locator("canvas").first();
+    await canvas.waitFor();
+    await owner.evaluate((element) => { window.__previewOwner = element; });
+    await canvas.evaluate(() => { window.__previewDocument = "preserve-this-document"; });
+    await page.evaluate(() => { document.querySelector(".prompt").open = true; });
+    release();
+    const result = latest(rocket).results[0];
+    await page.locator(`[data-score="${result.key}"]`).waitFor();
+    assert.equal(await page.evaluate(() => document.querySelector("iframe") === window.__previewOwner), true,
+      "loading scores must preserve the preview element");
+    assert.equal(await canvas.evaluate(() => window.__previewDocument), "preserve-this-document",
+      "loading scores must not restart an explicitly played document");
+    assert.equal(await page.locator(".prompt").evaluate((element) => element.open), true);
+    assert.equal(requests.filter((path) => path === detailPath).length, 1, "intent and navigation must share one request");
+    await assertScore(page, latest(rocket), result);
+    await clickAfterScroll(page, page.locator(".model-item").nth(1));
+    const second = latest(rocket).results[1];
+    await page.locator(`[data-score="${second.key}"]`).waitFor();
+    assert.equal(await page.locator(".loading,.detail-loading,.preview-live").count(), 0,
+      "cached model changes must not show another loading screen or auto-run the next artifact");
+    assert.equal(requests.filter((path) => path === detailPath).length, 1);
+    await assertStatic(state);
+  } finally {
+    release();
+    await context.close();
+  }
+  checks++;
+}
+async function assertPrefetchRecovery() {
+  const detailPath = `/data/views/${rocket.id}/v${latest(rocket).version}.json`;
+  const state = await newContext({ width: 1440, height: 900 });
+  let attempts = 0;
+  await state.context.route(`**${detailPath}`, (route) => {
+    attempts++;
+    return attempts === 1 ? route.fulfill({ status: 503, body: "Unavailable" }) : route.continue();
+  });
+  await state.page.goto(base);
+  const link = state.page.locator(`a.exp-row[href="#/${rocket.id}"]`);
+  const failed = state.page.waitForResponse((response) => new URL(response.url()).pathname === detailPath && response.status() === 503);
+  await link.hover();
+  await failed;
+  await state.page.waitForTimeout(100);
+  assert.equal(await state.page.locator(".intro").count(), 1);
+  assert.equal(await state.page.getByRole("button", { name: "重试", exact: true }).count(), 0);
+  await link.click();
+  await state.page.locator("[data-score]").waitFor();
+  assert.equal(attempts, 2, "a failed speculative request must not poison navigation");
+  await assertStatic(state);
+  await state.context.close();
+
+  const saving = await newContext({ width: 390, height: 844 });
+  await saving.context.addInitScript(() => {
+    Object.defineProperty(navigator, "connection", { configurable: true, value: { saveData: true } });
+  });
+  const requests = [];
+  saving.page.on("request", (request) => requests.push(new URL(request.url()).pathname));
+  await saving.page.goto(base);
+  const target = saving.page.locator(`a.exp-row[href="#/${rocket.id}"]`);
+  await target.focus();
+  await target.hover();
+  await saving.page.waitForTimeout(150);
+  assert.equal(requests.includes(detailPath), false, "save-data must disable speculative loading");
+  await target.click();
+  await saving.page.locator("[data-score]").waitFor();
+  assert.equal(requests.filter((path) => path === detailPath).length, 1);
+  await assertStatic(saving);
+  await saving.context.close();
+  checks += 2;
+}
 async function svgPixels(page) {
-  const image = page.locator(".image-box img").first();
+  await clickAfterScroll(page, page.locator('[data-action="start-preview"]').first());
+  const image = page.locator(".image-box img.preview-live").first();
   await image.evaluate((img) => img.decode());
   const colors = await image.evaluate((img) => {
     const canvas = document.createElement("canvas"); canvas.width = 300; canvas.height = 220;
@@ -326,6 +444,8 @@ async function svgPixels(page) {
   checks++;
 }
 async function canvasMotion(page, viewport) {
+  await page.locator(".stage").waitFor();
+  await clickAfterScroll(page, page.locator('[data-action="start-preview"]'));
   const owner = page.locator("iframe").first(), frame = owner.contentFrame();
   const canvas = frame.locator("canvas").first();
   await canvas.waitFor();
@@ -392,7 +512,9 @@ function fixtureData() {
 try {
   browser = await launchBrowser();
   await assertLoading();
+  await assertPrefetchRecovery();
   for (const [name, viewport] of [["desktop", { width: 1440, height: 900 }], ["mobile", { width: 390, height: 844 }]]) {
+    await assertProgressiveLoading(name, viewport);
     const state = await newContext(viewport), { page, context } = state;
     await page.goto(base);
     await stable(page, `${name}-home`);
@@ -401,6 +523,9 @@ try {
       const version = latest(experiment);
       for (const result of version.results) {
         await page.goto(routeURL(experiment, { model: result.key, viewport: name }));
+        await page.locator(".stage").waitFor();
+        assert.equal(await page.locator(".preview-live").count(), 0, "focus must not auto-run the original artifact");
+        await clickAfterScroll(page, page.locator('[data-action="start-preview"]'));
         await stable(page, `${name}-${experiment.id}-${result.key}-focus`);
         await assertScore(page, version, result);
       }
@@ -425,6 +550,8 @@ try {
     await canvasMotion(page, name);
     await clickAfterScroll(page, page.getByRole("link", { name: name === "desktop" ? "手机" : "桌面", exact: true }));
     await page.locator(`.frame-box.is-${name === "desktop" ? "mobile" : "desktop"}`).waitFor();
+    assert.equal(await page.locator("iframe").count(), 0);
+    await clickAfterScroll(page, page.locator('[data-action="start-preview"]'));
     assert.equal(Number(await page.locator("iframe").getAttribute("width")), name === "desktop" ? 390 : 1440);
     await assertStatic(state);
     for (const error of new Set(state.artifactErrors)) console.log(`artifact error (${name}): ${error}`);
@@ -484,7 +611,7 @@ try {
     assert.equal((await fetch(base + path)).status, 403, "private server file exposed");
   }
   for (const [path, hash] of originals) assert.equal(digest(readFileSync(resolve(root, path))), hash, `original source changed: ${path}`);
-  console.log(`ok    ${checks} 组静态 UI 检查：桌面、手机、评分细项、按需加载与播放、慢字体/切页/重试、无表单/API/存储、原始 SVG/Canvas 动画及源码保护`);
+  console.log(`ok    ${checks} 组静态 UI 检查：桌面、手机、评分细项、渐进显示/保留播放状态、预加载/省流/重试、按需播放、无表单/API/存储、原始 SVG/Canvas 动画及源码保护`);
 } finally {
   if (browser) await browser.close();
   await server.close();

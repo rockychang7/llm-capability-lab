@@ -13,6 +13,10 @@ export function siteIndex(lab) {
         } : null,
         results: version.results.map(({ key, model, label, run, vendor, url, thumb, score, referenceScore }) => ({
           key, model, label, run, vendor, url, thumb,
+          desktopThumb: score?.auto?.files.find((file) =>
+            file.viewport === "desktop" && file.kind === "frame" && file.label === "初始画面")?.path ?? null,
+          mobileThumb: score?.auto?.files.find((file) =>
+            file.viewport === "mobile" && file.kind === "frame" && file.label === "初始画面")?.path ?? null,
           ...(score ? { score: { total: score.total, count: score.count } } : {}),
           ...(referenceScore ? { referenceScore } : {})
         }))

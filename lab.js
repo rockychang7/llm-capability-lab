@@ -19,8 +19,8 @@ let lab, current, renderSequence = 0;
 const versionCache = new Map();
 const observer = new ResizeObserver((entries) => entries.forEach(({ target }) => fitFrame(target)));
 function announce(text) { live.textContent = text; }
-function route() {
-  const [path, query = ""] = location.hash.replace(/^#\/?/, "").split("?");
+function route(value = location.hash) {
+  const [path, query = ""] = value.replace(/^#\/?/, "").split("?");
   return { path: decodeURIComponent(path), params: new URLSearchParams(query) };
 }
 function hash(experiment, options = {}) {
@@ -71,13 +71,15 @@ function posterMarkup({ poster, name }) {
   return `${poster ? `<img class="preview-poster" src="${e(poster)}" alt="" loading="lazy" decoding="async">` : ""}
     <button class="btn preview-start" type="button" data-action="start-preview" aria-label="${e(`播放 ${name} 预览`)}"><span class="preview-symbol" aria-hidden="true">&#9654;</span>播放预览</button>`;
 }
-function preview(experiment, result, viewport, deferred = false) {
+function preview(experiment, result, viewport, large = false) {
   const size = VIEWPORTS[viewport];
   const kind = experiment.artifactType === "image" ? "image" : "frame";
-  const poster = kind === "frame" && viewport === "mobile" ? result.score?.auto?.files.find((file) =>
-    file.viewport === "mobile" && file.kind === "frame" && file.label === "初始画面")?.path : result.thumb;
+  const initial = (name) => result.score?.auto?.files.find((file) =>
+    file.viewport === name && file.kind === "frame" && file.label === "初始画面")?.path;
+  const poster = kind === "frame" && viewport === "mobile" ? result.mobileThumb ?? initial("mobile") :
+    large ? result.desktopThumb ?? initial("desktop") ?? result.thumb : result.thumb;
   const data = { poster, name: label(result) };
-  return `<div class="artifact-preview" data-preview data-kind="${kind}" data-url="${e(result.url)}" data-poster="${e(poster)}" data-name="${e(data.name)}" data-autoplay="${!deferred}">
+  return `<div class="artifact-preview" data-preview data-kind="${kind}" data-url="${e(result.url)}" data-poster="${e(poster)}" data-name="${e(data.name)}">
     <div class="${kind === "image" ? "image-box" : `frame-box is-${viewport}`}"${kind === "frame" ? ` style="--vw:${size.width};--vh:${size.height}"` : ""}>${posterMarkup(data)}</div>
     <button class="btn preview-stop" type="button" data-action="stop-preview" aria-label="停止预览" title="停止预览，下次从头开始" hidden><span class="preview-symbol" aria-hidden="true">&#9632;</span></button></div>`;
 }
@@ -91,7 +93,6 @@ function observeFrames() {
   app.querySelectorAll(".frame-box").forEach((box) => {
     fitFrame(box); observer.observe(box);
   });
-  app.querySelectorAll('[data-preview][data-autoplay="true"]').forEach(startPreview);
 }
 function startPreview(preview) {
   if (preview.classList.contains("is-playing")) return;
@@ -154,26 +155,29 @@ function browserEvidenceMarkup(version, result, score) {
   return `<details class="runlog browser-evidence"><summary><h2>自动检查截图${score.auto ? ` · ${score.auto.files.length} 张` : ""}</h2></summary>
     ${score.auto ? `<p class="muted small">采集 ${e(score.auto.at)} · ${e(score.auto.id)}。截图是一次真实运行的采样时刻，不证明每一帧。</p>${mediaMarkup(score.auto)}` : '<p class="muted small">尚未运行自动检查。</p>'}</details>`;
 }
-function renderFocus(experiment, version, options) {
-  const result = version.results.find((item) => item.key === options.model) ?? version.results[0];
-  if (!result) return '<div class="empty"><strong>暂无产物</strong></div>';
+function focusDetailsMarkup(version, result) {
   const score = scoreFor(version, result);
-  return `<section class="bench bench-row"><aside class="bench-list"><div class="list-head"><h2>原始产物 <span class="count">${version.results.length}</span></h2><span>按名称排序</span></div><ul class="model-list">
-    ${version.results.map((item, index) => `<li><a class="model-item" href="${hash(experiment, { ...options, model: item.key })}" aria-current="${item.key === result.key}"><span class="model-rank">${String(index + 1).padStart(2, "0")}</span><span class="model-name"><b>${e(label(item))}</b><span>${e(lab.vendors[item.vendor]?.label ?? item.vendor)}</span></span><span class="model-score" data-small-score="${e(item.key)}">${number(scoreFor(version, item).total)}</span></a></li>`).join("")}
-    </ul></aside><div class="bench-main"><div class="stage"><div class="stage-bar"><b>${e(label(result))}</b><a href="${e(result.url)}" target="_blank" rel="noopener">打开原始文件</a></div>${preview(experiment, result, options.viewport)}</div>
-    <section class="score">${heading("Agent 评分", weightLabel(version))}<div data-score="${e(result.key)}">${scoreMarkup(score)}</div>
+  return `<section class="score">${heading("Agent 评分", weightLabel(version))}<div data-score="${e(result.key)}">${scoreMarkup(score)}</div>
       <p class="legend">品味是 AI 判断，不是人类共识。仅最新完整评审计入汇总，每位 Agent 等权；未完整评审不补分，无完整评审时待评。</p></section>
     ${version.evaluation?.conclusion?.length ? `<details class="runlog evaluation-conclusion"><summary><h2>本实验评测结论</h2></summary><pre class="prompt-source">${e(version.evaluation.conclusion.join("\n\n"))}</pre></details>` : ""}
     <section class="agent-scores">${heading("各 Agent 得分", "每位 Agent 按冻结维度权重计算")}<div data-judges="${e(result.key)}">${judgesMarkup(score)}</div>${excludedMarkup(score)}</section>
     <section class="rules">${heading("逐项规则与判定", "脚本项取桌面与手机较差的一次；AI 项看拼图判断")}${checkTable(version, result, score)}</section>
     ${browserEvidenceMarkup(version, result, score)}
-    <details class="runlog"><summary><h2>原始运行记录</h2></summary><dl class="cells">${Object.entries(result.record).map(([name, value]) => `<div><dt class="mono">${e(name)}</dt><dd>${e(value)}</dd></div>`).join("")}<div><dt>SHA-256</dt><dd class="mono small">${e(result.sha256)}</dd></div></dl></details></div></section>`;
+    <details class="runlog"><summary><h2>原始运行记录</h2></summary><dl class="cells">${Object.entries(result.record).map(([name, value]) => `<div><dt class="mono">${e(name)}</dt><dd>${e(value)}</dd></div>`).join("")}<div><dt>SHA-256</dt><dd class="mono small">${e(result.sha256)}</dd></div></dl></details>`;
+}
+function renderFocus(experiment, version, options, loading = false) {
+  const result = version.results.find((item) => item.key === options.model) ?? version.results[0];
+  if (!result) return '<div class="empty"><strong>暂无产物</strong></div>';
+  return `<section class="bench bench-row"><aside class="bench-list"><div class="list-head"><h2>原始产物 <span class="count">${version.results.length}</span></h2><span>按名称排序</span></div><ul class="model-list">
+    ${version.results.map((item, index) => `<li><a class="model-item" href="${hash(experiment, { ...options, model: item.key })}" aria-current="${item.key === result.key}"><span class="model-rank">${String(index + 1).padStart(2, "0")}</span><span class="model-name"><b>${e(label(item))}</b><span>${e(lab.vendors[item.vendor]?.label ?? item.vendor)}</span></span><span class="model-score" data-small-score="${e(item.key)}">${number(scoreFor(version, item).total)}</span></a></li>`).join("")}
+    </ul></aside><div class="bench-main"><div class="stage"><div class="stage-bar"><b>${e(label(result))}</b><a href="${e(result.url)}" target="_blank" rel="noopener">打开原始文件</a></div>${preview(experiment, result, options.viewport, true)}</div>
+    <div data-focus-details aria-busy="${loading}">${loading ? '<p class="detail-loading" role="status">正在加载评分与证据…</p>' : focusDetailsMarkup(version, result)}</div></div></section>`;
 }
 function renderComparison(experiment, version, options) {
   return `<section class="bench"><div class="compare-grid ${experiment.artifactType === "image" ? "is-image" : ""} is-${options.viewport}">
     ${version.results.map((result) => {
       const score = scoreFor(version, result);
-      return `<article class="compare-card"><header><b>${e(label(result))}</b><span class="compare-score" data-small-score="${e(result.key)}">${number(score.total)}</span></header>${preview(experiment, result, options.viewport, true)}
+      return `<article class="compare-card"><header><b>${e(label(result))}</b><span class="compare-score" data-small-score="${e(result.key)}">${number(score.total)}</span></header>${preview(experiment, result, options.viewport)}
       <p class="compare-meta">${score.count} 位 Agent · ${e(result.record.harness)} · 联网 ${e(result.record.web_access)} · ${e(result.record.turns)} 轮</p><footer><a href="${hash(experiment, { ...options, view: "focus", model: result.key })}">评分与证据</a><a href="${e(result.url)}" target="_blank" rel="noopener">原始文件</a></footer></article>`;
     }).join("")}
     </div></section><section class="block">${heading("Agent 评分对照", weightLabel(version))}<div class="box scroll"><table class="matrix comparison-table"><thead><tr><th>产物</th><th>综合 / 100</th><th>确定性 / 100</th><th>品味 / 100</th><th>完整 Agent 数</th><th>Agent 分差</th></tr></thead><tbody>
@@ -182,22 +186,72 @@ function renderComparison(experiment, version, options) {
       return `<tr data-score-row="${e(result.key)}"><th><a href="${hash(experiment, { ...options, view: "focus", model: result.key })}">${e(label(result))}</a></th><td>${number(score.total)}</td><td>${number(score.objective)}</td><td>${number(score.taste)}</td><td>${score.count}</td><td>${number(score.spread?.range)}</td></tr>`;
     }).join("")}</tbody></table></div><p class="legend">品味是 AI 判断，不是人类共识。分差为本产物完整 Agent 综合分的最高值减最低值。</p></section>`;
 }
-function renderExperiment(experiment, params, version) {
+function promptMarkup(version, loading = false) {
+  return `<summary class="prompt-head"><h2>完整 Prompt · ${(version.prompt?.length ?? version.promptLength).toLocaleString("zh-CN")} 字</h2></summary>${loading ?
+    '<p class="detail-loading" role="status">正在加载 Prompt 原文…</p>' :
+    `<pre class="prompt-source">${e(version.prompt)}</pre><div class="actions prompt-actions"><button class="btn" type="button" data-action="copy-prompt">复制原文</button><a class="btn" href="${e(version.promptPath)}" target="_blank" rel="noopener">版本文件</a></div>`}`;
+}
+function standardsMarkup(version, loading = false) {
+  return `<summary><h2>本实验评分标准</h2></summary>${loading ? '<p class="detail-loading" role="status">正在加载评分标准…</p>' :
+    `<dl class="cells">${dimensionsFor(version).map((item) => `<div><dt>${e(KINDS[item.kind])} · ${e(item.name)} · ${item.weight}%</dt><dd>${e(item.rubric)}</dd></div>`).join("")}</dl>
+    <p class="muted small">协议：${e(version.evaluation?.protocol ?? "待定")}。冻结日期：${e(version.evaluation?.freezeDate ?? "未冻结")}。生成条件见原始运行记录；只比较本版本，不合并跨实验总榜。</p>
+    ${version.evaluationPath ? `<a class="text-link" href="${e(version.evaluationPath)}" target="_blank" rel="noopener">完整评测原文</a>` : ""}`}`;
+}
+function renderExperiment(experiment, params, version, loading = false) {
   const options = { v: version.version, view: params.get("view") === "compare" ? "compare" : "focus",
     viewport: params.get("viewport") === "mobile" ? "mobile" : "desktop", model: params.get("model") ?? undefined };
-  current = { experiment, version, options };
+  current = { experiment, version, options, loading };
   document.title = `${experiment.title} · LLM Capability Lab`;
   app.innerHTML = `<div class="page"><div class="crumb"><a href="#/">实验</a><span>/</span><span>${e(experiment.number)}</span></div>
     <header class="exp-head"><div class="exp-head-text"><p class="kicker">${e(experiment.capability)} / PROMPT v${version.version}</p><h1>${e(experiment.title)}</h1><p class="exp-head-question">${e(experiment.question)}</p></div>
     <label class="readout-select field">提示词版本<select id="version-select">${experiment.versions.map((item) => `<option value="${item.version}" ${item === version ? "selected" : ""}>v${item.version}${item.version === experiment.latestVersion ? " · 当前" : ""}</option>`).join("")}</select></label></header>
-    <details class="prompt"><summary class="prompt-head"><h2>完整 Prompt · ${version.prompt.length.toLocaleString("zh-CN")} 字</h2></summary><pre class="prompt-source">${e(version.prompt)}</pre><div class="actions prompt-actions"><button class="btn" type="button" data-action="copy-prompt">复制原文</button><a class="btn" href="${e(version.promptPath)}" target="_blank" rel="noopener">版本文件</a></div></details>
+    <details class="prompt">${promptMarkup(version, loading)}</details>
     <section class="bench"><div class="toolbar"><nav class="seg" aria-label="产物视图">${[["focus", "单个查看"], ["compare", "并排对照"]].map(([view, text]) => `<a href="${hash(experiment, { ...options, view })}" aria-current="${options.view === view}">${text}</a>`).join("")}</nav>
     <div class="toolbar-group"><div class="seg" aria-label="预览视口">${Object.entries(VIEWPORTS).map(([viewport, size]) => `<a href="${hash(experiment, { ...options, viewport })}" aria-current="${viewport === options.viewport}">${size.label}</a>`).join("")}</div><button class="btn" type="button" data-action="reload">${replay}重新加载</button></div></div></section>
-    ${options.view === "compare" ? renderComparison(experiment, version, options) : renderFocus(experiment, version, options)}
-    <details class="runlog standards"><summary><h2>本实验评分标准</h2></summary><dl class="cells">${dimensionsFor(version).map((item) => `<div><dt>${e(KINDS[item.kind])} · ${e(item.name)} · ${item.weight}%</dt><dd>${e(item.rubric)}</dd></div>`).join("")}</dl>
-      <p class="muted small">协议：${e(version.evaluation?.protocol ?? "待定")}。冻结日期：${e(version.evaluation?.freezeDate ?? "未冻结")}。生成条件见原始运行记录；只比较本版本，不合并跨实验总榜。</p>
-      ${version.evaluationPath ? `<a class="text-link" href="${e(version.evaluationPath)}" target="_blank" rel="noopener">完整评测原文</a>` : ""}</details></div>`;
+    ${options.view === "compare" ? renderComparison(experiment, version, options) : renderFocus(experiment, version, options, loading)}
+    <details class="runlog standards">${standardsMarkup(version, loading)}</details></div>`;
   observeFrames();
+}
+function hydrateFocus(version) {
+  const { options } = current;
+  const result = version.results.find((item) => item.key === options.model) ?? version.results[0];
+  current.version = version;
+  current.loading = false;
+  app.querySelector(".prompt").innerHTML = promptMarkup(version);
+  app.querySelector(".standards").innerHTML = standardsMarkup(version);
+  const details = app.querySelector("[data-focus-details]");
+  details.innerHTML = focusDetailsMarkup(version, result);
+  details.setAttribute("aria-busy", "false");
+  app.querySelectorAll("[data-small-score]").forEach((element) => {
+    const item = version.results.find((item) => item.key === element.dataset.smallScore);
+    if (item) element.textContent = number(scoreFor(version, item).total);
+  });
+}
+function showLoadError(error) {
+  const message = `<div class="empty"><strong>无法加载实验数据</strong><p>${e(error.message)}</p><button class="btn" type="button" data-action="retry">重试</button></div>`;
+  const details = current?.loading ? app.querySelector("[data-focus-details]") : null;
+  if (!details) { app.innerHTML = message; return; }
+  details.innerHTML = message;
+  details.setAttribute("aria-busy", "false");
+  app.querySelectorAll(".prompt .detail-loading,.standards .detail-loading").forEach((element) => {
+    element.textContent = "暂时无法加载，请重试。";
+    element.setAttribute("role", "alert");
+  });
+}
+async function retryDetails() {
+  if (!current?.loading || !app.querySelector("[data-focus-details]")) { await render(); return; }
+  const state = current, sequence = ++renderSequence;
+  const details = app.querySelector("[data-focus-details]");
+  details.innerHTML = '<p class="detail-loading" role="status">正在加载评分与证据…</p>';
+  details.setAttribute("aria-busy", "true");
+  app.querySelector(".prompt").innerHTML = promptMarkup(state.version, true);
+  app.querySelector(".standards").innerHTML = standardsMarkup(state.version, true);
+  try {
+    const version = await loadVersion(state.version);
+    if (current === state && sequence === renderSequence) hydrateFocus(version);
+  } catch (error) {
+    if (current === state && sequence === renderSequence) showLoadError(error);
+  }
 }
 app.addEventListener("change", (event) => {
   if (event.target.id === "version-select") location.hash = hash(current.experiment, { ...current.options, v: event.target.value });
@@ -206,7 +260,7 @@ app.addEventListener("click", async (event) => {
   const action = event.target.closest("[data-action]")?.dataset.action;
   if (action === "start-preview") startPreview(event.target.closest("[data-preview]"));
   if (action === "stop-preview") stopPreview(event.target.closest("[data-preview]"));
-  if (action === "retry") await render();
+  if (action === "retry") await retryDetails();
   if (action === "reload") {
     const running = app.querySelectorAll(".preview-live");
     running.forEach((element) => { element.src = element.getAttribute("src"); });
@@ -224,14 +278,33 @@ async function json(path) {
 }
 function loadVersion(summary) {
   if (!versionCache.has(summary.dataPath)) {
-    const request = json(summary.dataPath).catch((error) => {
+    const entry = { value: null, request: null };
+    entry.request = json(summary.dataPath).then((version) => {
+      entry.value = version;
+      return version;
+    }).catch((error) => {
       versionCache.delete(summary.dataPath);
       throw error;
     });
-    versionCache.set(summary.dataPath, request);
+    versionCache.set(summary.dataPath, entry);
   }
-  return versionCache.get(summary.dataPath);
+  return versionCache.get(summary.dataPath).request;
 }
+function prefetchVersion(event) {
+  if (!lab || navigator.connection?.saveData) return;
+  const link = event.target.closest('a[href^="#/"]');
+  if (!link) return;
+  try {
+    const { path, params } = route(link.hash);
+    const experiment = lab.experiments.find((item) => item.id === path);
+    if (!experiment) return;
+    const summary = experiment.versions.find((item) => item.version === Number(params.get("v"))) ?? latest(experiment);
+    loadVersion(summary).catch(() => {});
+  } catch {}
+}
+app.addEventListener("pointerover", prefetchVersion, { passive: true });
+app.addEventListener("pointerdown", prefetchVersion, { passive: true });
+app.addEventListener("focusin", prefetchVersion);
 async function render() {
   if (!lab) return;
   const sequence = ++renderSequence;
@@ -242,11 +315,17 @@ async function render() {
     const experiment = lab.experiments.find((item) => item.id === path);
     if (experiment) {
       const summary = experiment.versions.find((item) => item.version === Number(params.get("v"))) ?? latest(experiment);
-      // Clear the previous live document while fetching another experiment's details.
-      app.innerHTML = '<p class="loading" role="status">正在加载实验数据…</p>';
-      const version = await loadVersion(summary);
-      if (sequence !== renderSequence) return;
-      renderExperiment(experiment, params, version);
+      const cached = versionCache.get(summary.dataPath)?.value;
+      if (cached) renderExperiment(experiment, params, cached);
+      else {
+        if (params.get("view") === "compare") app.innerHTML = '<p class="loading" role="status">正在加载实验数据…</p>';
+        else renderExperiment(experiment, params, summary, true);
+        const version = await loadVersion(summary);
+        if (sequence !== renderSequence) return;
+        // Populate only the text/data regions so an explicitly started preview keeps its document.
+        if (current?.loading && app.querySelector("[data-focus-details]")) hydrateFocus(version);
+        else renderExperiment(experiment, params, version);
+      }
     } else renderHome(params);
     document.querySelectorAll("[data-nav]").forEach((element) => {
       if (!experiment && element.dataset.nav === (params.get("section") ?? "home")) element.setAttribute("aria-current", "page");
@@ -254,7 +333,7 @@ async function render() {
     });
   } catch (error) {
     if (sequence !== renderSequence) return;
-    app.innerHTML = `<div class="empty"><strong>无法加载实验数据</strong><p>${e(error.message)}</p><button class="btn" type="button" data-action="retry">重试</button></div>`;
+    showLoadError(error);
   }
 }
 window.addEventListener("hashchange", render);
