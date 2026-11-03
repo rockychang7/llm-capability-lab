@@ -1,0 +1,11 @@
+prompt: 03-super-mario-1-1
+prompt_version: 1
+provider: openai
+model: inherited-parent-unreported
+mode: xhigh
+harness: codex-desktop
+web_access: no
+turns: 1
+generated_at: 2026-11-03
+entrypoint: gpt-5-6-sol-xhigh.html
+context: current-session-user-reported-model-and-effort; pre-generation-read-agents-and-current-prompt-only

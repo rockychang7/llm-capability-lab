@@ -6,5 +6,6 @@ mode: xhigh
 harness: codex-desktop
 web_access: yes
 turns: unknown
-generated_at: 2026-10-29
+generated_at: 2026-11-03
 entrypoint: index.html
+context: existing-session-user-reported-model-and-effort

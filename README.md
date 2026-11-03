@@ -27,13 +27,15 @@
 |---|---|---|---|---|
 | 01 | 单文件火箭发射动画 | [prompt-v1](prompts/01-rocket-launch/prompt-v1.md) | [Claude High](results/01-rocket-launch/v1/outputs/claude-opus-5-5-high/claude-opus-5-5-high.html) · [Claude Extra High](results/01-rocket-launch/v1/outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.html) · [GPT 5.6](results/01-rocket-launch/v1/outputs/gpt-5-6-sol-xhigh/gpt-5-6-sol-xhigh.html) · [GPT 6.1](results/01-rocket-launch/v1/outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.html) · [GPT 6.1 Terra](results/01-rocket-launch/v1/outputs/gpt-6-1-terra-xhigh/rocket-launch.html) | [评测 v1](results/01-rocket-launch/v1/evaluation.md) · 5 / 5 已评 |
 | 02 | 鹈鹕骑自行车 SVG 动画 | [prompt-v1](prompts/02-pelican-bicycle/prompt-v1.md) | [Claude High](results/02-pelican-bicycle/v1/outputs/claude-opus-5-5-high/claude-opus-5-5-high.svg) · [Claude Extra High](results/02-pelican-bicycle/v1/outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.svg) · [GPT 5.6](results/02-pelican-bicycle/v1/outputs/gpt-5-6-sol-xhigh/gpt-5-6-sol-xhigh.svg) · [GPT 6.1 Sol](results/02-pelican-bicycle/v1/outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.svg) · [GPT 6.1 Terra](results/02-pelican-bicycle/v1/outputs/gpt-6-1-terra-xhigh/pelican.svg) | [评测 v1](results/02-pelican-bicycle/v1/evaluation.md) · 5 / 5 已评 |
-| 03 | 单文件超级马里奥 1-1 游戏 | [prompt-v1](prompts/03-super-mario-1-1/prompt-v1.md) | [Claude Extra High](results/03-super-mario-1-1/v1/outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.html) · [GPT 6.1 Sol Extra High](results/03-super-mario-1-1/v1/outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.html) · [GPT 6.1 Terra Extra High](results/03-super-mario-1-1/v1/outputs/gpt-6-1-terra-xhigh/index.html) | [评测 v1](results/03-super-mario-1-1/v1/evaluation.md) · 2 / 3 已评 |
+| 03 | 单文件超级马里奥 1-1 游戏 | [prompt-v1](prompts/03-super-mario-1-1/prompt-v1.md) | [Claude Extra High](results/03-super-mario-1-1/v1/outputs/claude-opus-5-5-xhigh/claude-opus-5-5-xhigh.html) · [GPT 5.6 Sol Extra High](results/03-super-mario-1-1/v1/outputs/gpt-5-6-sol-xhigh/gpt-5-6-sol-xhigh.html) · [GPT 6.1 Sol Extra High](results/03-super-mario-1-1/v1/outputs/gpt-6-1-sol-xhigh/gpt-6-1-sol-xhigh.html) · [GPT 6.1 Terra Extra High](results/03-super-mario-1-1/v1/outputs/gpt-6-1-terra-xhigh/index.html) | [评测 v1](results/03-super-mario-1-1/v1/evaluation.md) · 4 / 4 已评 |
 
-2026-11-02 补齐八份此前未评产物的 AI 判断，当前共 13 份产物，12 份有正式综合分。唯一剩余的马里奥 Terra 已重新实跑，仍因运行错误停在标题；未观察项按协议保留待评。具体分数及依据仅以各实验的 `evaluation.md` 为准，已有四份正式评分未改动。
+2026-11-03 新增马里奥 Terra 和 GPT 5.6 Sol Extra High 结果，均已完成协议 6 评测。Terra 的 AI 评审在已有上下文中进行，并非独立盲评。按维护者要求，马里奥 Terra 此前失败的一次运行及其评测记录已删除，不沿用其参考分。具体分数及依据仅以各实验的 `evaluation.md` 为准。
+
+马里奥 GPT 5.6 Sol Extra High 由用户指定在当前会话直接生成，当前运行环境未暴露渠道原始模型标识，`run.yaml` 如实记录为 `inherited-parent-unreported`。产物落盘前只读取了 `AGENTS.md` 和当前 Prompt，没有查看其他模型产物或评测；但用户请求和仓库说明已存在于当前会话，并非只发送 Prompt 代码块的独立调用，因此可比性仍有边界。
+
+马里奥 Terra 由用户指定在当前会话直接生成，显示名和推理档位由用户提供，渠道原始模型标识未暴露。生成前当前会话已包含实验说明，并读取 Prompt 文件，而非全新会话中仅接收 Prompt 原文，因此与独立单轮结果的可比性受限。
 
 鹈鹕及马里奥 GPT 6.1 Terra 的显示名与推理档位由用户提供；渠道原始模型标识未暴露。这两份产物在各自的 Codex 对话中读取 Prompt 文件后生成，并非在独立新会话中仅发送 Prompt 原文，因此与其他单轮结果的可比性受限。
-
-马里奥 Terra 的首页单元格展示既有 14.8 分，并明确标注“非正式参考分”，有效 Agent 数仍为 0；参考值来自 `evaluation.md`，详细计算与边界见该实验评测结论，协议 6 正式综合分仍待评。
 
 火箭 GPT 6.1 Terra 的显示名与推理档位由用户确认；渠道原始模型标识、运行环境和生成时间未提供，无法确认与其他结果的生成条件是否可比。
 
